@@ -68,13 +68,36 @@ export const allIds = () => deck.items.map((it) => it.id);
 // "what does this mean?" for a spoken word collapses into the reading question
 // that already exists. Both are set aside rather than asked — and the home
 // screen says so, with how to add a voice.
+// ── the course, and where the learner has got to ─────────────────────────
+// A stage is passed when enough of its own words can be answered and each of
+// its grammar points has been met. Only NEW material is gated: reviews of
+// anything already met keep coming whatever stage you are on.
+export function stageState({ canAnswerWord, grammarMet }) {
+  const stages = deck.stages.map((st) => {
+    const have = st.words.filter(canAnswerWord).length;
+    const need = Math.max(1, Math.ceil(st.words.length * st.gate));
+    const grammar = st.grammar.filter(grammarMet).length;
+    return { ...st, have, need, grammar, grammarNeeded: st.grammar.length, passed: have >= need && grammar >= st.grammar.length };
+  });
+  // The first stage not yet passed. Once they are all passed the course is
+  // over and the rest of the word list opens, in the order people speak.
+  const i = stages.findIndex((s) => !s.passed);
+  const current = i < 0 ? stages.length : i;
+  return { stages, current, done: current >= stages.length };
+}
+
 const NEEDS_VOICE = new Set(['tone-pair', 'word-listen']);
 // And these need a recording: a sentence nobody can hear is not a listening
 // question, it is a blank.
 const NEEDS_RECORDING = new Set(['sentence-listen']);
 const askable = (it, hasVoice, hasRecordings) =>
   (hasVoice || !NEEDS_VOICE.has(it.k)) && (hasRecordings || !NEEDS_RECORDING.has(it.k));
-export const askableIds = (hasVoice, hasRecordings = true) =>
-  deck.items.filter((it) => askable(it, hasVoice, hasRecordings)).map((it) => it.id);
+// A question is in reach if its stage is open, or if it has been met already —
+// a card you have seen never disappears because of where you are in the
+// course. Items belonging to no stage are the tail after the course.
+const inReach = (it, current, met) =>
+  met(it.id) || (it.stage != null ? it.stage <= current : current >= deck.stages.length);
+export const askableIds = (hasVoice, hasRecordings = true, current = Infinity, met = () => false) =>
+  deck.items.filter((it) => askable(it, hasVoice, hasRecordings) && inReach(it, current, met)).map((it) => it.id);
 export const setAsideCount = (hasVoice, hasRecordings = true) =>
   deck.items.filter((it) => !askable(it, hasVoice, hasRecordings)).length;

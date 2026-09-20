@@ -164,6 +164,40 @@ for (const [key, p] of Object.entries(PHRASES)) {
   check(p.at > 0, 'interface phrase with no threshold', key);
 }
 
+// ── 7b. the course is a course ───────────────────────────────────────────
+// The syllabus chooses the order, never the facts: every word it names has to
+// be one the deck actually teaches, no word may appear in two stages, and a
+// stage must be able to open the one after it.
+const SYLLABUS = (await import(pathToFileURL(join(ROOT, 'content', 'syllabus.mjs')).href)).default;
+const seenInStage = new Map();
+check(DECK.stages.length === SYLLABUS.length, 'a stage went missing between the syllabus and the deck', `${SYLLABUS.length} written, ${DECK.stages.length} built`);
+for (const [n, st] of SYLLABUS.entries()) {
+  const built = DECK.stages[n];
+  if (!built) continue;
+  check(built.id === st.id, 'stages are out of order', `${n}: ${built.id} vs ${st.id}`);
+  check(!!st.can && !!st.why, 'a stage with no purpose written down', st.id);
+  check(st.gate > 0 && st.gate <= 1, 'a stage gate outside 0–1', `${st.id}: ${st.gate}`);
+  for (const w of st.words) {
+    check(deckWords.has(w), 'a stage names a word the deck does not teach', `${st.id}: ${w}`);
+    check(!seenInStage.has(w), 'a word appears in two stages', `${w}: ${seenInStage.get(w)} and ${st.id}`);
+    seenInStage.set(w, st.id);
+  }
+  for (const g of st.grammar) check(DECK.grammar.some((x) => x.id === g), 'a stage names a grammar point that does not exist', `${st.id}: ${g}`);
+  // A gate you cannot pass is a wall.
+  const need = Math.max(1, Math.ceil(built.words.length * st.gate));
+  check(built.words.length >= need, 'a stage gate cannot be reached', `${st.id}: needs ${need} of ${built.words.length}`);
+  check(built.words.length >= 8, 'a stage too small to teach anything', `${st.id}: ${built.words.length} words`);
+  // Every gated word needs a question, or it can never be answered.
+  const askable = new Set(DECK.items.filter((it) => it.i != null).map((it) => it.i));
+  const orphan = built.words.filter((i) => !askable.has(i));
+  check(orphan.length === 0, 'a stage word with no question', `${st.id}: ${orphan.length}`);
+}
+// Every grammar point should belong to a stage, or it opens only after the
+// course is finished — which for 咗 or 嘅 would be absurd.
+const staged = new Set(SYLLABUS.flatMap((st) => st.grammar));
+const unstaged = DECK.grammar.filter((g) => !staged.has(g.id)).map((g) => g.id);
+check(unstaged.length === 0, 'a grammar point belongs to no stage', unstaged.join(', '));
+
 // ── 8. the recordings are recordings ─────────────────────────────────────
 const audioDir = join(ROOT, 'app', 'audio');
 const have = existsSync(audioDir) ? new Set(readdirSync(audioDir).map((f) => +f.replace('.mp3', ''))) : new Set();

@@ -60,6 +60,28 @@ speech, and Hong Kong writing mixes in standard Chinese. Words built from
 Mandarin function characters (就是, 他們) and swear words are left out, and the
 app labels which tier a word comes from.
 
+## The dictionaries that fill CC-Canto's gaps
+
+**English Wiktionary**, via **kaikki.org** (Tatu Ylonen's wiktextract).
+CC BY-SA 3.0. https://kaikki.org/dictionary/Chinese/
+86,198 Chinese words that carry a Jyutping reading and an English sense. What
+makes it worth 1.2 GB of download: Wiktionary **tags senses by variety**, so a
+sense marked Cantonese can be told apart from a Mandarin-only one.
+ boils the dump down to  (8 MB,
+committed); the dump itself is not committed.
+
+**Unihan**, the Unicode Consortium's character database. Unicode licence.
+https://www.unicode.org/Public/UCD/latest/ucd/Unihan.zip
+Cantonese readings () for 29,936 characters and English
+definitions () for 20,587. Terse, single characters only, and
+authoritative on readings — which is why the accuracy audit uses it as an
+independent check rather than only as a source.
+
+*Why these two:* CC-Canto is a good Cantonese dictionary and it stops. The gaps
+it leaves are not obscure words but everyday ones — 六 six had no gloss that
+belonged to its Cantonese reading at all. These two took the top 1,000 spoken
+words from 625 exact matches to 905.
+
 ## Considered, not yet used
 
 - **words.hk (粵典)** — a proper Cantonese-to-Cantonese dictionary under a

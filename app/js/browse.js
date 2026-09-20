@@ -11,7 +11,7 @@ import { D, wordAt, allIds, SKILL, SKILL_NAMES } from './deck.js';
 import { playRecording, playWord, canPlayWord } from './audio.js';
 import { toneName, toneChao, voiceCentre, forgetVoice } from './pitch.js';
 import { ladder } from './lang.js';
-import { header, playButton, S, VERSION, knownWordSet } from './app.js';
+import { header, playButton, S, VERSION, knownWordSet, course } from './app.js';
 
 // ── small shared pieces ──────────────────────────────────────────────────
 const SRC_NAME = {
@@ -121,6 +121,11 @@ export function contourGlyph(tone) {
 }
 
 // ── tones ────────────────────────────────────────────────────────────────
+// Kept as constants so the same words are shown and read aloud — a read-aloud
+// button that speaks a paraphrase of what is on screen is worse than none.
+const TONE_INTRO = 'Cantonese has six tones on an open syllable. They are not decoration: 詩 si1 is a poem, 史 si2 is history, 試 si3 is to try, 時 si4 is time, 市 si5 is a market.';
+const TONE_CHAO = 'The numbers in the middle are Chao pitch values, where 5 is the top of your own speaking range and 1 the bottom. A tone is a pitch relative to the speaker, which is why a child and an adult say the same tone an octave apart.';
+
 function tonesScreen() {
   const d = D();
   // An example for each tone, taken from the words being learnt rather than
@@ -140,8 +145,8 @@ function tonesScreen() {
   const centre = voiceCentre();
   return [header('Tones'), h('main', {},
     h('section', { class: 'card' },
-      h('p', {}, 'Cantonese has six tones on an open syllable. They are not decoration: 詩 si1 is a poem, 史 si2 is history, 試 si3 is to try, 時 si4 is time, 市 si5 is a market.'),
-      h('p', { class: 'note' }, 'The numbers in the middle are Chao pitch values, where 5 is the top of your own speaking range and 1 the bottom. A tone is a pitch relative to the speaker, which is why a child and an adult say the same tone an octave apart.'),
+      h('p', {}, TONE_INTRO, sayBtn(TONE_INTRO)),
+      h('p', { class: 'note' }, TONE_CHAO, sayBtn(TONE_CHAO)),
       h('div', { class: 'tonelist' }, ...rows)),
     h('section', { class: 'card' },
       h('h2', {}, 'Saying them'),
@@ -215,6 +220,36 @@ function paceCard(k) {
   );
 }
 
+// ── the course ───────────────────────────────────────────────────────────
+// The whole shape of it, open to read at any time. A learner who can see the
+// map is not being gated for the sake of it; they can see what the gate is for.
+function courseScreen() {
+  const c = course();
+  return [header('The course'), h('main', {},
+    h('section', { class: 'card' },
+      h('p', {}, COURSE_LEAD, sayBtn(COURSE_LEAD)),
+      h('p', { class: 'note' }, 'Reviews of anything you have already met keep coming whatever stage you are on. The gate only decides what NEW material opens.')),
+    ...c.stages.map((st, n) => h('section', { class: 'card' + (n === c.current ? ' notice' : '') },
+      h('div', { class: 'eyebrow' }, st.passed ? `Stage ${n + 1} — passed` : n === c.current ? `Stage ${n + 1} — open now` : `Stage ${n + 1}`),
+      h('h2', {}, st.title),
+      h('p', {}, st.can),
+      n <= c.current
+        ? h('div', {},
+          h('div', { class: 'bar' }, h('div', { class: 'fill', style: `width:${Math.round((Math.min(st.have, st.need) / st.need) * 100)}%` })),
+          h('p', { class: 'note' }, `${st.have} of ${st.need} words${st.grammarNeeded ? `, ${st.grammar} of ${st.grammarNeeded} grammar points` : ''}`),
+          h('div', { class: 'wordset' }, ...st.words.map((i) => {
+            const w = D().words[i];
+            return h('button', { class: 'wchip', type: 'button', onclick: () => sheet(wordCard(i, { example: true, reveal: true })) },
+              h('span', { class: 'han' }, w.w), h('span', { class: 'jyut' }, w.j), h('span', { class: 'gloss' }, w.g));
+          })))
+        : h('p', { class: 'note' }, `${st.words.length} words, waiting until the stage before it is passed.`),
+      h('p', { class: 'note' }, st.why))),
+    h('section', { class: 'card' },
+      h('h2', {}, 'And after that'),
+      h('p', {}, `The other ${(D().words.length - c.stages.reduce((n, s) => n + s.words.length, 0)).toLocaleString()} words, in the order people actually say them. No stages, no gates — by then the sentences hold themselves up.`)))];
+}
+const COURSE_LEAD = 'Ten stages, each a small vocabulary plus the grammar that turns those words into sentences, and each ending with something you can do. A stage stays shut until the one before it is passed — not to make a game of it, but because a measure word is no use before you can count.';
+
 // ── progress ─────────────────────────────────────────────────────────────
 // The rule carried over from Palimpsest: report what was observed, and say
 // plainly what each number does and does not mean.
@@ -254,7 +289,7 @@ function progressScreen() {
     h('section', { class: 'card' },
       h('h2', {}, `${k.n.toLocaleString()} words you can answer`),
       band
-        ? h('p', {}, `The first ${band.words.toLocaleString()} words of recorded Cantonese conversation cover ${band.pct}% of everything said in it.`)
+        ? (() => { const line = `The first ${band.words.toLocaleString()} words of recorded Cantonese conversation cover ${band.pct}% of everything said in it.`; return h('p', {}, line, sayBtn(line)); })()
         : h('p', {}, `The first mark is ${next ? next.words.toLocaleString() : '100'} words — ${next ? next.pct : 66.6}% of everything said in recorded conversation. ${next ? (next.words - k.n).toLocaleString() : ''} to go.`),
       next && band ? h('p', { class: 'note' }, `The next mark is ${next.words.toLocaleString()} words, which covers ${next.pct}%.`) : null,
       h('p', { class: 'note' }, 'Coverage is counted on the 125,119 words of recorded conversation in the corpus — not borrowed from a study of English. It says how much of what you hear will be words you have met; it does not say you will follow the conversation.')),
@@ -297,13 +332,19 @@ function progressScreen() {
 }
 
 // ── about ────────────────────────────────────────────────────────────────
+// Held as constants so the read-aloud button speaks exactly what is on screen.
+const ABOUT_LEAD = 'Learning to talk. A Cantonese app that only teaches what a published source actually says, and only claims progress it has measured.';
+const CANNOT = [
+  'It cannot hear whether you pronounced a word correctly. It measures the pitch of a syllable, which is a part of that and not the whole of it.',
+  'It cannot teach you to hold a conversation on its own. It builds the vocabulary, the ear and the grammar patterns that a conversation runs on; the conversation still has to happen with a person.',
+];
 function aboutScreen() {
   const d = D();
   const src = (title, body, licence) => h('div', { class: 'source' }, h('h3', {}, title), h('p', {}, body), h('p', { class: 'evidence' }, licence));
   return [header('About'), h('main', {},
     h('section', { class: 'card' },
       h('h2', {}, '學講 Hok Gong'),
-      h('p', {}, 'Learning to talk. A Cantonese app that only teaches what a published source actually says, and only claims progress it has measured.'),
+      h('p', {}, ABOUT_LEAD, sayBtn(ABOUT_LEAD)),
       h('p', { class: 'evidence' }, `Version ${VERSION.v}${VERSION.date ? ` · ${VERSION.date}` : ''}${VERSION.commit ? ` · ${VERSION.commit}` : ''} · deck built ${d.built}`)),
 
     h('section', { class: 'card' },
@@ -331,9 +372,9 @@ function aboutScreen() {
       h('p', { class: 'note' }, 'This is spaced retrieval practice, the method with the strongest evidence behind it for vocabulary. The intervals here are a simple version of SM-2, adjusted by how you answer.')),
 
     h('section', { class: 'card' },
-      h('h2', {}, 'What this app cannot do'),
-      h('p', {}, 'It cannot hear whether you pronounced a word correctly. It measures the pitch of a syllable, which is a part of that and not the whole of it.'),
-      h('p', {}, 'It cannot teach you to hold a conversation on its own. It builds the vocabulary, the ear and the grammar patterns that a conversation runs on; the conversation still has to happen with a person.'),
+      h('h2', {}, 'What this app cannot do', sayBtn(CANNOT.join(' '))),
+      h('p', {}, CANNOT[0]),
+      h('p', {}, CANNOT[1]),
       h('p', {}, 'The recorded corpus is from 1997 and 1998. Everyday grammar and conversation hold up; anything about technology, money or slang may be dated.'),
       h('p', {}, 'Roughly a third of the most common words have no dictionary gloss that matches the way they are said. Those are left out rather than guessed at, which is why some very common words are missing.')),
 
@@ -343,4 +384,4 @@ function aboutScreen() {
   )];
 }
 
-export const browseScreens = { words: wordsScreen, tones: tonesScreen, grammar: grammarScreen, context: contextScreen, progress: progressScreen, about: aboutScreen };
+export const browseScreens = { course: courseScreen, words: wordsScreen, tones: tonesScreen, grammar: grammarScreen, context: contextScreen, progress: progressScreen, about: aboutScreen };

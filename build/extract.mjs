@@ -24,7 +24,7 @@
 
 import { readFileSync, writeFileSync, readdirSync, mkdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SRC = join(ROOT, 'sources');
@@ -108,6 +108,55 @@ readEntries('cccanto-webdist.txt', 'CC-Canto');
 readEntries('cccedict-canto-readings-150923.txt', 'CC-Canto readings');
 readEntries('cedict.txt', 'CC-CEDICT');
 
+// ── two more dictionaries, because CC-Canto stops ────────────────────────
+// The gaps CC-Canto leaves are not obscure words; they are everyday ones. 六
+// "six" had no gloss that belonged to its Cantonese reading at all. words.hk
+// would be the right answer and is not available yet (it comes through a
+// signed data request), so until then:
+//
+//   Wiktionary  English Wiktionary tags each sense by variety, so a sense
+//               marked Cantonese can be told from a Mandarin-only one, and it
+//               prints Jyutping. Prepared by build/wiktionary.mjs.
+//               CC BY-SA 3.0.
+//   Unihan      The Unicode consortium's character database: a Cantonese
+//               reading (kCantonese) and an English definition (kDefinition)
+//               for 20,587 characters. Authoritative on readings, terse on
+//               meanings, and single characters only — which is where the
+//               commonest words are. Unicode licence.
+const addEntry = (head, jyuts, glosses, src) => {
+  if (!glosses.length) return;
+  if (!dict.has(head)) dict.set(head, []);
+  dict.get(head).push({ jyuts, glosses, src });
+};
+const wikt = JSON.parse(readFileSync(join(ROOT, 'corpus', 'wiktionary.json'), 'utf8'));
+for (const [word, byReading] of Object.entries(wikt)) {
+  for (const [jyut, slot] of Object.entries(byReading)) {
+    // A sense Wiktionary marks Cantonese is better evidence than one it does
+    // not, so the two are kept as separate entries and ranked separately.
+    addEntry(word, [jyut], slot.canto, 'Wiktionary (Cantonese sense)');
+    addEntry(word, [jyut], slot.any, 'Wiktionary');
+  }
+}
+{
+  const uni = new Map();
+  for (const line of readFileSync(join(SRC, 'unihan', 'Unihan_Readings.txt'), 'utf8').split(/\r?\n/)) {
+    if (!line || line.startsWith('#')) continue;
+    const [cp, field, ...rest] = line.split('\t');
+    if (field !== 'kCantonese' && field !== 'kDefinition') continue;
+    const ch = String.fromCodePoint(parseInt(cp.replace('U+', ''), 16));
+    const e = uni.get(ch) || {};
+    if (field === 'kCantonese') e.jyuts = rest.join(' ').trim().split(/\s+/);
+    else e.def = rest.join('\t').trim();
+    uni.set(ch, e);
+  }
+  for (const [ch, e] of uni) {
+    if (!e.jyuts || !e.def) continue;
+    // Unihan packs several senses into one line with semicolons and commas;
+    // the sense splitter downstream handles that.
+    addEntry(ch, e.jyuts, [e.def], 'Unihan');
+  }
+}
+
 // ── rime-cantonese: an independent pronunciation authority ───────────────
 // A rime line is `word <TAB> jyutping [<TAB> share%]`. The reading with NO
 // percentage is the main one; a percentage marks a minority reading. Reading
@@ -131,6 +180,8 @@ const rimeWords = readRime('jyut6ping3.words.dict.yaml');
 const rimeChars = readRime('jyut6ping3.chars.dict.yaml');
 const rimeSays = (w) => ([...w].length === 1 ? rimeChars.get(w) : rimeWords.get(w) || rimeChars.get(w)) || [];
 
+const uselessGloss = /^(variant of|old variant of|surname |abbr\. for|see |used in|erhua variant|another name for|an alternative form|alternative form|\(archaic\)|\(literary\))/i;
+
 // ── which sense is the right one ─────────────────────────────────────────
 // Matching the pronunciation is not enough. 都 is dou1 both as "all/also" (what
 // people say every other sentence) and as the noun "capital city", and the
@@ -151,14 +202,27 @@ const classOf = (t) => {
 };
 // What a learner should read: no pinyin in square brackets, no "as opposed to
 // 您nín" asides, no "1." numbering left over from the dictionary's own layout.
-const tidy = (s) => s
+// Splitting a sense can leave a bracket hanging — "Thailand )" and
+// "to match (; (noun)" both got through. A gloss with unbalanced brackets is
+// dropped back to the part that reads properly.
+const balance = (s) => {
+  let depth = 0, cutAt = -1;
+  const out = [];
+  for (const c of s) {
+    if (c === '(') { if (depth === 0) cutAt = out.length; depth++; }
+    else if (c === ')') { if (depth === 0) continue; depth--; }
+    out.push(c);
+  }
+  return (depth > 0 ? out.slice(0, cutAt).join('') : out.join('')).replace(/[\s;,]+$/, '').trim();
+};
+const tidy = (s) => balance(s
   .replace(/\[[^\]]*\]/g, '')
   .replace(/\([^)]*[\u3400-\u9FFF][^)]*\)/g, '')
   .replace(/^\s*\([^)]{1,24}\)\s*/, '')
   .replace(/^\s*\d+\s*[.)]\s*/, '')
   .replace(/\s+/g, ' ')
   .replace(/^[;,\s]+|[;,\s]+$/g, '')
-  .trim();
+  .trim());
 // Senses are separated by a semicolon, by a numbered marker, or by both — but
 // only outside brackets. Splitting on every semicolon cut "(phrase; said when…)"
 // in half and left 33 words glossed "(phrase".
@@ -178,14 +242,51 @@ const sensesOf = (entry) => {
       const m = /^\s*\(([^)]{1,24})\)/.exec(piece);
       if (m) { const c = classOf(m[1]); if (c) cls = c; }
       const text = tidy(piece);
+      // CC-Canto sometimes writes the part of speech as its own sense —
+      // "/noun; small pig; piglet/" — and "noun" is short, so it won a
+      // shortest-answer tiebreak and 小豬 was taught as meaning "noun".
+      const bare = classOf(text);
+      if (bare && text.split(/\s+/).length <= 2) { cls = bare; continue; }
       if (text && text.length <= 64 && !out.some((o) => o.text === text)) out.push({ text, cls });
     }
   }
   return out;
 };
+// How much a source is trusted for a Cantonese meaning. A Cantonese
+// dictionary and a sense Wiktionary marks Cantonese are the best evidence; a
+// Mandarin dictionary's sense is the weakest thing that can still be right.
+const SRC_SCORE = {
+  // A Cantonese dictionary outweighs the two-point bonus the recorded
+  // reading carries, so a real Cantonese sense under the standard reading
+  // beats a rare sense under a variant one.
+  'CC-Canto': 4,
+  'Wiktionary (Cantonese sense)': 4,
+  Wiktionary: 1.5,
+  Unihan: 1,
+  'CC-Canto readings': 0.5,
+  'CC-CEDICT': 0,
+};
+// Which sense of an entry a learner should be shown first. Dictionaries list
+// senses in their own order, and that order put "used in transliteration" ahead
+// of "to come" for 嚟 — a note about how a character is borrowed for its sound,
+// offered as the meaning of one of the commonest verbs in the language.
+const senseScore = (sense, cls) => {
+  let s = 0;
+  if (sense.cls === cls) s += 3;                        // agrees with the recorded part of speech
+  if (/^used (in|as|to|for|before|after)\b/i.test(sense.text)) s -= 4;   // describes a use, does not translate
+  // 湯 is soup, 黃 is yellow, 葉 is a leaf. Every one of them is also a
+  // surname, and the dictionaries often print that first — which had the app
+  // teaching thirteen everyday characters as family names.
+  if (/^(a |chinese )?surname\b/i.test(sense.text)) s -= 6;
+  if (/^(variant|see|short for|abbreviation)\b/i.test(sense.text)) s -= 5;
+  if (/^\(?(cantonese|hong kong)\)?/i.test(sense.text)) s += 1;
+  if (cls === 'verb' && /^to \w/.test(sense.text)) s += 2;
+  if (sense.text.length <= 24) s += 0.5;               // a short answer is a better answer
+  return s;
+};
 const scoreEntry = (senses, src, cls) => {
   const declared = senses.map((s) => s.cls).filter(Boolean);
-  let s = src === 'CC-Canto' ? 1 : 0;
+  let s = SRC_SCORE[src] ?? 0;
   // Agreement is rewarded. Disagreement is mostly ignored, because the two
   // vocabularies differ — the corpus tags 唔 an adverb, the dictionary calls it
   // a verb, and both mean the same negation. The exception is a sense offered
@@ -206,15 +307,25 @@ const scoreEntry = (senses, src, cls) => {
 //   inferred  the entry gives no Cantonese reading at all, but rime gives the
 //             word one reading only, so there is no other sense to confuse it
 //             with (其實 "actually", 如果 "if", 自己 "oneself")
+//   standard  the corpus recorded a minority reading whose only meaning is a
+//             rare one, and a Cantonese dictionary has the word under the
+//             reading rime calls standard. 嚟 was recorded as lei4, whose only
+//             gloss is "used in transliteration"; as lai4 it is "to come",
+//             which is the word people were plainly saying. The standard
+//             reading is taught and the recorded one is kept on the word.
 //   other     the only gloss belongs to a different reading — not taught
 const toneless = (j) => j.replace(/[1-6]/g, '');
 const confidenceFor = (entry, said, rime) => {
   if (entry.jyuts.includes(said)) return 'exact';
   if (rime.includes(said) && entry.jyuts.some((j) => toneless(j) === toneless(said))) return 'sandhi';
   if (!entry.jyuts.length && rime.length === 1 && rime[0] === said) return 'inferred';
+  if (entry.jyuts.some((j) => rime.includes(j))) return 'standard';
   return 'other';
 };
-const RANK = { exact: 3, sandhi: 2, inferred: 1, other: 0 };
+const RANK = { exact: 4, inferred: 3, sandhi: 2, standard: 1, other: 0 };
+// The reading the app will teach: the recorded one wherever it carries a real
+// meaning, otherwise the standard one the dictionary uses.
+const readingOf = (entry, said) => (entry.jyuts.includes(said) || !entry.jyuts.length ? said : entry.jyuts[0]);
 
 // ── the word list: spoken frequency, joined to the dictionaries ──────────
 const lexicon = [...counts.entries()]
@@ -228,16 +339,36 @@ const lexicon = [...counts.entries()]
     const entries = (dict.get(w) || []).filter((x) => x.glosses.length)
       .map((x, k) => ({ ...x, k, senses: sensesOf(x), conf: confidenceFor(x, said, rime) }))
       .filter((x) => x.senses.length);
-    // Best evidence first: the reading has to fit before the sense is weighed.
-    const ranked = [...entries].sort((a, b) =>
-      RANK[b.conf] - RANK[a.conf]
-      || scoreEntry(b.senses, b.src, cls) - scoreEntry(a.senses, a.src, cls)
-      || a.k - b.k);
+    // Best evidence first. The recorded reading is worth two points — it is
+    // what someone was actually heard saying — but a Cantonese dictionary
+    // entry under the standard reading can still outweigh a rare sense found
+    // under the recorded one, which is how 嚟 stopped being "used in
+    // transliteration" and became "to come".
+    // The best sense an entry offers breaks ties between entries: CC-Canto
+    // lists 又 twice, and the entry whose only sense was "used as the and in a
+    // mixed fraction" was winning on file order over the one that says "again".
+    const bestSense = (x) => Math.max(...x.senses.map((sn) => senseScore(sn, cls)));
+    const weigh = (x) => scoreEntry(x.senses, x.src, cls) + bestSense(x) * 0.5;
+    // How well the reading fits comes FIRST; the source only decides between
+    // entries that fit equally well. The other way round, a good Cantonese
+    // dictionary under a DIFFERENT reading beat a plain one under the right
+    // reading: 拜拜 baai1baai3 (bye-bye) was taught as "to die", which is
+    // baai3baai3 — a different word that happens to be written the same.
+    const ranked = [...entries].sort((a, b) => RANK[b.conf] - RANK[a.conf] || weigh(b) - weigh(a) || a.k - b.k);
     const pick = ranked[0];
-    const ordered = pick ? [...pick.senses].sort((a, b) => (b.cls === cls ? 1 : 0) - (a.cls === cls ? 1 : 0)).map((s) => s.text) : [];
+    // DEBUG_WORD=嚟 node build/extract.mjs — show every candidate and its score.
+    if (process.env.DEBUG_WORD === w) {
+      console.log(`\n${w}: recorded as ${said}; rime says ${rime.join('/') || 'nothing'}; corpus tag ${pos} (${cls})`);
+      for (const x of ranked) console.log(`   ${String(weigh(x).toFixed(1)).padStart(5)}  ${x.conf.padEnd(9)} ${x.src.padEnd(30)} [${x.jyuts.join(',') || 'no reading'}]  ${x.senses.map((s) => s.text).slice(0, 3).join(' / ')}`);
+    }
+    // A cross-reference teaches nothing: a word whose every sense is 'variant
+    // of X' or 'see Y' is left without a gloss, and so is not taught at all.
+    const ordered = pick ? [...pick.senses].sort((a, b) => senseScore(b, cls) - senseScore(a, cls)).map((s) => s.text)
+      .filter((g) => !/^used in transliteration/i.test(g) && !uselessGloss.test(g)) : [];
     return {
       w, rank: i + 1, n: e.n,
-      jyut: said,
+      jyut: pick ? readingOf(pick, said) : said,
+      said,                                              // as the corpus recorded it
       jyutAll: [...e.jyut.keys()],
       rimeJyut: rime,
       pos,
@@ -273,7 +404,6 @@ for (const [i, e] of lexicon.entries()) {
 
 // Glosses that teach nothing on their own, or that belong to a name or an old
 // form rather than to the word as it is used.
-const uselessGloss = /^(variant of|old variant of|surname |abbr\. for|see |used in|erhua variant|another name for|an alternative form|alternative form|\(archaic\)|\(literary\))/i;
 const properNoun = /^[A-Z][a-z]+( [A-Z][a-z]+)*( \(|,|$)/;
 // Written-Mandarin function characters. A Cantonese learner saying 就是 or 他們
 // is speaking Mandarin with a Cantonese accent, so those compounds are left out.
@@ -306,11 +436,11 @@ for (const line of readFileSync(join(RIME, 'essay-cantonese.txt'), 'utf8').split
   let best = null;
   for (const said of says) {
     const hit = entries.filter((x) => x.jyuts.includes(said))
-      .sort((a, b) => (a.src === 'CC-Canto' ? -1 : 1) - (b.src === 'CC-Canto' ? -1 : 1))[0];
+      .sort((a, b) => (SRC_SCORE[b.src] ?? 0) - (SRC_SCORE[a.src] ?? 0))[0];
     if (hit) { best = { said, hit }; break; }
   }
   if (!best) continue;
-  const glosses = sensesOf(best.hit).map((x) => x.text)
+  const glosses = sensesOf(best.hit).sort((a, b) => senseScore(b, null) - senseScore(a, null)).map((x) => x.text)
     .filter((g) => !uselessGloss.test(g) && !properNoun.test(g) && g.length <= 60)
     .slice(0, 3);
   if (!glosses.length) continue;
@@ -320,6 +450,43 @@ essay.sort((a, b) => b.freq - a.freq);
 for (const [i, e] of essay.entries()) { e.rank = lexicon.length + i + 1; e.tier = 2; e.n = 0; }
 for (const e of lexicon) { e.tier = 1; e.freq = null; }
 lexicon.push(...essay);
+
+// ── the words a first conversation needs, whether or not 1997 said them ──
+// content/essentials.mjs chooses an ORDER, not facts: a word listed there
+// still has to carry a reading rime gives it and a meaning a dictionary gives
+// that reading, or it does not go in. 你好 is the case in point — not in the
+// corpus at all, and not optional in a course.
+const SYLLABUS = (await import(pathToFileURL(join(ROOT, 'content', 'syllabus.mjs')).href)).default;
+const have = new Set(lexicon.map((e) => e.w));
+const added = [];
+for (const group of SYLLABUS) {
+  for (const w of group.words) {
+    if (have.has(w) || !han.test(w)) continue;
+    const entries = (dict.get(w) || []).filter((x) => x.glosses.length);
+    // rime does not list every compound — it has no entry for 你好 at all — so
+    // where it is silent the reading comes from whichever dictionary prints
+    // one, best source first. A published reading is still a published reading.
+    const says = rimeSays(w).length ? rimeSays(w)
+      : [...new Set(entries.slice().sort((a, b) => (SRC_SCORE[b.src] ?? 0) - (SRC_SCORE[a.src] ?? 0)).flatMap((x) => x.jyuts))];
+    if (!says.length) continue;
+    let best = null;
+    for (const said of says) {
+      const hits = entries.filter((x) => x.jyuts.includes(said))
+        .sort((a, b) => (SRC_SCORE[b.src] ?? 0) - (SRC_SCORE[a.src] ?? 0));
+      if (hits.length) { best = { said, hit: hits[0] }; break; }
+    }
+    if (!best) continue;
+    const glosses = sensesOf(best.hit).sort((a, b) => senseScore(b, null) - senseScore(a, null))
+      .map((x) => x.text).filter((g) => !uselessGloss.test(g) && g.length <= 60).slice(0, 3);
+    if (!glosses.length) continue;
+    have.add(w);
+    added.push({ w, freq: null, n: 0, jyut: best.said, said: best.said, jyutAll: [best.said], rimeJyut: says, pos: null,
+      gloss: glosses, glossSrc: best.hit.src, glossConf: 'exact', glossMatchesSaid: true, tier: 3,
+      dictJyut: [...new Set(entries.flatMap((x) => x.jyuts))] });
+  }
+}
+for (const [i, e] of added.entries()) e.rank = lexicon.length + i + 1;
+lexicon.push(...added);
 
 // ── Tatoeba: sentences, translations, and recorded audio ─────────────────
 const T = (f) => readFileSync(join(SRC, 'tatoeba', f), 'utf8').split('\n').filter(Boolean).map((l) => l.split('\t'));

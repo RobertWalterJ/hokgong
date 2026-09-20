@@ -33,16 +33,16 @@ export const PHRASES = {
   thanks:     { en: 'Thank you',        yue: '唔該',     jyut: 'm4 goi1',         at: 80,   needs: ['唔該'] },
   iKnow:      { en: 'I knew it',        yue: '我識',     jyut: 'ngo5 sik1',       at: 200,  needs: ['我', '識'] },
   iDont:      { en: 'Not yet',          yue: '我唔識',   jyut: 'ngo5 m4 sik1',    at: 200,  needs: ['我', '唔', '識'] },
-  words:      { en: 'Words',            yue: '生字',     jyut: 'saang1 zi6',      at: 300,  needs: ['生', '字'] },
-  tones:      { en: 'Tones',            yue: '聲調',     jyut: 'sing1 diu6',      at: 400,  needs: ['聲', '調'] },
-  grammar:    { en: 'Grammar',          yue: '文法',     jyut: 'man4 faat3',      at: 500,  needs: ['文', '法'] },
+  words:      { en: 'Words',            yue: '生字',     jyut: 'saang1 zi6',      at: 180,  needs: ['生', '字'] },
+  tones:      { en: 'Tones',            yue: '聲調',     jyut: 'sing1 diu6',      at: 220,  needs: ['聲', '調'] },
+  grammar:    { en: 'Grammar',          yue: '文法',     jyut: 'man4 faat3',      at: 260,  needs: ['文', '法'] },
   learn:      { en: 'Learn',            yue: '學',       jyut: 'hok6',            at: 100,  needs: ['學'] },
   done:       { en: 'Done',             yue: '完',       jyut: 'jyun4',           at: 150,  needs: ['完'] },
   today:      { en: 'Today',            yue: '今日',     jyut: 'gam1 jat6',       at: 180,  needs: ['今日'] },
-  what:       { en: 'What does it mean?', yue: '咩意思？', jyut: 'me1 ji3 si1',   at: 600,  needs: ['咩', '意思'] },
-  whichTone:  { en: 'Which one did you hear?', yue: '聽到邊個？', jyut: 'teng1 dou2 bin1 go3', at: 800, needs: ['聽', '到', '邊', '個'] },
-  onceMore:   { en: 'One more round',   yue: '再嚟一次', jyut: 'zoi3 lai4 jat1 ci3', at: 900, needs: ['再', '嚟', '一', '次'] },
-  seeYou:     { en: 'See you tomorrow', yue: '聽日見',   jyut: 'ting1 jat6 gin3', at: 1200, needs: ['聽日', '見'] },
+  what:       { en: 'What does it mean?', yue: '咩意思？', jyut: 'me1 ji3 si1',   at: 300,  needs: ['咩', '意思'] },
+  whichTone:  { en: 'Which one did you hear?', yue: '聽到邊個？', jyut: 'teng1 dou2 bin1 go3', at: 380, needs: ['聽', '到', '邊', '個'] },
+  onceMore:   { en: 'One more round',   yue: '再嚟一次', jyut: 'zoi3 lai4 jat1 ci3', at: 440, needs: ['再', '嚟', '一', '次'] },
+  seeYou:     { en: 'See you tomorrow', yue: '聽日見',   jyut: 'ting1 jat6 gin3', at: 520, needs: ['聽日', '見'] },
 };
 
 // What the learner can already answer, as a set of words — the ladder asks it

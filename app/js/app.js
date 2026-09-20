@@ -12,7 +12,7 @@ import { h, iconBtn, sayBtn, sheet, closeSheet, disclosure, show, route, back, c
 import { initSpeech, say, unlock, available as speechAvailable, cantoneseAvailable, onSpeaking } from './speech.js';
 import { playRecording, playWord, stopAudio, onAudio, canPlayWord, haveRecordings, probeRecordings } from './audio.js';
 import { State, Round, cardState, isHolding, dayKey, newLeftToday, nextDueSentence, now, shuffle, DAY } from './schedule.js';
-import { loadDeck, indexDeck, D, wordOf, exampleOf, allIds, askableIds, setAsideCount, SKILL, SELF_RATED } from './deck.js';
+import { loadDeck, indexDeck, D, wordOf, exampleOf, allIds, askableIds, setAsideCount, stageState, SKILL, SELF_RATED } from './deck.js';
 import { setProgress, setEnglishOnly, t } from './lang.js';
 import { press as tick, right as correct, wrong, setSound as setSoundOn } from './sound.js';
 import { attempt as toneAttempt, rank as toneRank, toneName, toneChao } from './pitch.js';
@@ -38,6 +38,32 @@ function refreshLadder() {
   return k;
 }
 
+// ── the course ───────────────────────────────────────────────────────────
+// Where the learner has got to, measured from their own answers: a word
+// counts when the last time the app asked, they got it right.
+export function course() {
+  const d = D();
+  const wordRight = new Set();
+  const grammarRight = new Set();
+  for (const it of d.items) {
+    const c = State.card(it.id);
+    if (!c || c.st === 'new' || !c.ok) continue;
+    if (it.i != null) wordRight.add(it.i);
+    if (it.gid != null) grammarRight.add(it.gid);
+  }
+  return stageState({ canAnswerWord: (i) => wordRight.has(i), grammarMet: (g) => grammarRight.has(g) });
+}
+const isMet = (id) => !!State.card(id);
+// What the app may ask right now: what this phone can play, and what the
+// course has opened.
+const inPlay = () => askableIds(canPlayWord(), haveRecordings(), course().current, isMet);
+
+// The reading face. The British Dyslexia Association asks for sans-serif;
+// this app uses a serif for meanings because that is what its sister reading
+// apps use and Robert reads them happily — so the requirement is that it can
+// be switched, and here it is.
+const applyReadingFont = (sans) => document.documentElement.style.setProperty('--read-font', sans ? 'var(--ui)' : 'var(--read)');
+
 // ── settings ─────────────────────────────────────────────────────────────
 const S = () => State.data.settings;
 function settingsSheet() {
@@ -54,6 +80,7 @@ function settingsSheet() {
     row('Always show Jyutping', 'The romanisation under every Cantonese word.', toggle('jyutping', s.jyutping !== false)),
     row('Keep the interface in English', 'Turns off the slow switch to Cantonese labels.', toggle('englishOnly', !!s.englishOnly, (v) => setEnglishOnly(v))),
     row('Larger text', 'Also available in your phone’s own settings.', toggle('big', !!s.big, (v) => document.documentElement.classList.toggle('big', v))),
+    row('Plain sans-serif for meanings', 'Meanings and quotations are set in a serif by default. This swaps them for the interface face, which some readers find easier.', toggle('sans', !!s.sans, (v) => applyReadingFont(v))),
     h('div', { class: 'srow col' },
       h('div', {}, h('div', { class: 'slabel' }, 'How fast to take on new words'),
         h('div', { class: 'note' }, 'New words are the part you choose. Reviews then arrive as they fall due — which is why a keen week makes a busy fortnight.')),
@@ -99,7 +126,7 @@ const phraseOfDay = () => {
 // ── home ─────────────────────────────────────────────────────────────────
 function homeScreen() {
   const d = D();
-  const ids = askableIds(canPlayWord(), haveRecordings());
+  const ids = inPlay();
   const k = refreshLadder();
   const due = State.dueIds(ids).length;
   const fresh = ids.filter((id) => !State.card(id)).length;
@@ -135,6 +162,7 @@ function homeScreen() {
         run > 1 ? h('p', { class: 'note centre' }, `${run} days in a row.`) : null,
         !due && !room && fresh ? h('button', { class: 'link', type: 'button', onclick: () => startRound({ beyondDaily: true }) }, 'Learn more anyway') : null,
         !due && !fresh && met ? h('p', { class: 'note centre' }, nextDueSentence(State.nextDue(ids) || now())) : null),
+      stageCard(),
       canPlayWord() && haveRecordings() ? null : noVoiceCard(),
       dayCard,
       h('nav', { class: 'rows' },
@@ -146,6 +174,34 @@ function homeScreen() {
         link('About', 'Sources, licences, and what this app cannot do', 'about', browseScreens.about)),
     ),
   ];
+}
+
+// ── where you are in the course ──────────────────────────────────────────
+// One stage at a time, with what it will let you do and how far from the gate
+// you are. The next stage is named but not opened: knowing what is coming is
+// part of knowing why this one matters.
+function stageCard() {
+  const c = course();
+  if (c.done) {
+    return h('section', { class: 'card' },
+      h('div', { class: 'eyebrow' }, 'The course is finished'),
+      h('p', {}, 'All ten stages are behind you, so the rest of the word list is open — about 5,800 more words, in the order people actually say them.'),
+      h('button', { class: 'wide', type: 'button', onclick: () => show('course', browseScreens.course) }, 'Look back over the stages'));
+  }
+  const st = c.stages[c.current];
+  const pct = Math.round((Math.min(st.have, st.need) / st.need) * 100);
+  const next = c.stages[c.current + 1];
+  return h('section', { class: 'card' },
+    h('div', { class: 'eyebrow' }, `Stage ${c.current + 1} of ${c.stages.length}`),
+    h('h2', {}, st.title),
+    h('p', {}, 'By the end: ', h('strong', {}, st.can)),
+    h('div', { class: 'bar' }, h('div', { class: 'fill', style: `width:${pct}%` })),
+    h('p', { class: 'note' }, st.have >= st.need && st.grammar < st.grammarNeeded
+      ? `Words done. ${st.grammarNeeded - st.grammar} grammar point${st.grammarNeeded - st.grammar === 1 ? '' : 's'} to meet before the next stage opens.`
+      : `${st.have} of ${st.need} words you can answer${st.grammarNeeded ? `, and ${st.grammar} of ${st.grammarNeeded} grammar points` : ''}.`),
+    disclosure('Why these words now', h('p', { class: 'note' }, st.why),
+      next ? h('p', { class: 'note' }, `Next: ${next.title}.`) : null,
+      h('button', { class: 'wide', type: 'button', onclick: () => show('course', browseScreens.course) }, 'See the whole course')));
 }
 
 // Said once, on the home screen, rather than inside a question the learner
@@ -181,7 +237,7 @@ let session = { asked: new Set() };
 
 function startRound(opts) {
   unlock();
-  const r = new Round(askableIds(canPlayWord(), haveRecordings()), { ...opts, exclude: session.asked, pace: pace(), groupOf: D().groupOf });
+  const r = new Round(inPlay(), { ...opts, exclude: session.asked, pace: pace(), groupOf: D().groupOf });
   if (r.empty) { show('round', () => emptyRound()); return; }
   show('round', () => roundScreen(r, { practice: !!opts.practice }), { arg: null });
 }
@@ -199,6 +255,9 @@ function roundScreen(round, { practice }) {
   const total = round.queue.length;
   let done = 0, right = 0;
   const tally = { };
+  // Where the course stood when the round began, so passing a gate during it
+  // can be said out loud at the end.
+  const stageBefore = course().current;
 
   const paint = () => {
     dots.replaceChildren(...Array.from({ length: total }, (_, i) => h('span', { class: 'dot' + (i < done ? ' done' : '') })));
@@ -210,13 +269,19 @@ function roundScreen(round, { practice }) {
     window.scrollTo(0, 0);
   };
   const summary = () => {
+    const after = course();
+    const passed = after.current > stageBefore ? after.stages[stageBefore] : null;
     const card = D().context[Math.floor(Math.random() * D().context.length)];
-    const left = new Round(askableIds(canPlayWord(), haveRecordings()), { practice, exclude: session.asked, pace: pace(), groupOf: D().groupOf });
+    const left = new Round(inPlay(), { practice, exclude: session.asked, pace: pace(), groupOf: D().groupOf });
     return h('section', { class: 'card' },
       h('h2', {}, `${right} of ${done}`),
+      passed ? h('div', { class: 'passed' },
+        h('div', { class: 'eyebrow' }, 'Stage passed'),
+        h('p', {}, `${passed.title}. You can now ${passed.can.charAt(0).toLowerCase()}${passed.can.slice(1)}`),
+        after.stages[after.current] ? h('p', { class: 'note' }, `Next: ${after.stages[after.current].title} — ${after.stages[after.current].can}`) : null) : null,
       h('p', { class: 'note' }, practice ? 'A recall test does not change when a word comes back — it only tells you where you stand.' : byline(tally)),
       card ? h('div', { class: 'ctx' }, contextCard(card, { compact: true })) : null,
-      left.empty ? h('p', { class: 'note' }, nextDueSentence(State.nextDue(askableIds(canPlayWord(), haveRecordings())) || now()))
+      left.empty ? h('p', { class: 'note' }, nextDueSentence(State.nextDue(inPlay()) || now()))
         : h('button', { class: 'wide primary', type: 'button', onclick: () => startRound({ practice }) }, t('onceMore').text),
       h('button', { class: 'ghost wide', type: 'button', onclick: () => show('home', homeScreen) }, t('done').text));
   };
@@ -557,6 +622,7 @@ async function boot() {
   setSoundOn(S().sound !== false);
   setEnglishOnly(!!S().englishOnly);
   if (S().big) document.documentElement.classList.add('big');
+  applyReadingFont(!!S().sans);
   onSpeaking((on) => document.documentElement.classList.toggle('speaking', on));
   onAudio((on) => document.documentElement.classList.toggle('playing', on));
   try {

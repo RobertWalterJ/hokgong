@@ -2,3 +2,7 @@ node_modules/
 sources/tatoeba/eng_sentences.tsv
 sources/*.zip
 sources/hkcancor.zip
+sources/wiktionary/kaikki-chinese.jsonl
+sources/unihan/Unihan.zip
+node_modules/
+build/_*

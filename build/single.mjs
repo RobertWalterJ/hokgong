@@ -25,6 +25,7 @@ const run = (f) => execFileSync(process.execPath, [join(ROOT, 'build', f)], { st
 run('verify.mjs');
 run('test-verify.mjs');
 run('audit-colour.mjs');
+execFileSync(process.execPath, [join(ROOT, 'audits', 'run-dyslexia.mjs')], { stdio: 'inherit' });
 run('test-schedule.mjs');
 
 const js = (await build({

@@ -23,6 +23,7 @@ const SENT = read('corpus/sentences.json');
 const COVERAGE = read('corpus/coverage.json');
 const GRAMMAR = await load('content/grammar.mjs');
 const CONTEXT = await load('content/context.mjs');
+const SYLLABUS = await load('content/syllabus.mjs');
 
 const WORDS = 6000;        // the conversational vocabulary the app is built to reach
 const READING = 1200;      // how far read-the-characters items go: reading matters, but later
@@ -38,7 +39,20 @@ const seeded = (str) => { let h = 2166136261; for (const c of str) h = Math.imul
 // frequency. Only words whose gloss belongs to the pronunciation recorded —
 // the rest wait for a Cantonese speaker to check them.
 const usable = LEX.filter((e) => e.gloss.length && e.glossMatchesSaid && chars(e.w) <= 4);
-const chosen = usable.slice(0, WORDS);
+// The first conversation comes first. content/essentials.mjs lists what a
+// learner needs in week one — greetings, politeness, family, counting — which
+// a 125,000-word corpus of 1997 adult conversation puts at word 2,523. Those
+// words jump the queue in the order that file gives; everything after them
+// stays in the order people actually speak.
+const ESSENTIAL_ORDER = new Map();
+for (const group of SYLLABUS) for (const w of group.words) if (!ESSENTIAL_ORDER.has(w)) ESSENTIAL_ORDER.set(w, ESSENTIAL_ORDER.size);
+const essentialsFirst = (a, b) => {
+  const ea = ESSENTIAL_ORDER.has(a.w) ? ESSENTIAL_ORDER.get(a.w) : Infinity;
+  const eb = ESSENTIAL_ORDER.has(b.w) ? ESSENTIAL_ORDER.get(b.w) : Infinity;
+  return ea - eb;
+};
+const ordered = [...usable].sort(essentialsFirst);
+const chosen = ordered.slice(0, WORDS);
 const index = new Map(chosen.map((e, i) => [e.w, i]));
 
 // Distractors come from the same part of the frequency list, so a question is
@@ -257,10 +271,35 @@ const place = (it) => {
 const order = new Map(items.map((it) => [it.id, place(it)]));
 items.sort((a, b) => order.get(a.id) - order.get(b.id) || a.id.localeCompare(b.id));
 
+// ── the stages, resolved to what is actually in the deck ─────────────────
+// A stage carries the positions of its own words, so the app can measure the
+// gate without knowing anything about the syllabus file.
+const stages = SYLLABUS.map((st) => ({
+  id: st.id,
+  title: st.title,
+  can: st.can,
+  why: st.why,
+  gate: st.gate,
+  grammar: st.grammar,
+  words: st.words.map((w) => index.get(w)).filter((i) => i != null),
+}));
+// Each item belongs to the stage that introduces its word or its grammar
+// point; everything else belongs to no stage at all — the long tail that
+// opens, in frequency order, once the course is finished.
+const stageOfWord = new Map();
+for (const [n, st] of stages.entries()) for (const i of st.words) if (!stageOfWord.has(i)) stageOfWord.set(i, n);
+const stageOfGrammar = new Map();
+for (const [n, st] of stages.entries()) for (const g of st.grammar) if (!stageOfGrammar.has(g)) stageOfGrammar.set(g, n);
+for (const it of items) {
+  const n = it.i != null ? stageOfWord.get(it.i) : it.gid != null ? stageOfGrammar.get(it.gid) : undefined;
+  if (n != null) it.stage = n;
+}
+
 mkdirSync(join(ROOT, 'app', 'data'), { recursive: true });
 const deck = {
   built: new Date().toISOString().slice(0, 10),
   coverage: COVERAGE,
+  stages,
   words: chosen.map((e) => ({ w: e.w, j: e.jyut, g: e.gloss[0], alt: e.gloss.slice(1, 3), r: e.rank, t: e.tier, c: e.glossConf, s: e.glossSrc })),
   examples,
   grammar,
@@ -276,3 +315,4 @@ for (const [k, n] of Object.entries(byKind)) console.log(`  ${k.padEnd(16)} ${n.
 console.log(`  tier 1 (recorded speech) ${chosen.filter((e) => e.tier === 1).length.toLocaleString()}, tier 2 (written frequency) ${chosen.filter((e) => e.tier === 2).length.toLocaleString()}`);
 console.log(`  words with an example sentence: ${Object.keys(examples).length.toLocaleString()}`);
 console.log(`grammar points: ${grammar.length}; context cards: ${context.length}; recordings to fetch: ${audioNeeded.size}`);
+console.log(`the course: ${stages.length} stages, ${stages.reduce((n, s) => n + s.words.length, 0)} words gated, ${items.filter((i) => i.stage != null).length.toLocaleString()} questions inside them`);

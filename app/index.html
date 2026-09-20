@@ -135,7 +135,7 @@ h1, h2, h3 { font-weight: 600; letter-spacing: -.011em; }
 .card h2 { margin: 0 0 var(--s3); font-size: 1.15rem; }
 .card h3 { margin: var(--s5) 0 var(--s2); font-size: 1rem; }
 .eyebrow {
-  font-size: .7rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase;
+  font-size: .78rem; font-weight: 600; letter-spacing: .06em;
   color: var(--muted); margin-bottom: var(--s3);
 }
 .note { color: var(--muted); font-size: .88em; }
@@ -180,7 +180,7 @@ details.more > :not(summary) { animation: rise .2s var(--ease); }
 .gloss { font-family: var(--read-font); }
 .gloss.big { font-size: clamp(1.5rem, 7vw, 2rem); line-height: 1.35; margin-bottom: var(--s5); }
 .prompt {
-  font-size: .72rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase;
+  font-size: .82rem; font-weight: 600; letter-spacing: .04em;
   color: var(--muted); display: flex; align-items: center; justify-content: center; gap: var(--s2);
   margin-bottom: var(--s4);
 }
@@ -268,7 +268,7 @@ html.playing .play { border-color: var(--accent); background: var(--tint); }
 .piece:disabled { opacity: .22; }
 
 /* ── words, tones, context ────────────────────────────────────────── */
-.word { text-align: center; }
+.word > .wline, .word > .jyut, .word > .gloss { text-align: center; }
 .wline { display: flex; align-items: center; gap: var(--s2); justify-content: center; }
 .word .gloss { font-size: 1.15rem; }
 .example {
@@ -306,6 +306,9 @@ html.playing .play { border-color: var(--accent); background: var(--tint); }
 }
 .ctx { margin: var(--s5) 0; }
 .gpoint { background: var(--chip); border-radius: 14px; padding: var(--s4); margin: var(--s4) 0; }
+
+.passed { background: var(--tint); border-radius: 14px; padding: var(--s4); margin: var(--s4) 0; }
+.passed .eyebrow { color: var(--accent); margin-bottom: var(--s1); }
 
 /* ── progress ─────────────────────────────────────────────────────── */
 .figure { font-size: clamp(2.4rem, 12vw, 3.2rem); line-height: 1.05; font-weight: 600; letter-spacing: -.03em; }
