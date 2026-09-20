@@ -6,6 +6,13 @@
 
 export default [
   {
+    v: '1.5.1', date: '2026-09-20',
+    what: [
+      'Fixed the app scrolling sideways. The row of dashes at the top of a round — one per question — was sized when a round was ten questions: eighteen pixels each came to 216px, which fits a phone. A round became twenty-five and can be set to forty, which is 546px and 870px, so the whole page could be dragged left and every screen looked half cut off. The dashes now share whatever width they are given.',
+      'The page can no longer be scrolled sideways at all, whatever goes wrong in future, and the build now fails if anything is wider than a 320px phone.',
+    ],
+  },
+  {
     v: '1.5.0', date: '2026-09-20',
     what: [
       'The app no longer stops you learning. There is always a button: when nothing is owed it carries on with new words past the day’s pace, and when there are none left in reach it carries on with recall. "Today’s words are done" used to hide the button and offer a faint link underneath, which read as "you are finished".',

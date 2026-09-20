@@ -93,7 +93,14 @@
 
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
-html { -webkit-text-size-adjust: 100%; overflow-x: hidden; }
+/* `clip` rather than `hidden`: hidden makes the root a scroll container, so
+   anything too wide could still be scrolled to sideways — which is exactly
+   what happened, and it made every screen look half cut off. `clip` cuts the
+   overflow off with no scrolling at all, and unlike `hidden` it does not
+   break the sticky header. This is a safety net, not the fix: something too
+   wide is still a bug, and build/test-layout.mjs fails the build over it. */
+html, body { overflow-x: clip; }
+html { -webkit-text-size-adjust: 100%; }
 html.big { font-size: 117%; }
 body {
   margin: 0; background: var(--bg); color: var(--ink);
@@ -273,8 +280,14 @@ details.more > :not(summary) { animation: rise .2s var(--ease); }
 }
 
 /* ── a round ──────────────────────────────────────────────────────── */
-.dots { display: flex; gap: var(--s1); justify-content: center; margin: 0 0 var(--s6); }
-.dot { width: 18px; height: 2px; border-radius: 2px; background: var(--line); transition: background .2s var(--ease); }
+/* One dash per question in the round. These were sized when a round was ten
+   questions: eighteen pixels each plus the gaps came to 216px, which fits a
+   phone. A round is twenty-five now and can be forty, which is 546px and
+   870px — wider than the screen, so the whole PAGE scrolled sideways and
+   every screen looked broken and half cut off (Robert, 20 Sept). They share
+   the space they are given instead, and never grow past their old size. */
+.dots { display: flex; gap: var(--s1); justify-content: center; margin: 0 0 var(--s6); min-width: 0; flex: 1 1 auto; }
+.dot { flex: 1 1 0; min-width: 2px; max-width: 18px; height: 2px; border-radius: 2px; background: var(--line); transition: background .2s var(--ease); }
 .dot.done { background: var(--accent); }
 .q { text-align: center; animation: rise .22s var(--ease); display: flex; flex-direction: column; justify-content: center; min-height: 56vh; }
 .play {
