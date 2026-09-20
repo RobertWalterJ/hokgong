@@ -1,0 +1,4 @@
+node_modules/
+sources/tatoeba/eng_sentences.tsv
+sources/*.zip
+sources/hkcancor.zip
