@@ -11,7 +11,7 @@
 import { h, iconBtn, sayBtn, sheet, closeSheet, disclosure, flash, show, route, back, currentScreen, repaint, ICON, applyReading, READ_DEFAULTS } from './ui.js';
 import { initSpeech, say, unlock, available as speechAvailable, cantoneseAvailable, onSpeaking } from './speech.js';
 import { playRecording, playWord, stopAudio, onAudio, canPlayWord, haveRecordings, probeRecordings } from './audio.js';
-import { State, Round, cardState, isHolding, dayKey, newLeftToday, nextDueSentence, now, shuffle, DAY } from './schedule.js';
+import { State, Round, cardState, isHolding, dayKey, newLeftToday, nextDueSentence, untilText, now, shuffle, DAY } from './schedule.js';
 import { loadDeck, indexDeck, D, wordOf, exampleOf, allIds, askableIds, setAsideCount, stageState, SKILL, SELF_RATED } from './deck.js';
 import { setProgress, setEnglishOnly, t } from './lang.js';
 import { press as tick, right as correct, wrong, setSound as setSoundOn } from './sound.js';
@@ -57,7 +57,9 @@ export function course() {
 const isMet = (id) => !!State.card(id);
 // What the app may ask right now: what this phone can play, and what the
 // course has opened.
-const inPlay = () => askableIds(canPlayWord(), haveRecordings(), course().current, isMet);
+// A word counts as met once any question about it has been asked.
+const wordMet = (i) => ['wl/', 'ws/', 'wr/'].some((p) => State.card(p + D().words[i]?.w));
+const inPlay = () => askableIds(canPlayWord(), haveRecordings(), course().current, isMet, wordMet);
 
 // ── a new version, and not losing your progress ──────────────────────────
 // Everything you have learnt lives in this phone's browser storage. That is
@@ -201,7 +203,7 @@ const phraseOfDay = () => {
   const d = D();
   const c = course();
   const from = c.done ? d.words.map((_, i) => i).slice(0, 600) : d.stages[c.current].words;
-  const pool = from.map((i) => ({ w: d.words[i], i })).filter((x) => x.w && d.examples[x.i]);
+  const pool = from.map((i) => ({ w: d.words[i], i })).filter((x) => x.w && d.examples[x.i]?.length);
   if (!pool.length) return null;
   const key = dayKey();
   let hash = 0;
@@ -279,17 +281,24 @@ function homeScreen() {
     : due && waiting ? `${due} to come back to, ${waiting} new`
       : due ? `${due} to come back to`
         : waiting ? `${waiting} new word${waiting === 1 ? '' : 's'} ready`
-          : 'Today’s words are done';
+          : fresh ? 'Today’s pace is done'
+            : 'You are up to date';
   const minutes = Math.max(2, Math.round((sitting().size * 11) / 60));
-  const under = first ? `Your first round — about ${minutes} minutes`
-    : due || waiting ? `About ${minutes} minutes`
-      : null;
 
+  // There is always a button. The first version hid it once the day's
+  // allowance of new words was spent and offered "Learn more anyway" as a
+  // faint link underneath — which reads as "you are finished" to someone who
+  // wants to keep going (Robert, 20 Sept: "the app is really fighting me").
+  // Nothing owed no longer means nothing to do: the button carries on with
+  // new words if any remain in reach, and with recall if they do not.
   const start = t('start');
-  const startBtn = (due || waiting || first)
-    ? h('button', { class: 'start', type: 'button', onclick: () => startRound({}) },
-      h('span', { class: 'han' }, first ? 'Start learning' : start.text),
-      !first && start.sub ? h('span', { class: 'sub' }, start.sub) : null)
+  const owed = due || waiting || first;
+  const startBtn = (owed || fresh || met)
+    ? h('button', { class: 'start', type: 'button', onclick: () => startRound(owed ? {} : fresh ? { beyondDaily: true } : { practice: true }) },
+      h('span', { class: 'han' }, owed ? (first ? 'Start learning' : start.text) : fresh ? 'Keep going' : 'Keep practising'),
+      h('span', { class: 'sub' }, owed ? (first ? `Your first round — about ${minutes} minutes` : `About ${minutes} minutes`)
+        : fresh ? `${sitting().size} more questions, past today’s pace`
+          : `${sitting().size} questions on what you have met`))
     : null;
 
   const link = (label, note, to, render) => h('button', { class: 'row', type: 'button', onclick: () => show(to, render) },
@@ -305,11 +314,10 @@ function homeScreen() {
     h('main', { class: 'home' },
       h('section', { class: 'today' },
         h('p', { class: 'lead' }, lead),
-        under ? h('p', { class: 'note centre under' }, under) : null,
         startBtn,
-        !startBtn && met ? h('p', { class: 'note centre' }, nextDueSentence(State.nextDue(ids) || now())) : null,
-        !due && !room && fresh ? h('button', { class: 'link', type: 'button', onclick: () => startRound({ beyondDaily: true }) }, 'Learn more anyway') : null,
-        met >= 12 ? h('button', { class: 'link', type: 'button', onclick: () => startRound({ practice: true }) }, 'Recall test') : null,
+        !owed && met ? countdownLine(State.nextDue(ids)) : null,
+        met >= 12 && !(startBtn && !owed && !fresh)
+          ? h('button', { class: 'link', type: 'button', onclick: () => startRound({ practice: true }) }, 'Recall test') : null,
         run > 1 ? h('p', { class: 'note centre' }, `${run} days in a row.`) : null),
       canPlayWord() && haveRecordings() ? null : noVoiceCard(),
       h('nav', { class: 'rows' },
@@ -319,6 +327,38 @@ function homeScreen() {
       wordToday(),
     ),
   ];
+}
+
+// What a recall test still has left to go through. Robert asked whether it
+// runs everything that needs recalling or just a handful — so the app says.
+// "Shakiest" is the scheduler's own estimate of how likely you are to still
+// have a word right now, the same number it sorts the test by.
+function recallScope() {
+  const ids = inPlay();
+  const t = now();
+  const met = ids.filter((id) => State.card(id));
+  if (met.length < 12) return null;
+  const shaky = met.filter((id) => State.recall(id, t) < 0.9).length;
+  return h('p', { class: 'note' }, shaky
+    ? `${shaky.toLocaleString()} of your ${met.length.toLocaleString()} questions are the ones it would reach for next. Run it again to carry on through them.`
+    : `All ${met.length.toLocaleString()} questions you have met are holding at the moment.`);
+}
+
+// How long until the next review comes round. Robert asked for this: when
+// the app says nothing is due, he wants to know how long "nothing" lasts.
+//
+// It is deliberately NOT a clock. It counts in minutes, refreshes once a
+// minute, and it sits UNDER the button rather than in place of it — nothing
+// is waiting on it, because the round above is playable the whole time. A
+// ticking countdown that gates the next thing you may do is what the standing
+// rule about timers is there to prevent; this only answers "when".
+function countdownLine(when) {
+  if (!when) return null;
+  const p = h('p', { class: 'note centre countdown' }, '');
+  const paint = () => { p.textContent = `Next review ${untilText(when)}. You can carry on before then.`; };
+  paint();
+  const tick = setInterval(() => { if (!p.isConnected) return clearInterval(tick); paint(); }, 60e3);
+  return p;
 }
 
 // A word from the stage you are on, quietly, at the foot of the page.
@@ -443,7 +483,8 @@ function roundScreen(round, { practice }) {
     return h('section', { class: 'card summary' },
       h('div', { class: 'eyebrow' }, practice ? 'Recall test finished' : 'Round finished'),
       h('p', { class: 'score' }, `${right} right, out of ${done}`),
-      h('p', { class: 'note' }, practice ? 'A recall test does not change when a word comes back — it only tells you where you stand.' : byline(tally)),
+      h('p', { class: 'note' }, practice ? `A recall test goes through everything you have met, weakest memory first, ${sitting().size} at a time — it does not change when a word comes back, it only tells you where you stand.` : byline(tally)),
+      practice ? recallScope() : null,
       passed ? h('div', { class: 'passed' },
         h('div', { class: 'eyebrow' }, 'Stage passed'),
         h('p', {}, `${passed.title}. You can now ${passed.can.charAt(0).toLowerCase()}${passed.can.slice(1)}`),

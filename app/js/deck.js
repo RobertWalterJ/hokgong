@@ -16,7 +16,11 @@ export async function loadDeck() {
 
 export const wordAt = (i) => deck.words[i];
 export const wordOf = (it) => (it.i != null ? deck.words[it.i] : null);
-export const exampleOf = (it) => (it.i != null ? deck.examples[it.i] || null : null);
+// A word can have up to three example sentences now. Which one you see turns
+// over with each review, so a word met five times has been met in three
+// different sentences rather than the same one five times.
+export const examplesOf = (i) => { const e = deck.examples[i]; return Array.isArray(e) ? e : e ? [e] : []; };
+export const exampleOf = (it, nth = 0) => { const list = examplesOf(it.i); return list.length ? list[nth % list.length] : null; };
 export const itemById = (id) => deck.byId.get(id);
 
 // The five things being learnt, so progress can be reported per skill rather
@@ -103,9 +107,16 @@ const askable = (it, hasVoice, hasRecordings) =>
 // A question is in reach if its stage is open, or if it has been met already —
 // a card you have seen never disappears because of where you are in the
 // course. Items belonging to no stage are the tail after the course.
-const inReach = (it, current, met) =>
-  met(it.id) || (it.stage != null ? it.stage <= current : current >= deck.stages.length);
-export const askableIds = (hasVoice, hasRecordings = true, current = Infinity, met = () => false) =>
-  deck.items.filter((it) => askable(it, hasVoice, hasRecordings) && inReach(it, current, met)).map((it) => it.id);
+const inReach = (it, current, met, wordMet) => {
+  if (met(it.id)) return true;                       // already seen: never taken away
+  if (it.stage != null) return it.stage <= current;
+  // Some questions depend on particular words rather than on a stage — a tone
+  // pair needs both of its words. Those open as soon as those words have been
+  // met. Everything else waits for the end of the course.
+  if (it.needs) return it.needs.every((i) => wordMet(i));
+  return current >= deck.stages.length;
+};
+export const askableIds = (hasVoice, hasRecordings = true, current = Infinity, met = () => false, wordMet = () => false) =>
+  deck.items.filter((it) => askable(it, hasVoice, hasRecordings) && inReach(it, current, met, wordMet)).map((it) => it.id);
 export const setAsideCount = (hasVoice, hasRecordings = true) =>
   deck.items.filter((it) => !askable(it, hasVoice, hasRecordings)).length;

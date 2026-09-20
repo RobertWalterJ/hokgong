@@ -224,10 +224,12 @@ export class Round {
   // `pace`: { newPerRound, newPerDay } from the placement check.
   // `groupOf(id)`: the big question a question serves; `parasOf(id)`: the
   // paragraphs its evidence quotes. Used to keep similar questions apart.
-  // `beyondDaily`: the player chose "Learn more anyway" — the day's allowance
-  // of new questions is lifted for this round (the per-round one still holds).
+  // `beyondDaily`: the player chose to keep going — the day's allowance of new
+  // questions is lifted AND the per-round trickle of five is lifted with it.
+  // Lifting only the daily one gave a five-question round, which is what
+  // Robert met on 20 Sept: "I can't get it to serve me up 25 questions back to
+  // back if I try my hardest."
   constructor(ids, { practice = false, exclude = new Set(), pace = null, groupOf = null, parasOf = null, beyondDaily = false, perGroup = PER_GROUP, size = ROUND } = {}) {
-    this.perGroup = perGroup;
     this.size = size;
     this.extra = new Set();
     this.beyondDaily = beyondDaily;
@@ -237,6 +239,16 @@ export class Round {
     const t = now();
     const cooling = (id) => t - (State.data.seen?.[id] || 0) < COOLDOWN;
     const pool = ids.filter((id) => !exclude.has(id) && !cooling(id));
+    // One question per word per round keeps a round from feeling like a drill
+    // on six words — but it is a cap, and early in the course it binds. Stage
+    // one opens fourteen words and two grammar points: sixteen groups, so
+    // "at most one each" makes a 25-question round arithmetically impossible,
+    // however willing the learner is. The rule gives way in proportion: with
+    // sixteen groups open it allows two each, and #spread still keeps them
+    // apart. Once the course has opened enough words it is back to one.
+    const openGroups = groupOf ? new Set(ids.map(groupOf).filter(Boolean)).size : Infinity;
+    if (openGroups && openGroups < Infinity) perGroup = Math.max(perGroup, Math.ceil(size / openGroups));
+    this.perGroup = perGroup;
     // Picks from candidates in priority order, skipping one that would be a
     // third from the same big question, or that quotes a paragraph another
     // pick already quotes (one would give the other away). Skipped ones
@@ -295,11 +307,17 @@ export class Round {
     // New questions scale with the reviews waiting: five when little is due,
     // three when some is, and one — never none — under a backlog. (Forcing
     // three into every round starved the reviews: persona study, 18 Sept.)
-    const allowance = due.length > BACKLOG ? 1 : due.length > EASING ? Math.min(MIN_NEW, perRound) : perRound;
+    // …unless the learner has explicitly asked for more, in which case the
+    // round is theirs to fill: new material up to the whole sitting.
+    const allowance = beyondDaily ? size
+      : due.length > BACKLOG ? 1 : due.length > EASING ? Math.min(MIN_NEW, perRound) : perRound;
     const nNew = Math.min(allowance, fresh.length, newRoom);
     // Reviews by due date, then new questions in the pack's teaching order.
-    const reviews = take(due, size - nNew);
-    const add = take(fresh, nNew);
+    // What is owed is never displaced by new material: when the learner has
+    // asked for a full round, the reviews still go in first and the new words
+    // fill whatever is left.
+    const reviews = take(due, beyondDaily ? size : size - nNew);
+    const add = take(fresh, Math.min(nNew, size - picked.length));
     // A round that runs out is a round that ends after two questions. Robert
     // wants fifteen minutes a day in three sittings, and between the stage
     // gate, the daily allowance of new words and the four-hour cool-down,
@@ -307,14 +325,47 @@ export class Round {
     // with words already met, likeliest-forgotten first — and those answers
     // are logged as PRACTICE, so filling the time never distorts the
     // schedule or inflates what the app claims you know.
+    //
+    // The fill runs in four steps, in the order a teacher would use, and each
+    // one only when the one before it is exhausted:
+    //
+    //   1. words met and out of their cool-down, likeliest-forgotten first;
+    //   2. more new material — the day's allowance governs how much new work
+    //      ARRIVES on its own, but it does not get to cut a sitting short once
+    //      the learner has started one. This is what a first round is: nothing
+    //      due, nothing met, so the trickle of five new questions was the whole
+    //      sitting, and then "come back tomorrow";
+    //   3. the cooling ones, asked longest ago first — the cool-down is a
+    //      preference, not a wall;
+    //   4. this session's, and only then, because a question asked twice in an
+    //      evening is what made the pack feel small (Robert, 18 Sept).
+    //
+    // Everything drawn by the fill is logged as PRACTICE, so filling the time
+    // never moves the schedule or inflates what the app claims you know.
     this.extra = new Set();
-    if (picked.length < size) {
-      const met = pool.filter((id) => State.card(id) && !due.includes(id));
-      met.sort((a, b) => State.recall(a, t) - State.recall(b, t));
-      const top = take(met, size - picked.length);
+    const byAge = (list) => list.slice().sort((x, y) => State.seenAt(x) - State.seenAt(y));
+    const metAll = ids.filter((id) => State.card(id) && !due.includes(id));
+    const fillWith = (cands) => {
+      if (picked.length >= size) return;
+      const top = take(cands.filter((id) => !picked.includes(id)), size - picked.length);
       for (const id of top) this.extra.add(id);
       reviews.push(...top);
+    };
+    fillWith(metAll.filter((id) => !exclude.has(id) && !cooling(id)).sort((x, y) => State.recall(x, t) - State.recall(y, t)));
+    if (picked.length < size) add.push(...take(fresh.filter((id) => !picked.includes(id)), size - picked.length));
+    fillWith(byAge(metAll.filter((id) => !exclude.has(id) && cooling(id))));
+    // The last two steps re-ask something the learner has already seen today,
+    // so they are only for a learner who asked to keep going. An ordinary
+    // round is allowed to come up short; home offers to carry on.
+    if (practice || beyondDaily) {
+      fillWith(byAge(metAll.filter((id) => exclude.has(id))));
+      // Last of all, the one-per-word limit gives way before the sitting does.
+      if (picked.length < size) {
+        const loose = byAge(metAll.filter((id) => !picked.includes(id))).slice(0, size - picked.length);
+        for (const id of loose) { picked.push(id); this.extra.add(id); reviews.push(id); }
+      }
     }
+    this.early = [...this.extra].filter((id) => cooling(id) || exclude.has(id)).length;
     this.queue = this.#spread(shuffle([...reviews, ...add]), groupOf);
     // …except the very first question of a player's first round: the pack's
     // opening anchor, not a random one.
@@ -359,6 +410,27 @@ export function shuffle(a) {
 
 // "The next one comes round Friday" — said on a Friday about a card due that
 // afternoon was Landfall's bug. Name the day by the calendar.
+// How long until the next review comes round, counted down in words. Robert
+// asked for this on 20 Sept: when the app says "nothing else is due" he wants
+// to know how long "nothing" lasts, rather than being told to come back
+// tomorrow and left to guess.
+//
+// It counts in minutes, never seconds. A clock ticking down a second at a
+// time is the thing he has asked every app here not to do, and a countdown to
+// MORE WORK BEING AVAILABLE is not a deadline — nothing is lost by ignoring
+// it, and the round below it is playable the whole time.
+export function untilText(when, nowT = now()) {
+  const ms = when - nowT;
+  if (ms <= 0) return 'now';
+  const mins = Math.ceil(ms / 60e3);
+  if (mins < 2) return 'in under a minute';
+  if (mins < 60) return `in ${mins} minutes`;
+  const h = Math.floor(mins / 60), m = mins % 60;
+  if (h < 24) return m ? `in ${h} hour${h === 1 ? '' : 's'} ${m} minute${m === 1 ? '' : 's'}` : `in ${h} hour${h === 1 ? '' : 's'}`;
+  const days = Math.round(h / 24);
+  return days === 1 ? 'tomorrow' : `in ${days} days`;
+}
+
 export function nextDueSentence(when, nowT = now()) {
   const due = new Date(when), today = new Date(nowT);
   const midnight = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();

@@ -7,7 +7,7 @@
 
 import { h, sayBtn, sheet, disclosure, show, ICON } from './ui.js';
 import { State, cardState, isHolding, dayKey, DAY, now } from './schedule.js';
-import { D, wordAt, allIds, SKILL, SKILL_NAMES } from './deck.js';
+import { D, wordAt, allIds, examplesOf, SKILL, SKILL_NAMES } from './deck.js';
 import { playRecording, playWord, canPlayWord } from './audio.js';
 import { toneName, toneChao, voiceCentre, forgetVoice } from './pitch.js';
 import { ladder } from './lang.js';
@@ -45,7 +45,10 @@ const stateDot = (id) => {
 export function wordCard(i, { example = false, reveal = false } = {}) {
   const d = D();
   const w = d.words[i];
-  const ex = example ? d.examples[i] : null;
+  // Which example: the next one along each time this word comes back.
+  const list = examplesOf(i);
+  const seenTimes = State.card('wl/' + w.w)?.reps || State.card('ws/' + w.w)?.reps || 0;
+  const ex = example && list.length ? list[seenTimes % list.length] : null;
   const showJyut = S().jyutping !== false || reveal;
   return h('div', { class: 'word' },
     h('div', { class: 'wline' },
@@ -59,7 +62,8 @@ export function wordCard(i, { example = false, reveal = false } = {}) {
       ex.j ? h('p', { class: 'jyut' }, ex.j) : null,
       h('p', { class: 'gloss' }, ex.e),
       ex.a ? playButton({ sentenceId: ex.id, label: 'Hear this sentence' }) : null,
-      evidenceLine({ sentence: ex.id })) : null,
+      evidenceLine({ sentence: ex.id }),
+      list.length > 1 ? h('p', { class: 'note' }, `One of ${list.length} sentences this word turns up in.`) : null) : null,
     reveal ? h('p', { class: 'evidence' },
       `${w.t === 1 ? 'Recorded in conversation' : 'From written-Cantonese frequency'}, rank ${w.r.toLocaleString()}. Meaning from ${SRC_NAME[w.s] || w.s}.`) : null,
     reveal && CONF_NOTE[w.c] ? h('p', { class: 'note' }, CONF_NOTE[w.c]) : null,

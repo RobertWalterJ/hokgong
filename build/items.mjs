@@ -139,26 +139,58 @@ const romanise = (text) => {
 // sentences per word for six thousand words is an hour of work for nothing.
 const byChar = new Map();
 for (const s of SENT) {
-  if (!s.eng || chars(s.text) > 14) continue;
+  if (!s.eng || chars(s.text) > 30) continue;
   for (const c of new Set(s.text)) {
     if (!byChar.has(c)) byChar.set(c, []);
     byChar.get(c).push(s);
   }
 }
-const exampleFor = (w) => (byChar.get(w[0]) || [])
-  .filter((s) => s.text.includes(w))
-  .sort((a, b) => (b.audio ? 1 : 0) - (a.audio ? 1 : 0) || chars(a.text) - chars(b.text))[0] || null;
+
+// How long a sentence may be, by how far into the course the word sits. The
+// app used to show nothing longer than 14 characters anywhere, at any stage,
+// so a learner at word 4,000 was reading the same length of sentence as one
+// on their first day. The corpus holds 2,392 translated sentences of 13
+// characters or more, all of it unused.
+const lengthFor = (i) => (i < 150 ? 8 : i < 600 ? 12 : i < 2000 ? 16 : 24);
+
+// CALLBACKS. Among the sentences that contain the word, prefer the ones built
+// from characters the learner has already been taught — the whole point of
+// teaching in an order. `taught` grows as the loop walks the word list, so a
+// word at position 300 is scored against the 299 words before it.
+const taught = new Set();
+const reach = (text) => {
+  const cs = [...text.replace(/[^㐀-鿿]/g, '')];
+  if (!cs.length) return 0;
+  return cs.filter((c) => taught.has(c)).length / cs.length;
+};
+// Up to three, easiest first: within reach, then with a recording, then short.
+// One example per word meant a word was only ever seen in one sentence; a
+// review now shows a different one.
+const examplesFor = (w, i) => {
+  const max = lengthFor(i);
+  const hits = (byChar.get(w[0]) || []).filter((s) => s.text.includes(w) && chars(s.text) <= max);
+  return hits
+    .map((s) => ({ s, r: reach(s.text), a: s.audio ? 1 : 0, n: chars(s.text) }))
+    .sort((a, b) => b.r - a.r || b.a - a.a || a.n - b.n)
+    .slice(0, 3)
+    .map((x) => x.s);
+};
 
 const items = [];
 const audioNeeded = new Set();     // Tatoeba sentence ids: audio.tatoeba.org/sentences/yue/<id>.mp3
 const examples = {};
 for (const [i, e] of chosen.entries()) {
   const rnd = seeded('w' + e.w);
-  const ex = exampleFor(e.w);
-  if (ex) {
-    examples[i] = { id: ex.id, t: ex.text, j: romanise(ex.text), e: ex.eng, a: ex.audio ? 1 : 0 };
-    if (ex.audio && i < AUDIO_WORDS) audioNeeded.add(ex.id);
+  const exs = examplesFor(e.w, i);
+  if (exs.length) {
+    examples[i] = exs.map((ex) => ({ id: ex.id, t: ex.text, j: romanise(ex.text), e: ex.eng, a: ex.audio ? 1 : 0 }));
+    // Only the first one's recording is bundled: three recordings per word for
+    // six hundred words is more audio than the app is worth carrying.
+    if (exs[0].audio && i < AUDIO_WORDS) audioNeeded.add(exs[0].id);
   }
+  // Every character of this word is now something the learner has been taught,
+  // for the words that come after it.
+  for (const c of e.w) taught.add(c);
   const options = pickOthers(e.gloss[0], i, 3, rnd);
   if (options.length < 3) continue;
   const level = Math.min(9, Math.ceil((i + 1) / 700));
@@ -407,8 +439,40 @@ const stageOfWord = new Map();
 for (const [n, st] of stages.entries()) for (const i of st.words) if (!stageOfWord.has(i)) stageOfWord.set(i, n);
 const stageOfGrammar = new Map();
 for (const [n, st] of stages.entries()) for (const g of st.grammar) if (!stageOfGrammar.has(g)) stageOfGrammar.set(g, n);
+// What each stage's learner can read by the time they reach it, as characters.
+const charsByStage = [];
+{
+  const seen = new Set();
+  for (const st of stages) {
+    for (const k of st.words) for (const c of chosen[k].w) seen.add(c);
+    charsByStage.push(new Set(seen));
+  }
+}
+// The stage a sentence becomes worth hearing: the first one by which most of
+// it is characters you have met. Without this, EVERY listening question and
+// EVERY tone question was locked until all ten stages were passed — 590
+// questions a learner would not see for months, including the whole of the
+// listening skill (found by the variety audit).
+const stageForText = (text) => {
+  const cs = [...text.replace(/[^㐀-鿿]/g, '')];
+  if (!cs.length) return undefined;
+  for (const [n, set] of charsByStage.entries()) {
+    if (cs.filter((c) => set.has(c)).length / cs.length >= 0.6) return n;
+  }
+  return undefined;               // still out of reach: it opens after the course
+};
 for (const it of items) {
-  const n = it.i != null ? stageOfWord.get(it.i) : it.gid != null ? stageOfGrammar.get(it.gid) : undefined;
+  let n;
+  if (it.i != null) n = stageOfWord.get(it.i);
+  else if (it.gid != null) n = stageOfGrammar.get(it.gid);
+  else if (it.choices) {
+    // A tone pair belongs to the stage that teaches the later of its words —
+    // and if those words are past the staged vocabulary, it opens as soon as
+    // the learner has met them (see `needs`).
+    const stagesOf = it.choices.map((c) => stageOfWord.get(c.i)).filter((x) => x != null);
+    if (stagesOf.length === it.choices.length) n = Math.max(...stagesOf);
+    else it.needs = it.choices.map((c) => c.i);
+  } else if (it.text) n = stageForText(it.text);
   if (n != null) it.stage = n;
 }
 

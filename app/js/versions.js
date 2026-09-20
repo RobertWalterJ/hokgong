@@ -6,6 +6,17 @@
 
 export default [
   {
+    v: '1.5.0', date: '2026-09-20',
+    what: [
+      'The app no longer stops you learning. There is always a button: when nothing is owed it carries on with new words past the day’s pace, and when there are none left in reach it carries on with recall. "Today’s words are done" used to hide the button and offer a faint link underneath, which read as "you are finished".',
+      'A round now fills to the length you chose, every time. Three separate rules were stopping it — the eighteen-new-questions-a-day pace, the four-hour cool-down that put everything you had just answered out of reach, and a trickle of five new questions a round that made a first sitting five questions long. A determined evening now passes four stages instead of none.',
+      'Under the button, how long until the next review comes round, counted in minutes rather than "tomorrow". It refreshes once a minute and nothing waits on it.',
+      'The recall test says what it covers: everything you have met, weakest memory first, and how many it still has to go through.',
+      'Words get up to three example sentences instead of one, and the later ones are longer — up to twenty-four characters — and built from words you have already been taught.',
+      'Fixed: every listening question and every tone question was locked until all ten stages were passed. That was 590 questions a learner could not reach.',
+    ],
+  },
+  {
     v: '1.4.0', date: '2026-09-20',
     what: [
       'Every Chinese sentence now carries its Jyutping underneath, and every Chinese word in the app’s own explanations is written with its reading beside it. A sentence in characters is a picture of a sentence if you cannot read them.',

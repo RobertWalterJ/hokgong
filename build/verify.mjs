@@ -53,14 +53,24 @@ for (const it of sentenceItems) {
   const s = sentById.get(it.sid);
   if (!s) { fail('sentence not in the corpus', it.id); continue; }
   check(s.text === it.text, 'sentence text does not match the source', `#${it.sid}`);
+  check(!!it.jyut, 'a sentence shown without its reading', `#${it.sid}`);
   check(!it.eng || s.eng === it.eng, 'translation does not match the source', `#${it.sid}`);
 }
-for (const [i, ex] of Object.entries(DECK.examples)) {
-  const s = sentById.get(ex.id);
-  if (!s) { fail('example sentence not in the corpus', `word ${i}`); continue; }
-  check(s.text === ex.t, 'example text does not match the source', `#${ex.id}`);
-  check(s.eng === ex.e, 'example translation does not match the source', `#${ex.id}`);
-  check(s.text.includes(DECK.words[i].w), 'example does not contain its word', `${DECK.words[i].w} / #${ex.id}`);
+for (const [i, list] of Object.entries(DECK.examples)) {
+  check(Array.isArray(list) && list.length >= 1 && list.length <= 3, 'a word with the wrong number of examples', `word ${i}`);
+  const seenIds = new Set();
+  for (const ex of [].concat(list)) {
+    const s = sentById.get(ex.id);
+    if (!s) { fail('example sentence not in the corpus', `word ${i}`); continue; }
+    check(s.text === ex.t, 'example text does not match the source', `#${ex.id}`);
+    check(s.eng === ex.e, 'example translation does not match the source', `#${ex.id}`);
+    check(s.text.includes(DECK.words[i].w), 'example does not contain its word', `${DECK.words[i].w} / #${ex.id}`);
+    check(!seenIds.has(ex.id), 'the same example twice for one word', `${DECK.words[i].w} / #${ex.id}`);
+    seenIds.add(ex.id);
+    // Every sentence shown carries a reading, or a learner who cannot read
+    // characters is looking at a picture.
+    check(!!ex.j && ex.j.length > 0, 'an example with no reading line', `#${ex.id}`);
+  }
 }
 
 // ── 3. every question can be answered ────────────────────────────────────

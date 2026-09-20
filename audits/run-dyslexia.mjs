@@ -82,9 +82,27 @@ for (const screen of ['tonesScreen', 'grammarScreen', 'contextScreen', 'aboutScr
 // ── nothing that depends on reading fast ─────────────────────────────────
 // A countdown, a timer, a question that disappears: all of them punish slow
 // reading, and none of them measures knowing a word.
-const timers = [...allJs.matchAll(/(setInterval\([^)]*)/g)].map((m) => m[1].slice(0, 40));
-check(timers.length === 0, 'nothing runs on a repeating timer', timers.join(' | '));
-check(!/countdown|timeLeft|secondsLeft|timeUp/i.test(allJs), 'nothing counts down');
+//
+// Amended 20 Sept 2026. Robert asked for one countdown: when the app says
+// nothing is due, how long is "nothing"? That is not the thing this rule is
+// guarding against. The rule exists so no display makes a learner hurry and
+// no display takes a question away — and this one counts down to MORE WORK
+// BECOMING AVAILABLE, refreshes once a minute rather than once a second, and
+// sits under a button that is playable the whole time it runs. So the check
+// is no longer "is there a timer at all" but the two things actually worth
+// forbidding: a timer fast enough to feel like a clock, and one that ends by
+// doing something.
+const timers = [...allJs.matchAll(/setInterval\(([\s\S]{0,200}?),\s*(\d+)(e\d)?\s*\)/g)]
+  .map((m) => ({ body: m[1], ms: Number(m[2]) * (m[3] ? 10 ** Number(m[3].slice(1)) : 1) }));
+const fast = timers.filter((x) => x.ms < 30e3).map((x) => `${x.ms}ms`);
+check(fast.length === 0, 'no repeating timer runs faster than once every 30 seconds', fast.join(', '));
+const acts = timers.filter((x) => /show\(|startRound|onAnswer|onNext|\.next\(|submit|advance/.test(x.body));
+check(acts.length === 0, 'no repeating timer advances or answers anything by itself', acts.map((x) => x.body.replace(/\s+/g, ' ').slice(0, 50)).join(' | '));
+// Comments stripped first: the code that explains why there is no deadline
+// should not be what trips the check for one.
+const code = allJs.replace(/^\s*\/\/.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '');
+check(!/timeLeft|secondsLeft|timeUp|deadline/i.test(code), 'nothing counts down to a deadline');
+if (timers.length) notes.push(`repeating timers (all should be display-only): ${timers.map((x) => `${x.ms}ms`).join(', ')}`);
 // A delay that fires a sound or moves on by itself is different from one that
 // starts audio the learner asked for; the audit lists them for a human.
 const delays = [...allJs.matchAll(/setTimeout\(([^,]{0,40}),\s*(\d+)/g)].map((m) => `${m[2]}ms`);
