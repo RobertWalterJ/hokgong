@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#FBF8F3" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#14110F" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#FFF9F6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#181419" media="(prefers-color-scheme: dark)">
 <title>Hok Gong — learning to talk</title>
 <meta name="description" content="A Cantonese app built on recorded speech: spaced retrieval, tones you can hear and say, and progress you can check.">
 <link rel="stylesheet" href="fonts/fonts.css">
@@ -14,25 +14,30 @@
    alone: right and wrong carry a tick and a cross, the state dots differ
    in lightness, and build/audit-colour.mjs measures every pair at build
    time under normal vision and all three forms of dichromacy. */
+/* Washed pink paper, pastel yellow and blue washes, and one vibrant red that
+   cuts through all of it. The pastels do the breathing; the red does the
+   pointing. Every pair below was searched rather than chosen by eye — the
+   first pinks tried put the two answer washes 4.2 apart under tritanopia,
+   where the audit wants 6. */
 :root {
-  --bg: #FBF8F3;
+  --bg: #FFF9F6;              /* off-white with a pink cast */
   --card: #FFFFFF;
-  --ink: #1B1714;
-  --muted: #5C534B;
-  --line: #E7DFD4;            /* hairlines; never a box outline */
-  --accent: #9A2A22;
+  --ink: #241C1B;             /* off-black, warm */
+  --muted: #6B5A56;
+  --line: #F2DFD9;            /* a pink hairline; never a box outline */
+  --accent: #CE2419;          /* vibrant red, dark enough to read as text */
   --accent-ink: #FFFFFF;
-  --tint: rgba(154, 42, 34, .07);
+  --tint: rgba(206, 36, 25, .06);
   /* Right is BLUE, not green. Blue survives protanopia and deuteranopia
      intact, while a green tick beside a red cross collapses to the same
      colour for the commonest form of colour blindness — the colour audit
      measured that pair at deltaE 8.7 and refused to build. */
-  --right: #1D5AA8;
-  --right-bg: #E4EDF9;
-  --wrong: #5B1B14;
-  --wrong-bg: #F2E6E4;
-  --dot-met: #766E64;         /* dots only: sits 3:1 from both --line and --ink */
-  --chip: #F4EEE5;
+  --right: #1C5FAE;
+  --right-bg: #E2ECFB;        /* pastel blue */
+  --wrong: #7B1E3C;           /* deep plum: a verdict, never mistaken for the accent */
+  --wrong-bg: #FADCE0;        /* washed pink */
+  --dot-met: #7C6D68;         /* dots only: sits 3:1 from both --line and --ink */
+  --chip: #FFF4E4;            /* pastel yellow */
   --focus: #1D4ED8;
 
   /* Two faces, not three. Instrument Sans carries the interface and the
@@ -56,30 +61,34 @@
   --read-font: var(--read);
   --ease: cubic-bezier(.2, .7, .3, 1);
 }
+/* The inverse, and it is meant to feel like the same room with the light off:
+   off-black with a plum cast rather than a flat grey, off-white type, the same
+   red lifted so it still cuts, and the washes turned into pastels that glow
+   instead of pressing. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #131211;
-    --card: #1C1A18;
-    --ink: #F2EBE2;
-    --muted: #B3A79A;
-    --line: #38302A;
-    --accent: #E4837A;
-    --accent-ink: #17140F;
-    --tint: rgba(233, 119, 106, .12);
-    --right: #6FC9D8;
-    --right-bg: #17323A;
-    --wrong: #FFB8AC;
-    --wrong-bg: #3A2320;
-    --dot-met: #888076;
-    --chip: #29231F;
+    --bg: #181419;            /* off-black, plum-cast */
+    --card: #221D23;
+    --ink: #F8F0ED;           /* off-white, warm */
+    --muted: #BCACAA;
+    --line: #3C333C;
+    --accent: #FF6F5E;        /* the same red, lifted */
+    --accent-ink: #181014;
+    --tint: rgba(255, 111, 94, .12);
+    --right: #93C4EE;         /* pastel blue */
+    --right-bg: #1C2B3D;
+    --wrong: #FFD0CA;         /* pastel pink */
+    --wrong-bg: #38222A;
+    --dot-met: #8E8087;
+    --chip: #2C2530;
     --focus: #93B4FF;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #131211; --card: #1C1A18; --ink: #F2EBE2; --muted: #B3A79A; --line: #38302A;
-  --accent: #E4837A; --accent-ink: #17140F; --tint: rgba(233, 119, 106, .12);
-  --right: #6FC9D8; --right-bg: #17323A;
-  --wrong: #FFB8AC; --wrong-bg: #3A2320; --dot-met: #888076; --chip: #29231F; --focus: #93B4FF;
+  --bg: #181419; --card: #221D23; --ink: #F8F0ED; --muted: #BCACAA; --line: #3C333C;
+  --accent: #FF6F5E; --accent-ink: #181014; --tint: rgba(255, 111, 94, .12);
+  --right: #93C4EE; --right-bg: #1C2B3D;
+  --wrong: #FFD0CA; --wrong-bg: #38222A; --dot-met: #8E8087; --chip: #2C2530; --focus: #93B4FF;
 }
 
 * { box-sizing: border-box; }

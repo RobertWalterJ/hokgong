@@ -6,6 +6,13 @@
 
 export default [
   {
+    v: '1.2.0', date: '2026-09-20',
+    what: [
+      'A new palette: washed pink paper, pastel yellow and pastel blue washes, and one vibrant red that cuts through them. Dark mode is the inverse rather than a dimming — off-black with a plum cast, off-white type, and pastels that glow instead of pressing.',
+      'The colours were searched rather than chosen by eye: the first pinks put the two answer washes 4.2 apart under tritanopia where the audit wants 6, so they moved until every pair passed.',
+    ],
+  },
+  {
     v: '1.1.0', date: '2026-09-20',
     what: [
       'The home screen rebuilt around one journey: what there is to do, where that sits in the course, then everything else. It used to open with "Nothing due" above a Start button, which told a new learner there was nothing to do.',
