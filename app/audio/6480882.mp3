@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="utf-8">    <title>
+        Error    </title>
+    <link href="/favicon.ico?1784195531" type="image/x-icon" rel="icon"><link href="/favicon.ico?1784195531" type="image/x-icon" rel="shortcut icon"><link rel="stylesheet" href="/cache_css/layout.css?1784196489">        <link rel="alternate"
+              hreflang="ar"
+              href="https://tatoeba.org/ar/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="az"
+              href="https://tatoeba.org/az/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="bal"
+              href="https://tatoeba.org/bal/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="eu"
+              href="https://tatoeba.org/eu/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="be"
+              href="https://tatoeba.org/be/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="bn"
+              href="https://tatoeba.org/bn/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="br"
+              href="https://tatoeba.org/br/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="ca"
+              href="https://tatoeba.org/ca/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="zh-cn"
+              href="https://tatoeba.org/zh-cn/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="zh-tw"
+              href="https://tatoeba.org/zh-tw/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="wuu"
+              href="https://tatoeba.org/wuu/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="cs"
+              href="https://tatoeba.org/cs/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="da"
+              href="https://tatoeba.org/da/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="nl"
+              href="https://tatoeba.org/nl/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="de"
+              href="https://tatoeba.org/de/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="el"
+              href="https://tatoeba.org/el/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="en"
+              href="https://tatoeba.org/en/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="eo"
+              href="https://tatoeba.org/eo/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="et"
+              href="https://tatoeba.org/et/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="fi"
+              href="https://tatoeba.org/fi/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="fr"
+              href="https://tatoeba.org/fr/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="fy"
+              href="https://tatoeba.org/fy/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="gl"
+              href="https://tatoeba.org/gl/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="ka"
+              href="https://tatoeba.org/ka/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="gos"
+              href="https://tatoeba.org/gos/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="hi"
+              href="https://tatoeba.org/hi/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="hu"
+              href="https://tatoeba.org/hu/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="id"
+              href="https://tatoeba.org/id/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="ia"
+              href="https://tatoeba.org/ia/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="is"
+              href="https://tatoeba.org/is/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="it"
+              href="https://tatoeba.org/it/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="ja"
+              href="https://tatoeba.org/ja/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="kab"
+              href="https://tatoeba.org/kab/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="ko"
+              href="https://tatoeba.org/ko/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="ku"
+              href="https://tatoeba.org/ku/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="la"
+              href="https://tatoeba.org/la/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="lt"
+              href="https://tatoeba.org/lt/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="jbo"
+              href="https://tatoeba.org/jbo/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="nds"
+              href="https://tatoeba.org/nds/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="mr"
+              href="https://tatoeba.org/mr/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="ms"
+              href="https://tatoeba.org/ms/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="oc"
+              href="https://tatoeba.org/oc/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="pl"
+              href="https://tatoeba.org/pl/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="pt-br"
+              href="https://tatoeba.org/pt-br/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="ro"
+              href="https://tatoeba.org/ro/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="ru"
+              href="https://tatoeba.org/ru/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="skr"
+              href="https://tatoeba.org/skr/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="sr"
+              href="https://tatoeba.org/sr/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="sk"
+              href="https://tatoeba.org/sk/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="es"
+              href="https://tatoeba.org/es/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="sv"
+              href="https://tatoeba.org/sv/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="tl"
+              href="https://tatoeba.org/tl/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="tr"
+              href="https://tatoeba.org/tr/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="tt"
+              href="https://tatoeba.org/tt/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="uk"
+              href="https://tatoeba.org/uk/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="uz"
+              href="https://tatoeba.org/uz/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="vi"
+              href="https://tatoeba.org/vi/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="cy"
+              href="https://tatoeba.org/cy/audio/download/6480882">
+                <link rel="alternate"
+              hreflang="zza"
+              href="https://tatoeba.org/zza/audio/download/6480882">
+        
+    <link rel="search" type="application/opensearchdescription+xml"
+          href="/opensearch.xml" title="Tatoeba" />
+    
+    </head>
+<body ng-app="app"
+    >
+    <!--  TOP  -->
+    
+<div id="top_menu_container" ng-controller="MenuController">
+    <md-toolbar id="top_menu" md-colors="{background: 'grey-800'}" layout="column" layout-gt-xs="row" layout-align-gt-xs="start center" flex ng-cloak>
+        
+<div layout="row" layout-align="start center" flex-xs flex-sm layout-padding>
+    <md-button hide-gt-sm class="hamburger-menu md-icon-button" ng-click="toggleMenu()">
+        <md-icon>menu</md-icon>
+    </md-button>
+
+    <a href="/en" layout="row" flex-xs="" layout-align="center center"><img src="/img/tatoeba.svg?1784195531" width="32" height="32" title="Tatoeba" alt=""><div class="tatoeba-name">Tatoeba</div></a>
+    <md-button hide-gt-xs class="md-icon-button" ng-click="showInterfaceLanguageSelection()">
+    <md-icon>language</md-icon> 
+    </md-button></div>        
+        <div flex hide-xs hide-sm>
+                    <div class="dropdown">
+                <div class="label">Browse <md-icon>expand_more</md-icon></div>
+
+                <div class="dropdown-content">
+                                    <div class="item"><a href="/en/sentences/show/random">Show random sentence</a></div>
+                                    <div class="item"><a href="/en/sentences/index">Browse by language</a></div>
+                                    <div class="item"><a href="/en/sentences_lists/index">Browse by list</a></div>
+                                    <div class="item"><a href="/en/tags/view_all">Browse by tag</a></div>
+                                    <div class="item"><a href="/en/audio/index">Browse audio</a></div>
+                                </div>
+            </div>
+                        <div class="dropdown">
+                <div class="label">Community <md-icon>expand_more</md-icon></div>
+
+                <div class="dropdown-content">
+                                    <div class="item"><a href="/en/wall/index">Wall</a></div>
+                                    <div class="item"><a href="/en/users/all">List of all members</a></div>
+                                    <div class="item"><a href="/en/stats/users_languages">Languages of members</a></div>
+                                    <div class="item"><a href="/en/stats/native_speakers">Native speakers</a></div>
+                                </div>
+            </div>
+                    </div>
+
+        <div id="user_menu" ng-cloak>
+            
+<div ng-controller="LoginDialogController as vm" layout="row" layout-align="center center" flex hide-xs hide-sm>
+    <md-button href="/en/users/register">
+    Register    </md-button>
+
+    <md-button ng-click="vm.showDialog('/en/audio/download/6480882')">
+        Log in    </md-button>
+</div>        </div>
+        
+        <md-button hide-xs class="" ng-click="showInterfaceLanguageSelection()">
+    <md-icon>language</md-icon> 
+    English</md-button>    </md-toolbar>
+
+    <md-sidenav class="sidenav-menu md-sidenav-left" md-component-id="menu" md-disable-scroll-target="body" ng-cloak>
+        <md-content>
+                        <div layout="row" layout-align="start center" layout-padding>
+                <md-button class="md-icon-button" ng-click="toggleMenu()">
+                    <md-icon>menu</md-icon>
+                </md-button>
+                <div layout="row" layout-align="center center">
+                    <span><img src="/img/tatoeba.svg?1784195531" width="32" height="32" title="Tatoeba" alt=""></span>
+                    <span class="tatoeba-name">Tatoeba</span>
+                </div>
+            </div>
+
+            <md-list>
+                                <md-list-item href="/en/users/register">
+                    <p>
+                    <md-icon>chevron_right</md-icon>
+                    Register                    </p>
+                </md-list-item>
+
+                <md-list-item ng-controller="LoginDialogController as vm" ng-click="vm.showDialog('/en/audio/download/6480882')">
+                    <p>
+                    <md-icon>chevron_right</md-icon>
+                    Log in                    </p>
+                </md-list-item>
+                            </md-list>
+
+            <md-divider></md-divider>
+
+            <md-list>
+                            <md-subheader>Browse</md-subheader>
+                                        <md-list-item href="/en/sentences/show/random">
+                            <p>
+                            <md-icon>chevron_right</md-icon>
+                            Show random sentence                            </p>
+                        </md-list-item>
+                                                <md-list-item href="/en/sentences/index">
+                            <p>
+                            <md-icon>chevron_right</md-icon>
+                            Browse by language                            </p>
+                        </md-list-item>
+                                                <md-list-item href="/en/sentences_lists/index">
+                            <p>
+                            <md-icon>chevron_right</md-icon>
+                            Browse by list                            </p>
+                        </md-list-item>
+                                                <md-list-item href="/en/tags/view_all">
+                            <p>
+                            <md-icon>chevron_right</md-icon>
+                            Browse by tag                            </p>
+                        </md-list-item>
+                                                <md-list-item href="/en/audio/index">
+                            <p>
+                            <md-icon>chevron_right</md-icon>
+                            Browse audio                            </p>
+                        </md-list-item>
+                                        <md-subheader>Community</md-subheader>
+                                        <md-list-item href="/en/wall/index">
+                            <p>
+                            <md-icon>chevron_right</md-icon>
+                            Wall                            </p>
+                        </md-list-item>
+                                                <md-list-item href="/en/users/all">
+                            <p>
+                            <md-icon>chevron_right</md-icon>
+                            List of all members                            </p>
+                        </md-list-item>
+                                                <md-list-item href="/en/stats/users_languages">
+                            <p>
+                            <md-icon>chevron_right</md-icon>
+                            Languages of members                            </p>
+                        </md-list-item>
+                                                <md-list-item href="/en/stats/native_speakers">
+                            <p>
+                            <md-icon>chevron_right</md-icon>
+                            Native speakers                            </p>
+                        </md-list-item>
+                                    </md-list>
+        </md-content>
+
+    </md-sidenav>
+</div>
+
+
+
+    <!--  SEARCH BAR  -->
+    
+<md-toolbar id="search-bar-minimal" ng-controller="SearchBarController as ctrl" ng-cloak>
+    <div class="md-toolbar-tools">
+
+    <language-icon lang="filters.from.code" title="filters.from.name" ng-if="filters.from"></language-icon>
+
+    <form method="get" accept-charset="utf-8" layout="column" name="ctrl.form" flex="" ng-init="ctrl.syncWithOtherSearchForms()" ng-submit="ctrl.submit(ctrl.form)">
+    <div layout="row" layout-align="center center" flex>
+        <md-input-container class="md-accent" flex md-no-float>
+            <input name="query" 
+                accesskey="4" 
+                type="search"
+                dir="auto" 
+                ng-model="filters.query"
+                ng-init="filters.query = &quot;&quot;"
+                                placeholder="Search"/>
+        </md-input-container>
+        <md-button type="submit" class="md-icon-button md-raised"><md-icon>search</md-icon></md-button>
+    </div>
+    </form>    </div>
+</md-toolbar>
+
+<md-toolbar id="search-bar" ng-controller="SearchBarController as ctrl" class="md-whiteframe-1dp md-primary">
+<form method="get" accept-charset="utf-8" id="SentenceSearchForm" name="ctrl.form" ng-submit="ctrl.submit(ctrl.form)"><div ng-cloak
+     layout-gt-sm="row" layout-align-gt-sm="center end" layout-margin
+     layout="column" layout-align="center center">
+    <div layout="column" flex>
+        <div layout="row" layout-align="end center" class="search-bar-extra">
+            <a href="//en.wiki.tatoeba.org/articles/show/text-search" target="_blank">Help</a><a href="/en/sentences/advanced_search">Advanced search</a>        </div>
+
+        <div layout="row">
+            <label for="SentenceQuery">
+                                Search            </label>
+            <input id="SentenceQuery"
+                   type="search"
+                   name="query"
+                   ng-model="filters.query"
+                   ng-init="filters.query = &quot;&quot;"
+                   accesskey="4"
+                   lang=""
+                   dir="auto"
+                   flex>
+            <md-icon id="clearSearch" tabindex="-1" ng-click="ctrl.clearSearch()">clear</md-icon>
+        </div>
+    </div>
+
+    <div layout-gt-xs="row" layout-align-gt-xs="center end"
+         layout="column" layout-align="center center">
+        <div layout="column">
+                        <label for="SentenceFrom">From</label>
+            <language-dropdown
+    input-id="SentenceFrom"
+    name="from"
+    languages-json="{&quot;abq&quot;:&quot;Abaza&quot;,&quot;abk&quot;:&quot;Abkhaz&quot;,&quot;ady&quot;:&quot;Adyghe&quot;,&quot;afh&quot;:&quot;Afrihili&quot;,&quot;afr&quot;:&quot;Afrikaans&quot;,&quot;ain&quot;:&quot;Ainu&quot;,&quot;akl&quot;:&quot;Aklanon&quot;,&quot;sqi&quot;:&quot;Albanian&quot;,&quot;arq&quot;:&quot;Algerian Arabic&quot;,&quot;amh&quot;:&quot;Amharic&quot;,&quot;grc&quot;:&quot;Ancient Greek&quot;,&quot;hbo&quot;:&quot;Ancient Hebrew&quot;,&quot;njo&quot;:&quot;Ao Naga&quot;,&quot;ara&quot;:&quot;Arabic&quot;,&quot;arg&quot;:&quot;Aragonese&quot;,&quot;asm&quot;:&quot;Assamese&quot;,&quot;aii&quot;:&quot;Assyrian Neo-Aramaic&quot;,&quot;ast&quot;:&quot;Asturian&quot;,&quot;ava&quot;:&quot;Avar&quot;,&quot;awa&quot;:&quot;Awadhi&quot;,&quot;aym&quot;:&quot;Aymara&quot;,&quot;aze&quot;:&quot;Azerbaijani&quot;,&quot;ban&quot;:&quot;Balinese&quot;,&quot;bal&quot;:&quot;Baluchi&quot;,&quot;bam&quot;:&quot;Bambara&quot;,&quot;bjn&quot;:&quot;Banjar&quot;,&quot;bak&quot;:&quot;Bashkir&quot;,&quot;eus&quot;:&quot;Basque&quot;,&quot;bar&quot;:&quot;Bavarian&quot;,&quot;bvy&quot;:&quot;Baybayanon&quot;,&quot;bel&quot;:&quot;Belarusian&quot;,&quot;ben&quot;:&quot;Bengali&quot;,&quot;ber&quot;:&quot;Berber&quot;,&quot;bom&quot;:&quot;Berom&quot;,&quot;bho&quot;:&quot;Bhojpuri&quot;,&quot;bis&quot;:&quot;Bislama&quot;,&quot;brx&quot;:&quot;Bodo&quot;,&quot;bos&quot;:&quot;Bosnian&quot;,&quot;bre&quot;:&quot;Breton&quot;,&quot;bzt&quot;:&quot;Brithenig&quot;,&quot;bul&quot;:&quot;Bulgarian&quot;,&quot;mya&quot;:&quot;Burmese&quot;,&quot;bua&quot;:&quot;Buryat&quot;,&quot;yue&quot;:&quot;Cantonese&quot;,&quot;cat&quot;:&quot;Catalan&quot;,&quot;cay&quot;:&quot;Cayuga&quot;,&quot;ceb&quot;:&quot;Cebuano&quot;,&quot;bcl&quot;:&quot;Central Bikol&quot;,&quot;dtp&quot;:&quot;Central Dusun&quot;,&quot;nch&quot;:&quot;Central Huasteca Nahuatl&quot;,&quot;knc&quot;:&quot;Central Kanuri&quot;,&quot;ckb&quot;:&quot;Central Kurdish (Soran\u00ee)&quot;,&quot;cmo&quot;:&quot;Central Mnong&quot;,&quot;chg&quot;:&quot;Chagatai&quot;,&quot;cha&quot;:&quot;Chamorro&quot;,&quot;cbk&quot;:&quot;Chavacano&quot;,&quot;che&quot;:&quot;Chechen&quot;,&quot;chr&quot;:&quot;Cherokee&quot;,&quot;cpi&quot;:&quot;Chinese Pidgin English&quot;,&quot;chn&quot;:&quot;Chinook Jargon&quot;,&quot;nya&quot;:&quot;Chinyanja&quot;,&quot;cho&quot;:&quot;Choctaw&quot;,&quot;ckt&quot;:&quot;Chukchi&quot;,&quot;chv&quot;:&quot;Chuvash&quot;,&quot;kzj&quot;:&quot;Coastal Kadazan&quot;,&quot;swc&quot;:&quot;Congo Swahili&quot;,&quot;cor&quot;:&quot;Cornish&quot;,&quot;cos&quot;:&quot;Corsican&quot;,&quot;crh&quot;:&quot;Crimean Tatar&quot;,&quot;hrv&quot;:&quot;Croatian&quot;,&quot;cyo&quot;:&quot;Cuyonon&quot;,&quot;cycl&quot;:&quot;CycL&quot;,&quot;ces&quot;:&quot;Czech&quot;,&quot;dan&quot;:&quot;Danish&quot;,&quot;dar&quot;:&quot;Dargwa&quot;,&quot;div&quot;:&quot;Dhivehi&quot;,&quot;drt&quot;:&quot;Drents&quot;,&quot;dng&quot;:&quot;Dungan&quot;,&quot;nld&quot;:&quot;Dutch&quot;,&quot;dws&quot;:&quot;Dutton World Speedwords&quot;,&quot;hye&quot;:&quot;Eastern Armenian&quot;,&quot;arz&quot;:&quot;Egyptian Arabic&quot;,&quot;egl&quot;:&quot;Emilian&quot;,&quot;eng&quot;:&quot;English&quot;,&quot;emx&quot;:&quot;Erromintxela&quot;,&quot;myv&quot;:&quot;Erzya&quot;,&quot;epo&quot;:&quot;Esperanto&quot;,&quot;est&quot;:&quot;Estonian&quot;,&quot;evn&quot;:&quot;Evenki&quot;,&quot;ewe&quot;:&quot;Ewe&quot;,&quot;ext&quot;:&quot;Extremaduran&quot;,&quot;fao&quot;:&quot;Faroese&quot;,&quot;hif&quot;:&quot;Fiji Hindi&quot;,&quot;fij&quot;:&quot;Fijian&quot;,&quot;fin&quot;:&quot;Finnish&quot;,&quot;fra&quot;:&quot;French&quot;,&quot;fry&quot;:&quot;Frisian&quot;,&quot;fur&quot;:&quot;Friulian&quot;,&quot;gaa&quot;:&quot;Ga&quot;,&quot;gag&quot;:&quot;Gagauz&quot;,&quot;glg&quot;:&quot;Galician&quot;,&quot;gan&quot;:&quot;Gan Chinese&quot;,&quot;gbm&quot;:&quot;Garhwali&quot;,&quot;kat&quot;:&quot;Georgian&quot;,&quot;deu&quot;:&quot;German&quot;,&quot;aln&quot;:&quot;Gheg Albanian&quot;,&quot;gil&quot;:&quot;Gilbertese&quot;,&quot;got&quot;:&quot;Gothic&quot;,&quot;ell&quot;:&quot;Greek&quot;,&quot;kal&quot;:&quot;Greenlandic&quot;,&quot;gos&quot;:&quot;Gronings&quot;,&quot;gcf&quot;:&quot;Guadeloupean Creole French&quot;,&quot;grn&quot;:&quot;Guarani&quot;,&quot;ngu&quot;:&quot;Guerrero Nahuatl&quot;,&quot;guj&quot;:&quot;Gujarati&quot;,&quot;afb&quot;:&quot;Gulf Arabic&quot;,&quot;guw&quot;:&quot;Gun&quot;,&quot;hat&quot;:&quot;Haitian Creole&quot;,&quot;hak&quot;:&quot;Hakka Chinese&quot;,&quot;hau&quot;:&quot;Hausa&quot;,&quot;haw&quot;:&quot;Hawaiian&quot;,&quot;heb&quot;:&quot;Hebrew&quot;,&quot;hil&quot;:&quot;Hiligaynon&quot;,&quot;mrj&quot;:&quot;Hill Mari&quot;,&quot;hin&quot;:&quot;Hindi&quot;,&quot;mik&quot;:&quot;Hitchiti&quot;,&quot;mww&quot;:&quot;Hmong Daw (White)&quot;,&quot;hnj&quot;:&quot;Hmong Njua (Green)&quot;,&quot;hoc&quot;:&quot;Ho&quot;,&quot;hun&quot;:&quot;Hungarian&quot;,&quot;hrx&quot;:&quot;Hunsrik&quot;,&quot;iba&quot;:&quot;Iban&quot;,&quot;isl&quot;:&quot;Icelandic&quot;,&quot;ido&quot;:&quot;Ido&quot;,&quot;ibo&quot;:&quot;Igbo&quot;,&quot;ilo&quot;:&quot;Ilocano&quot;,&quot;ind&quot;:&quot;Indonesian&quot;,&quot;izh&quot;:&quot;Ingrian&quot;,&quot;inh&quot;:&quot;Ingush&quot;,&quot;igs&quot;:&quot;Interglossa&quot;,&quot;ina&quot;:&quot;Interlingua&quot;,&quot;ile&quot;:&quot;Interlingue&quot;,&quot;isv&quot;:&quot;Interslavic&quot;,&quot;ike&quot;:&quot;Inuktitut&quot;,&quot;acm&quot;:&quot;Iraqi Arabic&quot;,&quot;gle&quot;:&quot;Irish&quot;,&quot;tts&quot;:&quot;Isan&quot;,&quot;ita&quot;:&quot;Italian&quot;,&quot;jam&quot;:&quot;Jamaican Patois&quot;,&quot;jpn&quot;:&quot;Japanese&quot;,&quot;jav&quot;:&quot;Javanese&quot;,&quot;tmr&quot;:&quot;Jewish Babylonian Aramaic&quot;,&quot;jpa&quot;:&quot;Jewish Palestinian Aramaic&quot;,&quot;cjy&quot;:&quot;Jin Chinese&quot;,&quot;jdt&quot;:&quot;Juhuri (Judeo-Tat)&quot;,&quot;quc&quot;:&quot;K&#039;iche&#039;&quot;,&quot;kbd&quot;:&quot;Kabardian&quot;,&quot;kab&quot;:&quot;Kabyle&quot;,&quot;xal&quot;:&quot;Kalmyk&quot;,&quot;kam&quot;:&quot;Kamba&quot;,&quot;kan&quot;:&quot;Kannada&quot;,&quot;pam&quot;:&quot;Kapampangan&quot;,&quot;krc&quot;:&quot;Karachay-Balkar&quot;,&quot;kaa&quot;:&quot;Karakalpak&quot;,&quot;xqa&quot;:&quot;Karakhanid&quot;,&quot;krl&quot;:&quot;Karelian&quot;,&quot;kas&quot;:&quot;Kashmiri&quot;,&quot;csb&quot;:&quot;Kashubian&quot;,&quot;kaz&quot;:&quot;Kazakh&quot;,&quot;kek&quot;:&quot;Kekchi (Q&#039;eqchi&#039;)&quot;,&quot;mfa&quot;:&quot;Kelantan-Pattani Malay&quot;,&quot;kxi&quot;:&quot;Keningau Murut&quot;,&quot;kjh&quot;:&quot;Khakas&quot;,&quot;klj&quot;:&quot;Khalaj&quot;,&quot;kha&quot;:&quot;Khasi&quot;,&quot;khm&quot;:&quot;Khmer&quot;,&quot;kin&quot;:&quot;Kinyarwanda&quot;,&quot;run&quot;:&quot;Kirundi&quot;,&quot;tlh&quot;:&quot;Klingon&quot;,&quot;ksh&quot;:&quot;K\u00f6lsch&quot;,&quot;koi&quot;:&quot;Komi-Permyak&quot;,&quot;kpv&quot;:&quot;Komi-Zyrian&quot;,&quot;gom&quot;:&quot;Konkani (Goan)&quot;,&quot;kor&quot;:&quot;Korean&quot;,&quot;avk&quot;:&quot;Kotava&quot;,&quot;kum&quot;:&quot;Kumyk&quot;,&quot;fkv&quot;:&quot;Kven Finnish&quot;,&quot;kir&quot;:&quot;Kyrgyz&quot;,&quot;ldn&quot;:&quot;L\u00e1adan&quot;,&quot;lld&quot;:&quot;Ladin&quot;,&quot;lad&quot;:&quot;Ladino&quot;,&quot;lbe&quot;:&quot;Lak&quot;,&quot;lkt&quot;:&quot;Lakota&quot;,&quot;lao&quot;:&quot;Lao&quot;,&quot;ltg&quot;:&quot;Latgalian&quot;,&quot;lat&quot;:&quot;Latin&quot;,&quot;lvs&quot;:&quot;Latvian&quot;,&quot;lzz&quot;:&quot;Laz&quot;,&quot;lez&quot;:&quot;Lezgi&quot;,&quot;ayl&quot;:&quot;Libyan Arabic&quot;,&quot;lij&quot;:&quot;Ligurian&quot;,&quot;lim&quot;:&quot;Limburgish&quot;,&quot;lin&quot;:&quot;Lingala&quot;,&quot;lfn&quot;:&quot;Lingua Franca Nova&quot;,&quot;lzh&quot;:&quot;Literary Chinese&quot;,&quot;lit&quot;:&quot;Lithuanian&quot;,&quot;liv&quot;:&quot;Livonian&quot;,&quot;jbo&quot;:&quot;Lojban&quot;,&quot;lmo&quot;:&quot;Lombard&quot;,&quot;lou&quot;:&quot;Louisiana Creole&quot;,&quot;nds&quot;:&quot;Low German (Low Saxon)&quot;,&quot;dsb&quot;:&quot;Lower Sorbian&quot;,&quot;lug&quot;:&quot;Luganda&quot;,&quot;lut&quot;:&quot;Lushootseed&quot;,&quot;ltz&quot;:&quot;Luxembourgish&quot;,&quot;mkd&quot;:&quot;Macedonian&quot;,&quot;mad&quot;:&quot;Madurese&quot;,&quot;bfz&quot;:&quot;Mahasu Pahari&quot;,&quot;mai&quot;:&quot;Maithili&quot;,&quot;mlg&quot;:&quot;Malagasy&quot;,&quot;zsm&quot;:&quot;Malay&quot;,&quot;zlm&quot;:&quot;Malay (Vernacular)&quot;,&quot;mal&quot;:&quot;Malayalam&quot;,&quot;mlt&quot;:&quot;Maltese&quot;,&quot;mgm&quot;:&quot;Mambae&quot;,&quot;mnc&quot;:&quot;Manchu&quot;,&quot;mdr&quot;:&quot;Mandar&quot;,&quot;cmn&quot;:&quot;Mandarin Chinese&quot;,&quot;glv&quot;:&quot;Manx&quot;,&quot;mri&quot;:&quot;Maori&quot;,&quot;arn&quot;:&quot;Mapuche&quot;,&quot;mar&quot;:&quot;Marathi&quot;,&quot;mah&quot;:&quot;Marshallese&quot;,&quot;mhr&quot;:&quot;Meadow Mari&quot;,&quot;mni&quot;:&quot;Meitei&quot;,&quot;mic&quot;:&quot;Mi&#039;kmaq&quot;,&quot;enm&quot;:&quot;Middle English&quot;,&quot;frm&quot;:&quot;Middle French&quot;,&quot;pal&quot;:&quot;Middle Persian (Pahlavi)&quot;,&quot;nan&quot;:&quot;Min Nan Chinese&quot;,&quot;min&quot;:&quot;Minangkabau&quot;,&quot;xmf&quot;:&quot;Mingrelian&quot;,&quot;mwl&quot;:&quot;Mirandese&quot;,&quot;moh&quot;:&quot;Mohawk&quot;,&quot;mdf&quot;:&quot;Moksha&quot;,&quot;mnw&quot;:&quot;Mon&quot;,&quot;mon&quot;:&quot;Mongolian&quot;,&quot;mnr&quot;:&quot;Mono (USA)&quot;,&quot;mfe&quot;:&quot;Morisyen&quot;,&quot;ary&quot;:&quot;Moroccan Arabic&quot;,&quot;mus&quot;:&quot;Muskogee (Creek)&quot;,&quot;nst&quot;:&quot;Naga (Tangshang)&quot;,&quot;nah&quot;:&quot;Nahuatl&quot;,&quot;nnb&quot;:&quot;Nande&quot;,&quot;nau&quot;:&quot;Nauruan&quot;,&quot;nav&quot;:&quot;Navajo&quot;,&quot;nap&quot;:&quot;Neapolitan&quot;,&quot;npi&quot;:&quot;Nepali&quot;,&quot;new&quot;:&quot;Newari&quot;,&quot;ngt&quot;:&quot;Ngeq &quot;,&quot;fuv&quot;:&quot;Nigerian Fulfulde&quot;,&quot;niu&quot;:&quot;Niuean&quot;,&quot;nog&quot;:&quot;Nogai&quot;,&quot;frr&quot;:&quot;North Frisian&quot;,&quot;apc&quot;:&quot;North Levantine Arabic&quot;,&quot;max&quot;:&quot;North Moluccan Malay&quot;,&quot;hdn&quot;:&quot;Northern Haida&quot;,&quot;kmr&quot;:&quot;Northern Kurdish (Kurmanc\u00ee)&quot;,&quot;sme&quot;:&quot;Northern Sami&quot;,&quot;kiu&quot;:&quot;Northern Zaza (Kirmanjki)&quot;,&quot;nob&quot;:&quot;Norwegian Bokm\u00e5l&quot;,&quot;nno&quot;:&quot;Norwegian Nynorsk&quot;,&quot;nov&quot;:&quot;Novial&quot;,&quot;nus&quot;:&quot;Nuer&quot;,&quot;iii&quot;:&quot;Nuosu&quot;,&quot;nys&quot;:&quot;Nyungar&quot;,&quot;ood&quot;:&quot;O&#039;odham&quot;,&quot;oci&quot;:&quot;Occitan&quot;,&quot;ori&quot;:&quot;Odia (Oriya)&quot;,&quot;oji&quot;:&quot;Ojibwe&quot;,&quot;ryu&quot;:&quot;Okinawan&quot;,&quot;oar&quot;:&quot;Old Aramaic&quot;,&quot;orv&quot;:&quot;Old East Slavic&quot;,&quot;ang&quot;:&quot;Old English&quot;,&quot;fro&quot;:&quot;Old French&quot;,&quot;ofs&quot;:&quot;Old Frisian&quot;,&quot;non&quot;:&quot;Old Norse&quot;,&quot;prg&quot;:&quot;Old Prussian&quot;,&quot;osx&quot;:&quot;Old Saxon&quot;,&quot;osp&quot;:&quot;Old Spanish&quot;,&quot;otk&quot;:&quot;Old Turkish&quot;,&quot;nlv&quot;:&quot;Orizaba Nahuatl&quot;,&quot;oss&quot;:&quot;Ossetian&quot;,&quot;ota&quot;:&quot;Ottoman Turkish&quot;,&quot;pfl&quot;:&quot;Palatine German&quot;,&quot;pau&quot;:&quot;Palauan&quot;,&quot;pli&quot;:&quot;Pali&quot;,&quot;pag&quot;:&quot;Pangasinan&quot;,&quot;pap&quot;:&quot;Papiamento&quot;,&quot;pus&quot;:&quot;Pashto&quot;,&quot;pdc&quot;:&quot;Pennsylvania German&quot;,&quot;pes&quot;:&quot;Persian&quot;,&quot;phn&quot;:&quot;Phoenician&quot;,&quot;pcd&quot;:&quot;Picard&quot;,&quot;pms&quot;:&quot;Piedmontese&quot;,&quot;ppl&quot;:&quot;Pipil&quot;,&quot;crk&quot;:&quot;Plains Cree&quot;,&quot;pol&quot;:&quot;Polish&quot;,&quot;por&quot;:&quot;Portuguese&quot;,&quot;fuc&quot;:&quot;Pulaar&quot;,&quot;pan&quot;:&quot;Punjabi (Eastern)&quot;,&quot;pnb&quot;:&quot;Punjabi (Western)&quot;,&quot;qxq&quot;:&quot;Qashqai&quot;,&quot;que&quot;:&quot;Quechua&quot;,&quot;qya&quot;:&quot;Quenya&quot;,&quot;rap&quot;:&quot;Rapa Nui&quot;,&quot;rel&quot;:&quot;Rendille&quot;,&quot;rhg&quot;:&quot;Rohingya&quot;,&quot;rom&quot;:&quot;Romani&quot;,&quot;ron&quot;:&quot;Romanian&quot;,&quot;roh&quot;:&quot;Romansh&quot;,&quot;rus&quot;:&quot;Russian&quot;,&quot;rue&quot;:&quot;Rusyn&quot;,&quot;smo&quot;:&quot;Samoan&quot;,&quot;sgs&quot;:&quot;Samogitian&quot;,&quot;sag&quot;:&quot;Sango&quot;,&quot;san&quot;:&quot;Sanskrit&quot;,&quot;sat&quot;:&quot;Santali&quot;,&quot;skr&quot;:&quot;Saraiki&quot;,&quot;srd&quot;:&quot;Sardinian&quot;,&quot;stq&quot;:&quot;Saterland Frisian&quot;,&quot;sco&quot;:&quot;Scots&quot;,&quot;gla&quot;:&quot;Scottish Gaelic&quot;,&quot;srp&quot;:&quot;Serbian&quot;,&quot;tsn&quot;:&quot;Setswana&quot;,&quot;crs&quot;:&quot;Seychellois Creole&quot;,&quot;wuu&quot;:&quot;Shanghainese&quot;,&quot;sna&quot;:&quot;Shona&quot;,&quot;shs&quot;:&quot;Shuswap&quot;,&quot;scn&quot;:&quot;Sicilian&quot;,&quot;szl&quot;:&quot;Silesian&quot;,&quot;sjn&quot;:&quot;Sindarin&quot;,&quot;snd&quot;:&quot;Sindhi&quot;,&quot;sin&quot;:&quot;Sinhala&quot;,&quot;slk&quot;:&quot;Slovak&quot;,&quot;slv&quot;:&quot;Slovenian&quot;,&quot;som&quot;:&quot;Somali&quot;,&quot;ajp&quot;:&quot;South Levantine Arabic&quot;,&quot;alt&quot;:&quot;Southern Altai&quot;,&quot;hax&quot;:&quot;Southern Haida&quot;,&quot;sdh&quot;:&quot;Southern Kurdish&quot;,&quot;sma&quot;:&quot;Southern Sami&quot;,&quot;sot&quot;:&quot;Southern Sotho&quot;,&quot;laa&quot;:&quot;Southern Subanen&quot;,&quot;diq&quot;:&quot;Southern Zaza (Dimli)&quot;,&quot;spa&quot;:&quot;Spanish&quot;,&quot;srn&quot;:&quot;Sranan Tongo&quot;,&quot;zgh&quot;:&quot;Standard Moroccan Tamazight&quot;,&quot;sux&quot;:&quot;Sumerian&quot;,&quot;sun&quot;:&quot;Sundanese&quot;,&quot;sva&quot;:&quot;Svan&quot;,&quot;swg&quot;:&quot;Swabian&quot;,&quot;swh&quot;:&quot;Swahili&quot;,&quot;ssw&quot;:&quot;Swazi&quot;,&quot;swe&quot;:&quot;Swedish&quot;,&quot;gsw&quot;:&quot;Swiss German&quot;,&quot;syl&quot;:&quot;Sylheti&quot;,&quot;syc&quot;:&quot;Syriac&quot;,&quot;shy&quot;:&quot;Tachawit&quot;,&quot;mvv&quot;:&quot;Tagal Murut&quot;,&quot;tgl&quot;:&quot;Tagalog&quot;,&quot;thv&quot;:&quot;Tahaggart Tamahaq&quot;,&quot;tah&quot;:&quot;Tahitian&quot;,&quot;tgk&quot;:&quot;Tajik&quot;,&quot;tzl&quot;:&quot;Talossan&quot;,&quot;tly&quot;:&quot;Talysh&quot;,&quot;tam&quot;:&quot;Tamil&quot;,&quot;rif&quot;:&quot;Tarifit&quot;,&quot;shi&quot;:&quot;Tashelhit&quot;,&quot;tat&quot;:&quot;Tatar&quot;,&quot;ttq&quot;:&quot;Tawallammat Tamajaq&quot;,&quot;tel&quot;:&quot;Telugu&quot;,&quot;tmw&quot;:&quot;Temuan&quot;,&quot;tet&quot;:&quot;Tetun&quot;,&quot;tha&quot;:&quot;Thai&quot;,&quot;bod&quot;:&quot;Tibetan&quot;,&quot;tig&quot;:&quot;Tigre&quot;,&quot;tir&quot;:&quot;Tigrinya&quot;,&quot;tpi&quot;:&quot;Tok Pisin&quot;,&quot;tkl&quot;:&quot;Tokelauan&quot;,&quot;tok&quot;:&quot;Toki Pona&quot;,&quot;toi&quot;:&quot;Tonga (Zambezi)&quot;,&quot;ton&quot;:&quot;Tongan&quot;,&quot;tso&quot;:&quot;Tsonga&quot;,&quot;tum&quot;:&quot;Tumbuka&quot;,&quot;tpn&quot;:&quot;Tupinamb\u00e1&quot;,&quot;tur&quot;:&quot;Turkish&quot;,&quot;tuk&quot;:&quot;Turkmen&quot;,&quot;tvl&quot;:&quot;Tuvaluan&quot;,&quot;tyv&quot;:&quot;Tuvinian&quot;,&quot;aoz&quot;:&quot;Uab Meto&quot;,&quot;udm&quot;:&quot;Udmurt&quot;,&quot;ukr&quot;:&quot;Ukrainian&quot;,&quot;umb&quot;:&quot;Umbundu&quot;,&quot;hsb&quot;:&quot;Upper Sorbian&quot;,&quot;urd&quot;:&quot;Urdu&quot;,&quot;urh&quot;:&quot;Urhobo&quot;,&quot;uig&quot;:&quot;Uyghur&quot;,&quot;uzb&quot;:&quot;Uzbek&quot;,&quot;vec&quot;:&quot;Venetian&quot;,&quot;vep&quot;:&quot;Veps&quot;,&quot;vie&quot;:&quot;Vietnamese&quot;,&quot;vol&quot;:&quot;Volap\u00fck&quot;,&quot;vro&quot;:&quot;V\u00f5ro&quot;,&quot;wln&quot;:&quot;Walloon&quot;,&quot;war&quot;:&quot;Waray&quot;,&quot;guc&quot;:&quot;Wayuu&quot;,&quot;cym&quot;:&quot;Welsh&quot;,&quot;gaz&quot;:&quot;West-Central Oromo&quot;,&quot;hyw&quot;:&quot;Western Armenian&quot;,&quot;wol&quot;:&quot;Wolof&quot;,&quot;xho&quot;:&quot;Xhosa&quot;,&quot;hsn&quot;:&quot;Xiang Chinese&quot;,&quot;sah&quot;:&quot;Yakut&quot;,&quot;yid&quot;:&quot;Yiddish&quot;,&quot;yor&quot;:&quot;Yoruba&quot;,&quot;yua&quot;:&quot;Yucatec Maya&quot;,&quot;zza&quot;:&quot;Zaza&quot;,&quot;zea&quot;:&quot;Zeelandic&quot;,&quot;zul&quot;:&quot;Zulu&quot;}"
+    selected-language="filters.from"
+    initial-selection=""
+    placeholder="Any language"
+    force-item-selection=""
+></language-dropdown>
+        </div>
+
+        <div id="arrow" tabindex="-1" ng-click="ctrl.swapLanguages()">
+            <md-icon>swap_horiz</md-icon>
+        </div>
+
+        <div layout="column">
+            <label for="SentenceTo">
+                                To            </label>
+            <language-dropdown
+    input-id="SentenceTo"
+    name="to"
+    languages-json="{&quot;abq&quot;:&quot;Abaza&quot;,&quot;abk&quot;:&quot;Abkhaz&quot;,&quot;ady&quot;:&quot;Adyghe&quot;,&quot;afh&quot;:&quot;Afrihili&quot;,&quot;afr&quot;:&quot;Afrikaans&quot;,&quot;ain&quot;:&quot;Ainu&quot;,&quot;akl&quot;:&quot;Aklanon&quot;,&quot;sqi&quot;:&quot;Albanian&quot;,&quot;arq&quot;:&quot;Algerian Arabic&quot;,&quot;amh&quot;:&quot;Amharic&quot;,&quot;grc&quot;:&quot;Ancient Greek&quot;,&quot;hbo&quot;:&quot;Ancient Hebrew&quot;,&quot;njo&quot;:&quot;Ao Naga&quot;,&quot;ara&quot;:&quot;Arabic&quot;,&quot;arg&quot;:&quot;Aragonese&quot;,&quot;asm&quot;:&quot;Assamese&quot;,&quot;aii&quot;:&quot;Assyrian Neo-Aramaic&quot;,&quot;ast&quot;:&quot;Asturian&quot;,&quot;ava&quot;:&quot;Avar&quot;,&quot;awa&quot;:&quot;Awadhi&quot;,&quot;aym&quot;:&quot;Aymara&quot;,&quot;aze&quot;:&quot;Azerbaijani&quot;,&quot;ban&quot;:&quot;Balinese&quot;,&quot;bal&quot;:&quot;Baluchi&quot;,&quot;bam&quot;:&quot;Bambara&quot;,&quot;bjn&quot;:&quot;Banjar&quot;,&quot;bak&quot;:&quot;Bashkir&quot;,&quot;eus&quot;:&quot;Basque&quot;,&quot;bar&quot;:&quot;Bavarian&quot;,&quot;bvy&quot;:&quot;Baybayanon&quot;,&quot;bel&quot;:&quot;Belarusian&quot;,&quot;ben&quot;:&quot;Bengali&quot;,&quot;ber&quot;:&quot;Berber&quot;,&quot;bom&quot;:&quot;Berom&quot;,&quot;bho&quot;:&quot;Bhojpuri&quot;,&quot;bis&quot;:&quot;Bislama&quot;,&quot;brx&quot;:&quot;Bodo&quot;,&quot;bos&quot;:&quot;Bosnian&quot;,&quot;bre&quot;:&quot;Breton&quot;,&quot;bzt&quot;:&quot;Brithenig&quot;,&quot;bul&quot;:&quot;Bulgarian&quot;,&quot;mya&quot;:&quot;Burmese&quot;,&quot;bua&quot;:&quot;Buryat&quot;,&quot;yue&quot;:&quot;Cantonese&quot;,&quot;cat&quot;:&quot;Catalan&quot;,&quot;cay&quot;:&quot;Cayuga&quot;,&quot;ceb&quot;:&quot;Cebuano&quot;,&quot;bcl&quot;:&quot;Central Bikol&quot;,&quot;dtp&quot;:&quot;Central Dusun&quot;,&quot;nch&quot;:&quot;Central Huasteca Nahuatl&quot;,&quot;knc&quot;:&quot;Central Kanuri&quot;,&quot;ckb&quot;:&quot;Central Kurdish (Soran\u00ee)&quot;,&quot;cmo&quot;:&quot;Central Mnong&quot;,&quot;chg&quot;:&quot;Chagatai&quot;,&quot;cha&quot;:&quot;Chamorro&quot;,&quot;cbk&quot;:&quot;Chavacano&quot;,&quot;che&quot;:&quot;Chechen&quot;,&quot;chr&quot;:&quot;Cherokee&quot;,&quot;cpi&quot;:&quot;Chinese Pidgin English&quot;,&quot;chn&quot;:&quot;Chinook Jargon&quot;,&quot;nya&quot;:&quot;Chinyanja&quot;,&quot;cho&quot;:&quot;Choctaw&quot;,&quot;ckt&quot;:&quot;Chukchi&quot;,&quot;chv&quot;:&quot;Chuvash&quot;,&quot;kzj&quot;:&quot;Coastal Kadazan&quot;,&quot;swc&quot;:&quot;Congo Swahili&quot;,&quot;cor&quot;:&quot;Cornish&quot;,&quot;cos&quot;:&quot;Corsican&quot;,&quot;crh&quot;:&quot;Crimean Tatar&quot;,&quot;hrv&quot;:&quot;Croatian&quot;,&quot;cyo&quot;:&quot;Cuyonon&quot;,&quot;cycl&quot;:&quot;CycL&quot;,&quot;ces&quot;:&quot;Czech&quot;,&quot;dan&quot;:&quot;Danish&quot;,&quot;dar&quot;:&quot;Dargwa&quot;,&quot;div&quot;:&quot;Dhivehi&quot;,&quot;drt&quot;:&quot;Drents&quot;,&quot;dng&quot;:&quot;Dungan&quot;,&quot;nld&quot;:&quot;Dutch&quot;,&quot;dws&quot;:&quot;Dutton World Speedwords&quot;,&quot;hye&quot;:&quot;Eastern Armenian&quot;,&quot;arz&quot;:&quot;Egyptian Arabic&quot;,&quot;egl&quot;:&quot;Emilian&quot;,&quot;eng&quot;:&quot;English&quot;,&quot;emx&quot;:&quot;Erromintxela&quot;,&quot;myv&quot;:&quot;Erzya&quot;,&quot;epo&quot;:&quot;Esperanto&quot;,&quot;est&quot;:&quot;Estonian&quot;,&quot;evn&quot;:&quot;Evenki&quot;,&quot;ewe&quot;:&quot;Ewe&quot;,&quot;ext&quot;:&quot;Extremaduran&quot;,&quot;fao&quot;:&quot;Faroese&quot;,&quot;hif&quot;:&quot;Fiji Hindi&quot;,&quot;fij&quot;:&quot;Fijian&quot;,&quot;fin&quot;:&quot;Finnish&quot;,&quot;fra&quot;:&quot;French&quot;,&quot;fry&quot;:&quot;Frisian&quot;,&quot;fur&quot;:&quot;Friulian&quot;,&quot;gaa&quot;:&quot;Ga&quot;,&quot;gag&quot;:&quot;Gagauz&quot;,&quot;glg&quot;:&quot;Galician&quot;,&quot;gan&quot;:&quot;Gan Chinese&quot;,&quot;gbm&quot;:&quot;Garhwali&quot;,&quot;kat&quot;:&quot;Georgian&quot;,&quot;deu&quot;:&quot;German&quot;,&quot;aln&quot;:&quot;Gheg Albanian&quot;,&quot;gil&quot;:&quot;Gilbertese&quot;,&quot;got&quot;:&quot;Gothic&quot;,&quot;ell&quot;:&quot;Greek&quot;,&quot;kal&quot;:&quot;Greenlandic&quot;,&quot;gos&quot;:&quot;Gronings&quot;,&quot;gcf&quot;:&quot;Guadeloupean Creole French&quot;,&quot;grn&quot;:&quot;Guarani&quot;,&quot;ngu&quot;:&quot;Guerrero Nahuatl&quot;,&quot;guj&quot;:&quot;Gujarati&quot;,&quot;afb&quot;:&quot;Gulf Arabic&quot;,&quot;guw&quot;:&quot;Gun&quot;,&quot;hat&quot;:&quot;Haitian Creole&quot;,&quot;hak&quot;:&quot;Hakka Chinese&quot;,&quot;hau&quot;:&quot;Hausa&quot;,&quot;haw&quot;:&quot;Hawaiian&quot;,&quot;heb&quot;:&quot;Hebrew&quot;,&quot;hil&quot;:&quot;Hiligaynon&quot;,&quot;mrj&quot;:&quot;Hill Mari&quot;,&quot;hin&quot;:&quot;Hindi&quot;,&quot;mik&quot;:&quot;Hitchiti&quot;,&quot;mww&quot;:&quot;Hmong Daw (White)&quot;,&quot;hnj&quot;:&quot;Hmong Njua (Green)&quot;,&quot;hoc&quot;:&quot;Ho&quot;,&quot;hun&quot;:&quot;Hungarian&quot;,&quot;hrx&quot;:&quot;Hunsrik&quot;,&quot;iba&quot;:&quot;Iban&quot;,&quot;isl&quot;:&quot;Icelandic&quot;,&quot;ido&quot;:&quot;Ido&quot;,&quot;ibo&quot;:&quot;Igbo&quot;,&quot;ilo&quot;:&quot;Ilocano&quot;,&quot;ind&quot;:&quot;Indonesian&quot;,&quot;izh&quot;:&quot;Ingrian&quot;,&quot;inh&quot;:&quot;Ingush&quot;,&quot;igs&quot;:&quot;Interglossa&quot;,&quot;ina&quot;:&quot;Interlingua&quot;,&quot;ile&quot;:&quot;Interlingue&quot;,&quot;isv&quot;:&quot;Interslavic&quot;,&quot;ike&quot;:&quot;Inuktitut&quot;,&quot;acm&quot;:&quot;Iraqi Arabic&quot;,&quot;gle&quot;:&quot;Irish&quot;,&quot;tts&quot;:&quot;Isan&quot;,&quot;ita&quot;:&quot;Italian&quot;,&quot;jam&quot;:&quot;Jamaican Patois&quot;,&quot;jpn&quot;:&quot;Japanese&quot;,&quot;jav&quot;:&quot;Javanese&quot;,&quot;tmr&quot;:&quot;Jewish Babylonian Aramaic&quot;,&quot;jpa&quot;:&quot;Jewish Palestinian Aramaic&quot;,&quot;cjy&quot;:&quot;Jin Chinese&quot;,&quot;jdt&quot;:&quot;Juhuri (Judeo-Tat)&quot;,&quot;quc&quot;:&quot;K&#039;iche&#039;&quot;,&quot;kbd&quot;:&quot;Kabardian&quot;,&quot;kab&quot;:&quot;Kabyle&quot;,&quot;xal&quot;:&quot;Kalmyk&quot;,&quot;kam&quot;:&quot;Kamba&quot;,&quot;kan&quot;:&quot;Kannada&quot;,&quot;pam&quot;:&quot;Kapampangan&quot;,&quot;krc&quot;:&quot;Karachay-Balkar&quot;,&quot;kaa&quot;:&quot;Karakalpak&quot;,&quot;xqa&quot;:&quot;Karakhanid&quot;,&quot;krl&quot;:&quot;Karelian&quot;,&quot;kas&quot;:&quot;Kashmiri&quot;,&quot;csb&quot;:&quot;Kashubian&quot;,&quot;kaz&quot;:&quot;Kazakh&quot;,&quot;kek&quot;:&quot;Kekchi (Q&#039;eqchi&#039;)&quot;,&quot;mfa&quot;:&quot;Kelantan-Pattani Malay&quot;,&quot;kxi&quot;:&quot;Keningau Murut&quot;,&quot;kjh&quot;:&quot;Khakas&quot;,&quot;klj&quot;:&quot;Khalaj&quot;,&quot;kha&quot;:&quot;Khasi&quot;,&quot;khm&quot;:&quot;Khmer&quot;,&quot;kin&quot;:&quot;Kinyarwanda&quot;,&quot;run&quot;:&quot;Kirundi&quot;,&quot;tlh&quot;:&quot;Klingon&quot;,&quot;ksh&quot;:&quot;K\u00f6lsch&quot;,&quot;koi&quot;:&quot;Komi-Permyak&quot;,&quot;kpv&quot;:&quot;Komi-Zyrian&quot;,&quot;gom&quot;:&quot;Konkani (Goan)&quot;,&quot;kor&quot;:&quot;Korean&quot;,&quot;avk&quot;:&quot;Kotava&quot;,&quot;kum&quot;:&quot;Kumyk&quot;,&quot;fkv&quot;:&quot;Kven Finnish&quot;,&quot;kir&quot;:&quot;Kyrgyz&quot;,&quot;ldn&quot;:&quot;L\u00e1adan&quot;,&quot;lld&quot;:&quot;Ladin&quot;,&quot;lad&quot;:&quot;Ladino&quot;,&quot;lbe&quot;:&quot;Lak&quot;,&quot;lkt&quot;:&quot;Lakota&quot;,&quot;lao&quot;:&quot;Lao&quot;,&quot;ltg&quot;:&quot;Latgalian&quot;,&quot;lat&quot;:&quot;Latin&quot;,&quot;lvs&quot;:&quot;Latvian&quot;,&quot;lzz&quot;:&quot;Laz&quot;,&quot;lez&quot;:&quot;Lezgi&quot;,&quot;ayl&quot;:&quot;Libyan Arabic&quot;,&quot;lij&quot;:&quot;Ligurian&quot;,&quot;lim&quot;:&quot;Limburgish&quot;,&quot;lin&quot;:&quot;Lingala&quot;,&quot;lfn&quot;:&quot;Lingua Franca Nova&quot;,&quot;lzh&quot;:&quot;Literary Chinese&quot;,&quot;lit&quot;:&quot;Lithuanian&quot;,&quot;liv&quot;:&quot;Livonian&quot;,&quot;jbo&quot;:&quot;Lojban&quot;,&quot;lmo&quot;:&quot;Lombard&quot;,&quot;lou&quot;:&quot;Louisiana Creole&quot;,&quot;nds&quot;:&quot;Low German (Low Saxon)&quot;,&quot;dsb&quot;:&quot;Lower Sorbian&quot;,&quot;lug&quot;:&quot;Luganda&quot;,&quot;lut&quot;:&quot;Lushootseed&quot;,&quot;ltz&quot;:&quot;Luxembourgish&quot;,&quot;mkd&quot;:&quot;Macedonian&quot;,&quot;mad&quot;:&quot;Madurese&quot;,&quot;bfz&quot;:&quot;Mahasu Pahari&quot;,&quot;mai&quot;:&quot;Maithili&quot;,&quot;mlg&quot;:&quot;Malagasy&quot;,&quot;zsm&quot;:&quot;Malay&quot;,&quot;zlm&quot;:&quot;Malay (Vernacular)&quot;,&quot;mal&quot;:&quot;Malayalam&quot;,&quot;mlt&quot;:&quot;Maltese&quot;,&quot;mgm&quot;:&quot;Mambae&quot;,&quot;mnc&quot;:&quot;Manchu&quot;,&quot;mdr&quot;:&quot;Mandar&quot;,&quot;cmn&quot;:&quot;Mandarin Chinese&quot;,&quot;glv&quot;:&quot;Manx&quot;,&quot;mri&quot;:&quot;Maori&quot;,&quot;arn&quot;:&quot;Mapuche&quot;,&quot;mar&quot;:&quot;Marathi&quot;,&quot;mah&quot;:&quot;Marshallese&quot;,&quot;mhr&quot;:&quot;Meadow Mari&quot;,&quot;mni&quot;:&quot;Meitei&quot;,&quot;mic&quot;:&quot;Mi&#039;kmaq&quot;,&quot;enm&quot;:&quot;Middle English&quot;,&quot;frm&quot;:&quot;Middle French&quot;,&quot;pal&quot;:&quot;Middle Persian (Pahlavi)&quot;,&quot;nan&quot;:&quot;Min Nan Chinese&quot;,&quot;min&quot;:&quot;Minangkabau&quot;,&quot;xmf&quot;:&quot;Mingrelian&quot;,&quot;mwl&quot;:&quot;Mirandese&quot;,&quot;moh&quot;:&quot;Mohawk&quot;,&quot;mdf&quot;:&quot;Moksha&quot;,&quot;mnw&quot;:&quot;Mon&quot;,&quot;mon&quot;:&quot;Mongolian&quot;,&quot;mnr&quot;:&quot;Mono (USA)&quot;,&quot;mfe&quot;:&quot;Morisyen&quot;,&quot;ary&quot;:&quot;Moroccan Arabic&quot;,&quot;mus&quot;:&quot;Muskogee (Creek)&quot;,&quot;nst&quot;:&quot;Naga (Tangshang)&quot;,&quot;nah&quot;:&quot;Nahuatl&quot;,&quot;nnb&quot;:&quot;Nande&quot;,&quot;nau&quot;:&quot;Nauruan&quot;,&quot;nav&quot;:&quot;Navajo&quot;,&quot;nap&quot;:&quot;Neapolitan&quot;,&quot;npi&quot;:&quot;Nepali&quot;,&quot;new&quot;:&quot;Newari&quot;,&quot;ngt&quot;:&quot;Ngeq &quot;,&quot;fuv&quot;:&quot;Nigerian Fulfulde&quot;,&quot;niu&quot;:&quot;Niuean&quot;,&quot;nog&quot;:&quot;Nogai&quot;,&quot;frr&quot;:&quot;North Frisian&quot;,&quot;apc&quot;:&quot;North Levantine Arabic&quot;,&quot;max&quot;:&quot;North Moluccan Malay&quot;,&quot;hdn&quot;:&quot;Northern Haida&quot;,&quot;kmr&quot;:&quot;Northern Kurdish (Kurmanc\u00ee)&quot;,&quot;sme&quot;:&quot;Northern Sami&quot;,&quot;kiu&quot;:&quot;Northern Zaza (Kirmanjki)&quot;,&quot;nob&quot;:&quot;Norwegian Bokm\u00e5l&quot;,&quot;nno&quot;:&quot;Norwegian Nynorsk&quot;,&quot;nov&quot;:&quot;Novial&quot;,&quot;nus&quot;:&quot;Nuer&quot;,&quot;iii&quot;:&quot;Nuosu&quot;,&quot;nys&quot;:&quot;Nyungar&quot;,&quot;ood&quot;:&quot;O&#039;odham&quot;,&quot;oci&quot;:&quot;Occitan&quot;,&quot;ori&quot;:&quot;Odia (Oriya)&quot;,&quot;oji&quot;:&quot;Ojibwe&quot;,&quot;ryu&quot;:&quot;Okinawan&quot;,&quot;oar&quot;:&quot;Old Aramaic&quot;,&quot;orv&quot;:&quot;Old East Slavic&quot;,&quot;ang&quot;:&quot;Old English&quot;,&quot;fro&quot;:&quot;Old French&quot;,&quot;ofs&quot;:&quot;Old Frisian&quot;,&quot;non&quot;:&quot;Old Norse&quot;,&quot;prg&quot;:&quot;Old Prussian&quot;,&quot;osx&quot;:&quot;Old Saxon&quot;,&quot;osp&quot;:&quot;Old Spanish&quot;,&quot;otk&quot;:&quot;Old Turkish&quot;,&quot;nlv&quot;:&quot;Orizaba Nahuatl&quot;,&quot;oss&quot;:&quot;Ossetian&quot;,&quot;ota&quot;:&quot;Ottoman Turkish&quot;,&quot;pfl&quot;:&quot;Palatine German&quot;,&quot;pau&quot;:&quot;Palauan&quot;,&quot;pli&quot;:&quot;Pali&quot;,&quot;pag&quot;:&quot;Pangasinan&quot;,&quot;pap&quot;:&quot;Papiamento&quot;,&quot;pus&quot;:&quot;Pashto&quot;,&quot;pdc&quot;:&quot;Pennsylvania German&quot;,&quot;pes&quot;:&quot;Persian&quot;,&quot;phn&quot;:&quot;Phoenician&quot;,&quot;pcd&quot;:&quot;Picard&quot;,&quot;pms&quot;:&quot;Piedmontese&quot;,&quot;ppl&quot;:&quot;Pipil&quot;,&quot;crk&quot;:&quot;Plains Cree&quot;,&quot;pol&quot;:&quot;Polish&quot;,&quot;por&quot;:&quot;Portuguese&quot;,&quot;fuc&quot;:&quot;Pulaar&quot;,&quot;pan&quot;:&quot;Punjabi (Eastern)&quot;,&quot;pnb&quot;:&quot;Punjabi (Western)&quot;,&quot;qxq&quot;:&quot;Qashqai&quot;,&quot;que&quot;:&quot;Quechua&quot;,&quot;qya&quot;:&quot;Quenya&quot;,&quot;rap&quot;:&quot;Rapa Nui&quot;,&quot;rel&quot;:&quot;Rendille&quot;,&quot;rhg&quot;:&quot;Rohingya&quot;,&quot;rom&quot;:&quot;Romani&quot;,&quot;ron&quot;:&quot;Romanian&quot;,&quot;roh&quot;:&quot;Romansh&quot;,&quot;rus&quot;:&quot;Russian&quot;,&quot;rue&quot;:&quot;Rusyn&quot;,&quot;smo&quot;:&quot;Samoan&quot;,&quot;sgs&quot;:&quot;Samogitian&quot;,&quot;sag&quot;:&quot;Sango&quot;,&quot;san&quot;:&quot;Sanskrit&quot;,&quot;sat&quot;:&quot;Santali&quot;,&quot;skr&quot;:&quot;Saraiki&quot;,&quot;srd&quot;:&quot;Sardinian&quot;,&quot;stq&quot;:&quot;Saterland Frisian&quot;,&quot;sco&quot;:&quot;Scots&quot;,&quot;gla&quot;:&quot;Scottish Gaelic&quot;,&quot;srp&quot;:&quot;Serbian&quot;,&quot;tsn&quot;:&quot;Setswana&quot;,&quot;crs&quot;:&quot;Seychellois Creole&quot;,&quot;wuu&quot;:&quot;Shanghainese&quot;,&quot;sna&quot;:&quot;Shona&quot;,&quot;shs&quot;:&quot;Shuswap&quot;,&quot;scn&quot;:&quot;Sicilian&quot;,&quot;szl&quot;:&quot;Silesian&quot;,&quot;sjn&quot;:&quot;Sindarin&quot;,&quot;snd&quot;:&quot;Sindhi&quot;,&quot;sin&quot;:&quot;Sinhala&quot;,&quot;slk&quot;:&quot;Slovak&quot;,&quot;slv&quot;:&quot;Slovenian&quot;,&quot;som&quot;:&quot;Somali&quot;,&quot;ajp&quot;:&quot;South Levantine Arabic&quot;,&quot;alt&quot;:&quot;Southern Altai&quot;,&quot;hax&quot;:&quot;Southern Haida&quot;,&quot;sdh&quot;:&quot;Southern Kurdish&quot;,&quot;sma&quot;:&quot;Southern Sami&quot;,&quot;sot&quot;:&quot;Southern Sotho&quot;,&quot;laa&quot;:&quot;Southern Subanen&quot;,&quot;diq&quot;:&quot;Southern Zaza (Dimli)&quot;,&quot;spa&quot;:&quot;Spanish&quot;,&quot;srn&quot;:&quot;Sranan Tongo&quot;,&quot;zgh&quot;:&quot;Standard Moroccan Tamazight&quot;,&quot;sux&quot;:&quot;Sumerian&quot;,&quot;sun&quot;:&quot;Sundanese&quot;,&quot;sva&quot;:&quot;Svan&quot;,&quot;swg&quot;:&quot;Swabian&quot;,&quot;swh&quot;:&quot;Swahili&quot;,&quot;ssw&quot;:&quot;Swazi&quot;,&quot;swe&quot;:&quot;Swedish&quot;,&quot;gsw&quot;:&quot;Swiss German&quot;,&quot;syl&quot;:&quot;Sylheti&quot;,&quot;syc&quot;:&quot;Syriac&quot;,&quot;shy&quot;:&quot;Tachawit&quot;,&quot;mvv&quot;:&quot;Tagal Murut&quot;,&quot;tgl&quot;:&quot;Tagalog&quot;,&quot;thv&quot;:&quot;Tahaggart Tamahaq&quot;,&quot;tah&quot;:&quot;Tahitian&quot;,&quot;tgk&quot;:&quot;Tajik&quot;,&quot;tzl&quot;:&quot;Talossan&quot;,&quot;tly&quot;:&quot;Talysh&quot;,&quot;tam&quot;:&quot;Tamil&quot;,&quot;rif&quot;:&quot;Tarifit&quot;,&quot;shi&quot;:&quot;Tashelhit&quot;,&quot;tat&quot;:&quot;Tatar&quot;,&quot;ttq&quot;:&quot;Tawallammat Tamajaq&quot;,&quot;tel&quot;:&quot;Telugu&quot;,&quot;tmw&quot;:&quot;Temuan&quot;,&quot;tet&quot;:&quot;Tetun&quot;,&quot;tha&quot;:&quot;Thai&quot;,&quot;bod&quot;:&quot;Tibetan&quot;,&quot;tig&quot;:&quot;Tigre&quot;,&quot;tir&quot;:&quot;Tigrinya&quot;,&quot;tpi&quot;:&quot;Tok Pisin&quot;,&quot;tkl&quot;:&quot;Tokelauan&quot;,&quot;tok&quot;:&quot;Toki Pona&quot;,&quot;toi&quot;:&quot;Tonga (Zambezi)&quot;,&quot;ton&quot;:&quot;Tongan&quot;,&quot;tso&quot;:&quot;Tsonga&quot;,&quot;tum&quot;:&quot;Tumbuka&quot;,&quot;tpn&quot;:&quot;Tupinamb\u00e1&quot;,&quot;tur&quot;:&quot;Turkish&quot;,&quot;tuk&quot;:&quot;Turkmen&quot;,&quot;tvl&quot;:&quot;Tuvaluan&quot;,&quot;tyv&quot;:&quot;Tuvinian&quot;,&quot;aoz&quot;:&quot;Uab Meto&quot;,&quot;udm&quot;:&quot;Udmurt&quot;,&quot;ukr&quot;:&quot;Ukrainian&quot;,&quot;umb&quot;:&quot;Umbundu&quot;,&quot;hsb&quot;:&quot;Upper Sorbian&quot;,&quot;urd&quot;:&quot;Urdu&quot;,&quot;urh&quot;:&quot;Urhobo&quot;,&quot;uig&quot;:&quot;Uyghur&quot;,&quot;uzb&quot;:&quot;Uzbek&quot;,&quot;vec&quot;:&quot;Venetian&quot;,&quot;vep&quot;:&quot;Veps&quot;,&quot;vie&quot;:&quot;Vietnamese&quot;,&quot;vol&quot;:&quot;Volap\u00fck&quot;,&quot;vro&quot;:&quot;V\u00f5ro&quot;,&quot;wln&quot;:&quot;Walloon&quot;,&quot;war&quot;:&quot;Waray&quot;,&quot;guc&quot;:&quot;Wayuu&quot;,&quot;cym&quot;:&quot;Welsh&quot;,&quot;gaz&quot;:&quot;West-Central Oromo&quot;,&quot;hyw&quot;:&quot;Western Armenian&quot;,&quot;wol&quot;:&quot;Wolof&quot;,&quot;xho&quot;:&quot;Xhosa&quot;,&quot;hsn&quot;:&quot;Xiang Chinese&quot;,&quot;sah&quot;:&quot;Yakut&quot;,&quot;yid&quot;:&quot;Yiddish&quot;,&quot;yor&quot;:&quot;Yoruba&quot;,&quot;yua&quot;:&quot;Yucatec Maya&quot;,&quot;zza&quot;:&quot;Zaza&quot;,&quot;zea&quot;:&quot;Zeelandic&quot;,&quot;zul&quot;:&quot;Zulu&quot;}"
+    selected-language="filters.to"
+    initial-selection=""
+    placeholder="Any language"
+    force-item-selection=""
+></language-dropdown>
+        </div>
+    </div>
+
+    <md-button type="submit" class="search-submit-button md-raised">
+        <md-icon>search</md-icon>
+    </md-button>
+</div>
+
+</form></md-toolbar>
+
+    <div class="announcement-container">
+            </div>
+
+    <!--  CONTENT -->
+    <div id="content">
+        <div class="container">
+                <h2>Page not found</h2>
+    <p>The requested address '<strong>/en/audio/download/6480882</strong>' was not found on this server.</p>
+
+        <!--
+            Quick fix to readjust the size of the container when
+            the main content is smaller than the annexe content.
+        -->
+        <div style="clear:both"></div>
+        </div>
+    </div>
+
+    <!--  FOOT -->
+    <div id="footer" layout="column" ng-cloak>
+
+    <div layout="row" layout-align="center center" flex layout-margin ng-controller="MenuController">
+        <md-button  class="" ng-click="showInterfaceLanguageSelection()">
+    <md-icon>language</md-icon> 
+    English</md-button>    </div>
+
+    <div layout="row" layout-xs="column" layout-align="space-between start">
+    <div class="category" flex-gt-xs>
+        <h3>Need some help?</h3>
+        <ul>
+            <li>
+                <a href="https://en.wiki.tatoeba.org/articles/show/quick-start">Quick Start Guide</a>            </li>
+            <li>
+                <a href="https://en.wiki.tatoeba.org/articles/show/main">Tatoeba Wiki</a>            </li>
+            <li>
+                <a href="https://en.wiki.tatoeba.org/articles/show/faq">FAQ</a>            </li>
+            <li>
+                <a href="/en/help">Help</a>            </li>
+        </ul>
+    </div>
+    
+    <div class="category" flex-gt-xs>
+                <h3>Developers</h3>
+        <ul>
+            <li>
+                <a href="/en/downloads">Downloads</a>            </li>
+            <li>
+                <a href="https://github.com/Tatoeba/tatoeba2" target="_blank">GitHub</a>            </li>
+            <li>
+                <a href="https://api.tatoeba.org" target="_blank">API</a>            </li>
+        </ul>
+    </div>
+    
+    <div class="category" flex-gt-xs>
+                <h3>About</h3>
+        <ul>
+            <li>
+                <a href="/en/about">What is Tatoeba?</a>            </li>
+            <li>
+                <a href="/en/contact">Contact us</a>            </li>
+            <li>
+                <a href="https://status.tatoeba.org">Status</a>            </li>
+            <li>
+                <a href="/en/terms_of_use">Terms of use</a>            </li>
+            <li>
+                <a href="http://blog.tatoeba.org/" target="_blank">Blog</a>            </li>
+            <li>
+                <a href="http://twitter.com/tatoeba_org" target="_blank">Twitter</a>            </li>
+            <li>
+                <a href="https://www.facebook.com/groups/129340017083187/" target="_blank">Facebook</a>            </li>
+        </ul>
+    </div>
+    </div>
+
+    <div layout="row" layout-align="center center" class="license">
+        <img alt="Creative Commons License" src="/img/cc-logo.svg" width="36" height="36"/>
+        <div class="text">
+            Our data is released under various Creative Commons licenses.<a href="/en/terms_of_use#section-6" class="more-info">More information</a>            <br/>
+            If you love this content, please consider a <a href=/en/donate>donation</a>.        </div>
+    </div>
+</div>
+<script src="/cache_js/layout.js?1784196489"></script><script src="/js/elements/login-dialog.ctrl.js?1784195531"></script><script type="text/ng-template" id="language-dropdown-template"><div class="language-dropdown-container">
+    <md-autocomplete
+        ng-cloak
+        md-select-on-focus
+        md-input-name="{{name}}"
+        md-input-id="{{inputId}}"
+        md-menu-class="language-dropdown"
+        md-selected-item="selectedLanguage"
+        md-selected-item-change="vm.onSelectedLanguageChange()"
+        md-search-text="vm.searchText"
+        md-search-text-change="vm.onSearchTextChange()"
+        md-items="language in vm.querySearch(vm.searchText)"
+        md-item-text="language.name"
+        md-min-length="1-+(vm.hasSuggestions||vm.showAll)"
+        md-autoselect="vm.autoselect"
+        ng-blur="vm.onBlur()"
+        ng-focus="vm.onFocus($event)"
+        md-require-match="true"
+        md-no-cache="vm.searchText == ''"
+        placeholder="{{placeholder}}">
+        <md-item-template>
+           <svg class="language-icon" ng-if="vm.hasLanguageIcon(language.code)">
+               <use ng-attr-xlink:href="{{vm.getLanguageIconSpriteUrl(language.code)}}"
+                    xlink:href="" />
+           </svg>
+
+           <span md-highlight-text="vm.searchText"
+                 md-highlight-flags="ig"
+                 ng-class="{'priority-language': language.isPriority}">{{language.name}}</span>
+        </md-item-template>
+        <md-not-found>
+            No language found.            <md-button class="md-primary"
+                       ng-show="!vm.showAll"
+                       ng-click="vm.showAll = true; vm.searchText = ''">
+                <md-icon ng-cloak>keyboard_arrow_left</md-icon>
+                                Show all            </md-button>
+        </md-not-found>
+    </md-autocomplete>
+    <input type="hidden" name="{{name}}" value="{{selectedLanguage.code}}" autocomplete="off">
+</div>
+</script></body>
+</html>

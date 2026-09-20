@@ -41,13 +41,30 @@ English translation, and **1,784 with recorded audio** by a human speaker
 (user `cantonesespoken`). Sentences are CC BY 2.0 FR; the audio is CC BY 4.0.
 Each sentence keeps its id, so it can be credited and linked.
 
+## The word list past the corpus
+
+**rime-cantonese**, CanCLID. CC BY 4.0. https://github.com/rime/rime-cantonese
+Two files are used: `essay-cantonese.txt`, a frequency list of written
+Cantonese (266,870 entries), and `jyut6ping3.words.dict.yaml` /
+`jyut6ping3.chars.dict.yaml`, a Jyutping lexicon (103,090 and 34,375 lines).
+
+It does two jobs. It confirms pronunciations independently of the dictionaries —
+a line with no percentage is the word's main reading, one with a percentage is a
+minority reading, which is how 搵 is taught as wan2 "to look for" and not as the
+rare man5 "to wipe away tears". And it carries the word list past the 6,399
+words HKCanCor happened to record, which is well short of the 4,000–6,000 a
+learner needs to hold a conversation.
+
+*Limitation, stated plainly:* tier 2 is **written** Cantonese frequency, not
+speech, and Hong Kong writing mixes in standard Chinese. Words built from
+Mandarin function characters (就是, 他們) and swear words are left out, and the
+app labels which tier a word comes from.
+
 ## Considered, not yet used
 
 - **words.hk (粵典)** — a proper Cantonese-to-Cantonese dictionary under a
   Non-Commercial Open Data Licence (attribution, the 特別鳴謝 list and a link
   required; no commercial use). Its definitions are better than CC-CEDICT's for
   everyday words. Fits this app, which is personal and not for sale.
-- **rime-cantonese** (CC BY 4.0) — Jyutping lexicons, useful for pronouncing
-  words the corpus doesn't cover. https://github.com/rime/rime-cantonese
 - **Common Voice zh-HK** (CC0) — more recorded speech, many speakers, which is
   what tone training wants; a large download.
