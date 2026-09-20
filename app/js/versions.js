@@ -6,6 +6,14 @@
 
 export default [
   {
+    v: '1.6.0', date: '2026-09-20',
+    what: [
+      'Removed sentences that should never have been taught. The listening questions come from Tatoeba, a general corpus of whatever people have contributed, and nothing in the build was reading them for what they SAY — only for their length, their recording and which characters they use. So "You might as well go kill yourself" passed every check there was. 533 sentences about death, violence, illness, sex, politics and religion are now set aside before anything else looks at them, and the build fails if one reaches the deck.',
+      'Questions whose answers are Chinese words now show the reading under each one — 唔該 m4 goi1 against 多謝 do1 ze6 — instead of two characters and nothing else. Same for the gap-filling sentences and the pieces you put in order. The build now fails if any Chinese button has no reading beside it.',
+      'A sentence is no longer offered until you know more of it. The old rule let one through if three fifths of its characters were familiar, which is how a sentence two-fifths unknown turned up in a second-ever round. It now wants four fifths known AND at most two new characters, so the unknown part is small rather than merely proportionate.',
+    ],
+  },
+  {
     v: '1.5.1', date: '2026-09-20',
     what: [
       'Fixed the app scrolling sideways. The row of dashes at the top of a round — one per question — was sized when a round was ten questions: eighteen pixels each came to 216px, which fits a phone. A round became twenty-five and can be set to forty, which is 546px and 870px, so the whole page could be dragged left and every screen looked half cut off. The dashes now share whatever width they are given.',

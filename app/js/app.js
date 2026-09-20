@@ -559,11 +559,20 @@ const prompt = (text) => h('p', { class: 'prompt' }, text, sayBtn(text));
 
 // Four buttons, the right answer in a seeded-random place, and no colour-only
 // feedback: right and wrong are marked with a word and a symbol as well.
-function choices(options, answer, onPick) {
+// `reads` maps a Chinese option to its Jyutping. Without it a question whose
+// ANSWERS are Chinese words shows two buttons reading 唔該 and 多謝 and nothing
+// else, which to a learner who cannot read characters is a coin toss between
+// two pictures (Robert, 20 Sept: "I can't read Chinese yet. The questions like
+// this don't work.").
+function choices(options, answer, onPick, { reads = null } = {}) {
   const wrap = h('div', { class: 'choices' });
   const all = shuffle([answer, ...options]);
+  const label = (o) => {
+    const j = reads && reads[o];
+    return j ? [h('span', { class: 'han' }, o), h('span', { class: 'jyut' }, j)] : [o];
+  };
   for (const o of all) {
-    const b = h('button', { class: 'choice', type: 'button', onclick: () => {
+    const b = h('button', { class: 'choice' + (reads && reads[o] ? ' withread' : ''), type: 'button', onclick: () => {
       if (wrap.classList.contains('locked')) return;
       wrap.classList.add('locked');
       const ok = o === answer;
@@ -571,7 +580,7 @@ function choices(options, answer, onPick) {
       b.append(h('span', { class: 'mark' }, ok ? '✓' : '✗'));
       if (!ok) for (const other of wrap.children) if (other.dataset.v === answer) { other.classList.add('right'); other.append(h('span', { class: 'mark' }, '✓')); }
       onPick(ok);
-    } }, o);
+    } }, ...label(o));
     b.dataset.v = o;
     wrap.append(b);
   }
@@ -738,8 +747,8 @@ function notePick(it, ctx) {
         h('p', {}, note.plain, sayBtn(note.plain)),
         note.watch ? h('p', { class: 'watch' }, note.watch) : null,
         h('p', { class: 'evidence' }, 'The words and their readings come from the sources; this note about when to use which is mine.')) : null,
-    ], { ...ctx, ok, answer: w.w }));
-  }));
+    ], { ...ctx, ok, answer: `${w.w} (${w.j})` }));
+  }, { reads: it.reads }));
   return card;
 }
 
@@ -870,6 +879,10 @@ function grammarPick(it, ctx) {
   const card = h('section', { class: 'card q' },
     prompt('Which word goes in the gap?'),
     h('p', { class: 'han big' }, blanked),
+    // The gap is in a Chinese sentence, so without the reading line the
+    // question is a picture with a hole in it. The gap keeps its place in the
+    // reading, so you can hear what goes either side of the missing word.
+    it.blanked ? h('p', { class: 'jyut' }, it.blanked) : null,
     h('p', { class: 'gloss' }, it.eng));
   card.append(choices(it.options, it.answer, (ok) => {
     ctx.onAnswer(ok);
@@ -878,8 +891,8 @@ function grammarPick(it, ctx) {
       sentenceBlock(it.text, it.jyut, it.eng),
       g ? h('div', { class: 'gpoint' }, h('h3', {}, g.title), h('p', {}, g.plain), g.watch ? h('p', { class: 'watch' }, g.watch) : null) : null,
       evidenceLine({ sentence: it.sid }),
-    ], { ...ctx, ok, answer: it.answer }));
-  }));
+    ], { ...ctx, ok, answer: it.reads?.[it.answer] ? `${it.answer} (${it.reads[it.answer]})` : it.answer }));
+  }, { reads: it.reads }));
   return card;
 }
 
@@ -902,6 +915,10 @@ function grammarBuild(it, ctx) {
       evidenceLine({ sentence: it.sid }),
     ], ctx));
   };
+  // Each piece carries its reading. Arranging six Chinese chunks you cannot
+  // read is not a grammar question, it is a jigsaw (Robert, 20 Sept).
+  const readOf = (p) => it.pieceReads?.[it.pieces.indexOf(p)] || null;
+  const face = (p) => { const j = readOf(p); return j ? [h('span', { class: 'han' }, p), h('span', { class: 'jyut' }, j)] : [p]; };
   for (const piece of shuffle(it.pieces)) {
     const b = h('button', { class: 'piece', type: 'button', onclick: () => {
       if (b.disabled) return;
@@ -912,10 +929,10 @@ function grammarBuild(it, ctx) {
         const i = chosen.lastIndexOf(piece);
         if (i >= 0) chosen.splice(i, 1);
         back0.remove(); b.disabled = false;
-      } }, piece);
+      } }, ...face(piece));
       line.append(back0);
       check();
-    } }, piece);
+    } }, ...face(piece));
     tray.append(b);
   }
   card.append(line, tray);

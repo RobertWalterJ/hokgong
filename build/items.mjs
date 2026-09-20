@@ -19,7 +19,20 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const read = (f) => JSON.parse(readFileSync(join(ROOT, f), 'utf8'));
 const load = async (f) => (await import(pathToFileURL(join(ROOT, f)).href)).default;
 const LEX = read('corpus/lexicon.json');
-const SENT = read('corpus/sentences.json');
+// Every sentence the app can show is read for what it SAYS before anything
+// else looks at it. Tatoeba is a general corpus and was never assembled for a
+// beginner; nothing here was checking the content until a listening question
+// asked Robert to recognise "You might as well go kill yourself".
+const { unsuitable } = await import(pathToFileURL(join(ROOT, 'content', 'unsuitable.mjs')).href);
+const RAW_SENT = read('corpus/sentences.json');
+const dropped = new Map();
+const SENT = RAW_SENT.filter((s) => {
+  const why = s.eng ? unsuitable(s.eng, s.text) : null;
+  if (why) { dropped.set(why, (dropped.get(why) || 0) + 1); return false; }
+  return true;
+});
+console.log(`sentences: ${SENT.length.toLocaleString()} kept of ${RAW_SENT.length.toLocaleString()}; ${(RAW_SENT.length - SENT.length).toLocaleString()} set aside as unsuitable`);
+for (const [why, n] of [...dropped].sort((a, b) => b[1] - a[1])) console.log(`  ${String(n).padStart(5)}  ${why}`);
 const COVERAGE = read('corpus/coverage.json');
 const GRAMMAR = await load('content/grammar.mjs');
 const CONTEXT = await load('content/context.mjs');
@@ -303,15 +316,25 @@ for (const g of GRAMMAR) {
   if (g.contrast) {
     const marker = g.match.length <= 2 ? g.match : null;
     const ex = examples6.find((s) => marker && s.text.includes(marker));
+    const opts = ex ? [g.contrast, '過', '住'].filter((x) => x !== marker).slice(0, 3) : [];
     if (ex) items.push({ id: `gp/${g.id}/${ex.id}`, k: 'grammar-pick', gid: g.id, sid: ex.id, text: ex.text, jyut: romanise(ex.text), eng: ex.eng, audio: ex.audio ? 1 : 0,
-      blank: marker, answer: marker, options: [g.contrast, '過', '住'].filter((x) => x !== marker).slice(0, 3), level: 4 });
+      blank: marker, answer: marker, options: opts,
+      // The gap is in a Chinese sentence and the options are Chinese markers,
+      // so without these the whole question is a picture. `blanked` is the
+      // reading line with the gap kept in its place, so the learner can see
+      // WHERE the missing word goes and hear what surrounds it.
+      blanked: romanise(ex.text.slice(0, ex.text.indexOf(marker))) + ' ___ ' + romanise(ex.text.slice(ex.text.indexOf(marker) + marker.length)),
+      reads: Object.fromEntries([marker, ...opts].map((x) => [x, romanise(x)])), level: 4 });
   }
   // Build the sentence: the pieces, shuffled. A production test that doesn't
   // ask you to type Chinese.
   for (const s of examples6.filter((x) => chars(x.text) <= 10).slice(0, 2)) {
     const pieces = seg(s.text.replace(/[。？！，]/g, ''));
     if (pieces.length >= 3 && pieces.length <= 7) {
-      items.push({ id: `gb/${g.id}/${s.id}`, k: 'grammar-build', gid: g.id, sid: s.id, text: s.text, jyut: romanise(s.text), eng: s.eng, audio: s.audio ? 1 : 0, pieces, level: 4 });
+      // Same again: the pieces to be put in order are Chinese, so each one
+      // carries its reading or the question cannot be answered by someone who
+      // reads only the romanisation.
+      items.push({ id: `gb/${g.id}/${s.id}`, k: 'grammar-build', gid: g.id, sid: s.id, text: s.text, jyut: romanise(s.text), eng: s.eng, audio: s.audio ? 1 : 0, pieces, pieceReads: pieces.map(romanise), level: 4 });
     }
   }
 }
@@ -380,6 +403,11 @@ for (const n of NOTES) {
   items.push({
     id: `np/${n.id}`, k: 'note-pick', nid: n.id,
     prompt: annotate(n.ask.prompt), i: answer, options: others.map((i) => chosen[i].w),
+    // The answers to this one ARE Chinese words, so the buttons read 唔該 and
+    // 多謝 and nothing else. Robert cannot read characters — "I can't read
+    // Chinese yet, the questions like this don't work" — so each option
+    // carries its reading, which is the part he can actually tell apart.
+    reads: Object.fromEntries([answer, ...others].map((i) => [chosen[i].w, spaced(chosen[i].jyut)])),
     level: 3,
   });
 }
@@ -453,11 +481,28 @@ const charsByStage = [];
 // EVERY tone question was locked until all ten stages were passed — 590
 // questions a learner would not see for months, including the whole of the
 // listening skill (found by the variety audit).
+//
+// The threshold was 0.6, and 你唔好去死 cleared it exactly — 你 唔 好 are taught
+// in stage one, 去 and 死 are not, which is three characters out of five. So a
+// sentence two-fifths unknown was offered in a learner's second-ever round.
+// Robert: "Is this question scaled or gated to my current level of learning?"
+// It was, technically, and the gate was set too low to mean anything.
+//
+// Nation's coverage work puts comfortable listening at about 95% of the words
+// known, and 80% is where comprehension starts to break down badly. A four-
+// option question does not need 95%, but it does need more than three fifths,
+// and it needs the unknown part to be SMALL rather than merely proportionate:
+// two new characters in a five-character sentence is a different thing from
+// two in a twenty-character one.
+const KNOWN_ENOUGH = 0.8;
+const NEW_AT_MOST = 2;
 const stageForText = (text) => {
   const cs = [...text.replace(/[^㐀-鿿]/g, '')];
   if (!cs.length) return undefined;
   for (const [n, set] of charsByStage.entries()) {
-    if (cs.filter((c) => set.has(c)).length / cs.length >= 0.6) return n;
+    const unknown = cs.filter((c) => !set.has(c)).length;
+    if (unknown > NEW_AT_MOST) continue;
+    if ((cs.length - unknown) / cs.length >= KNOWN_ENOUGH) return n;
   }
   return undefined;               // still out of reach: it opens after the course
 };

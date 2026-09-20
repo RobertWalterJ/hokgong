@@ -314,6 +314,13 @@ html.playing .play { border-color: var(--accent); background: var(--tint); }
 .choice.right { border-color: var(--right); background: var(--right-bg); }
 .choice.wrong { border-color: var(--wrong); background: var(--wrong-bg); }
 .choice .mark { position: absolute; right: var(--s4); top: 50%; transform: translateY(-50%); font-size: 1.1rem; }
+/* When the answer itself is a Chinese word, the button is two lines: the
+   characters, and the reading under them. Without the second line the choice
+   is between two pictures. */
+.choice.withread { display: flex; flex-direction: column; gap: 2px; align-items: center; }
+.choice.withread .han { font-size: 1.25rem; line-height: 1.3; }
+.choice.withread .jyut, .piece .jyut { color: var(--accent); font-family: var(--ui); font-size: .85rem; letter-spacing: .01em; }
+.piece { display: inline-flex; flex-direction: column; gap: 1px; align-items: center; line-height: 1.25; }
 .choice.right .mark { color: var(--right); }
 .choice.wrong .mark { color: var(--wrong); }
 .choice.tone { display: flex; align-items: baseline; gap: var(--s3); }

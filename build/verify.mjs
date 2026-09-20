@@ -255,6 +255,53 @@ for (const f of have.size ? readdirSync(audioDir) : []) {
 }
 check(notAudio === 0, 'files in app/audio that are not mp3s', `${notAudio} files`);
 
+// ── 8b. nothing the app can show is unfit to teach ───────────────────────
+// Every other check in this file asks whether the deck is FAITHFUL to its
+// source. None asked whether what the source says should be taught to a
+// beginner — so "You might as well go kill yourself", a real Tatoeba sentence
+// quoted exactly, with a real recording by a real person, passed every one of
+// them and reached Robert in his second-ever round (20 Sept 2026).
+//
+// This one reads the content. It covers every place a sentence can surface.
+const { unsuitable } = await import(pathToFileURL(join(ROOT, 'content', 'unsuitable.mjs')).href);
+let unfit = 0;
+const unfitEg = [];
+const scan = (eng, text, where) => {
+  checks++;
+  const why = eng ? unsuitable(eng, text || '') : null;
+  if (!why) return;
+  unfit++;
+  if (unfitEg.length < 5) unfitEg.push(`${where} "${String(eng).slice(0, 44)}" (${why})`);
+};
+// Sentences only. A single word's meaning is not a sentence: 死 is an ordinary
+// Cantonese word and "to die" is what it means, so a vocabulary list that
+// teaches it is doing its job. What went wrong was a SENTENCE built on it.
+const SENTENCE_KINDS = new Set(['sentence-listen', 'grammar-mean', 'grammar-pick', 'grammar-build']);
+for (const it of DECK.items) {
+  if (!SENTENCE_KINDS.has(it.k)) continue;
+  if (it.eng) scan(it.eng, it.text, it.k);
+  for (const o of it.options || []) if (typeof o === 'string' && /[a-z]/i.test(o)) scan(o, '', it.k + ' option');
+}
+for (const list of Object.values(DECK.examples)) for (const ex of [].concat(list)) scan(ex.e, ex.t, 'example');
+for (const g of DECK.grammar) for (const ex of g.examples || []) scan(ex.eng, ex.text, 'grammar example');
+check(unfit === 0, 'sentences unfit to teach a beginner reached the deck', `${unfit} — e.g. ${unfitEg.join(' | ')}`);
+
+// ── 8c. a Chinese option always carries its reading ──────────────────────
+// A question whose ANSWERS are Chinese words is unanswerable to someone who
+// reads only the romanisation: two buttons saying 唔該 and 多謝 are two
+// pictures (Robert, 20 Sept: "I can't read Chinese yet").
+const hanOnly = /^[㐀-䶿一-鿿豈-﫿]+$/;
+for (const it of DECK.items) {
+  for (const o of it.options || []) {
+    if (typeof o !== 'string' || !hanOnly.test(o)) continue;
+    check(!!it.reads?.[o], 'a Chinese answer button has no reading beside it', `${it.id}: ${o}`);
+  }
+  for (const [n, p] of (it.pieces || []).entries()) {
+    if (!hanOnly.test(p)) continue;
+    check(!!it.pieceReads?.[n], 'a Chinese piece to arrange has no reading', `${it.id}: ${p}`);
+  }
+}
+
 // ── 9. the deck is big enough to be worth playing ────────────────────────
 check(DECK.words.length >= 4000, 'the word list is short of a conversational vocabulary', `${DECK.words.length} words`);
 check(DECK.items.filter((i) => i.k === 'sentence-listen').length >= 100, 'too little listening practice', '');
