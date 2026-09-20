@@ -136,6 +136,49 @@ h1, h2, h3 { font-weight: 600; letter-spacing: -.011em; }
 .chev { display: inline-grid; place-items: center; color: var(--muted); }
 .chev svg { width: 18px; height: 18px; }
 
+
+/* ── the banner ───────────────────────────────────────────────────────
+   The same shape as the other apps: a soft band at the head of the page,
+   faint text behind the wordmark, and a strip that says where you are.
+   The undertext has its OWN band and fades out before the wordmark
+   starts — text over text is the worst case for a dyslexic reader. */
+.bar.quiet { border: 0; margin-bottom: 0; }
+.bar.quiet::after { display: none; }
+.bar .spacer { flex: 1; }
+.hero {
+  position: relative; overflow: hidden; margin: 0 calc(var(--s4) * -1) var(--s5);
+  padding: var(--s2) var(--s5) var(--s5);
+  background: linear-gradient(180deg, var(--tint), transparent 82%);
+  text-align: center;
+}
+.undertext {
+  height: 78px; overflow: hidden; margin: 0 calc(var(--s5) * -1) calc(var(--s3) * -1);
+  pointer-events: none; text-align: left; user-select: none;
+  -webkit-mask-image: linear-gradient(180deg, #000 25%, transparent);
+  mask-image: linear-gradient(180deg, #000 25%, transparent);
+}
+.undertext p {
+  margin: 0; white-space: nowrap; font-family: var(--han);
+  font-size: 1.5rem; line-height: 1.35; color: var(--accent); opacity: .16;
+}
+.undertext p:nth-child(2) { margin-left: -1.4em; }
+.undertext p:nth-child(3) { margin-left: .9em; }
+.wordmark.big { justify-content: center; gap: var(--s3); margin-top: var(--s2); }
+.wordmark.big .han { font-size: 2.1rem; letter-spacing: .06em; }
+.wordmark.big .name { font-size: 1.15rem; letter-spacing: .01em; }
+.tagline { color: var(--muted); font-size: .95rem; margin: var(--s1) 0 var(--s4); }
+.stagerail { display: flex; gap: 5px; justify-content: center; margin-bottom: var(--s3); }
+.pip { width: 16px; height: 4px; border-radius: 2px; background: var(--line); }
+.pip.done { background: var(--accent); opacity: .55; }
+.pip.here { background: var(--accent); width: 26px; }
+.railline {
+  display: inline-flex; align-items: center; gap: var(--s1); cursor: pointer;
+  color: var(--ink); font-size: .92rem; font-weight: 600; padding: var(--s1) var(--s2);
+  border-radius: 999px;
+}
+.railline:hover { background: var(--tint); color: var(--accent); }
+.railline .chev svg { width: 16px; height: 16px; }
+
 /* ── sections ─────────────────────────────────────────────────────────
    A section is space and, where two things must be told apart, one
    hairline. A filled sheet is kept for the few places that earn it. */
@@ -172,7 +215,7 @@ details.more > :not(summary) { animation: rise .2s var(--ease); }
 .rows { display: flex; flex-direction: column; margin: var(--s6) 0 var(--s7); }
 .row {
   display: flex; align-items: center; gap: var(--s3); width: 100%; text-align: left;
-  padding: var(--s4) var(--s2); cursor: pointer; min-height: 56px;
+  padding: var(--s3) var(--s2); cursor: pointer; min-height: 52px;
   border-bottom: 1px solid var(--line);
   transition: padding-left .16s var(--ease), color .16s var(--ease);
 }

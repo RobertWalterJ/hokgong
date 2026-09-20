@@ -202,6 +202,51 @@ const phraseOfDay = () => {
   return pool[hash % pool.length];
 };
 
+// ── the banner ───────────────────────────────────────────────────────────
+// The same shape as Palimpsest's: a soft band at the head of the page with
+// faint text behind the wordmark and a strip that says where you are. Here
+// the faint text is YOUR Cantonese — the words you most recently answered
+// right, or the stage's words before you have any — so the banner is about
+// your journey rather than decoration.
+//
+// The undertext never sits behind anything you have to read: it has its own
+// band that fades out before the wordmark starts. Text over text is the worst
+// case for a dyslexic reader.
+function hero() {
+  const d = D();
+  const c = course();
+  // Recently answered right, newest first; the stage's own words if there is
+  // nothing yet.
+  const mine = d.items
+    .filter((it) => it.i != null)
+    .map((it) => ({ i: it.i, c: State.card(it.id) }))
+    .filter((x) => x.c && x.c.ok && x.c.st !== 'new')
+    .sort((a, b) => (b.c.last || 0) - (a.c.last || 0))
+    .map((x) => d.words[x.i].w);
+  const seed = [...new Set(mine)];
+  const fill = (c.done ? d.words.slice(0, 60).map((w) => w.w) : c.stages[c.current].words.map((i) => d.words[i]?.w).filter(Boolean));
+  const pool = [...seed, ...fill.filter((w) => !seed.includes(w))];
+  const line = (from, n) => pool.slice(from, from + n).join('　') || '學講';
+  const under = h('div', { class: 'undertext', 'aria-hidden': 'true' },
+    h('p', {}, line(0, 6)), h('p', {}, line(6, 6)), h('p', {}, line(12, 6)));
+
+  // Ten stages as a rail: filled behind you, ringed where you are.
+  const rail = h('div', { class: 'stagerail', role: 'img', 'aria-label': c.done ? 'All ten stages passed' : `Stage ${c.current + 1} of ${c.stages.length}` },
+    ...c.stages.map((st, n) => h('span', { class: 'pip' + (n < c.current ? ' done' : n === c.current ? ' here' : '') })));
+
+  return h('header', { class: 'hero' },
+    under,
+    h('div', { class: 'wordmark big' },
+      h('span', { class: 'han' }, '學講'),
+      h('span', { class: 'name' }, 'Hok Gong')),
+    h('p', { class: 'tagline' }, 'Learning to talk.'),
+    rail,
+    h('button', { class: 'railline', type: 'button', onclick: () => show('course', browseScreens.course) },
+      c.done ? 'All ten stages passed — the whole list is open'
+        : `Stage ${c.current + 1} of ${c.stages.length} · ${c.stages[c.current].title}`,
+      h('span', { class: 'chev', html: ICON.chev })));
+}
+
 // ── home ─────────────────────────────────────────────────────────────────
 // One journey, in one order: where you are, the one thing to do, then
 // everything else. The first version opened with "Nothing due · 18 new" above
@@ -241,10 +286,15 @@ function homeScreen() {
   const link = (label, note, to, render) => h('button', { class: 'row', type: 'button', onclick: () => show(to, render) },
     h('div', {}, h('div', { class: 'rlabel' }, label), h('div', { class: 'note' }, note)), h('span', { class: 'chev', html: ICON.chev }));
 
+  // Home is now four things: the banner that says where you are, the one
+  // button, three ways on, and a word to look at. The stage detail that used
+  // to sit here — what it will let you do, the count towards the gate, why
+  // these words — is one tap away on The course, where a learner goes when
+  // they want it rather than every time they open the app.
   return [
-    header('', { home: true }),
+    h('div', { class: 'bar quiet' }, h('span', { class: 'spacer' }), iconBtn('settings', 'Settings', settingsSheet)),
+    hero(),
     h('main', { class: 'home' },
-      // 1. The one thing to do.
       h('section', { class: 'today' },
         h('p', { class: 'lead' }, lead),
         under ? h('p', { class: 'note centre under' }, under) : null,
@@ -253,23 +303,11 @@ function homeScreen() {
         !due && !room && fresh ? h('button', { class: 'link', type: 'button', onclick: () => startRound({ beyondDaily: true }) }, 'Learn more anyway') : null,
         met >= 12 ? h('button', { class: 'link', type: 'button', onclick: () => startRound({ practice: true }) }, 'Recall test') : null,
         run > 1 ? h('p', { class: 'note centre' }, `${run} days in a row.`) : null),
-      // 2. Where that sits in the course.
-      stageCard(),
-      // 3. Anything the phone cannot do, said once.
       canPlayWord() && haveRecordings() ? null : noVoiceCard(),
-      // 4. Everything else, in the order it is worth reaching for.
       h('nav', { class: 'rows' },
-        link('The course', c.done ? 'All ten stages behind you' : `Stage ${c.current + 1} of ${c.stages.length} — what is open, and what is next`, 'course', browseScreens.course),
-        link('Progress', 'What you can answer, and how that has moved', 'progress', browseScreens.progress),
-        link(t('words').text, `${d.words.length.toLocaleString()} words, in the order people say them`, 'words', browseScreens.words),
-        link(t('tones').text, 'The six tones, and whether yours land', 'tones', browseScreens.tones),
-        link(t('grammar').text, `${d.grammar.length} patterns, each with real examples`, 'grammar', browseScreens.grammar),
-        link('Where the words come from', `${d.context.length} short cards: Cantonese in Canada, and at the table`, 'context', browseScreens.context),
-        link('About', 'Sources, licences, and what this app cannot do', 'about', browseScreens.about)),
-      // 5. A word to look at, last — and only once there is a stage to draw it
-      //    from. It used to autoplay a recording at a learner who had not
-      //    asked for one, and to pick a word thousands of places away from
-      //    anything they were learning.
+        link('The course', c.done ? 'All ten stages behind you' : 'The ten stages, and what each one is for', 'course', browseScreens.course),
+        link('Progress', 'What you can answer, and how it has moved', 'progress', browseScreens.progress),
+        link('Look things up', 'Words, tones, grammar, sources', 'lookup', browseScreens.lookup)),
       wordToday(),
     ),
   ];

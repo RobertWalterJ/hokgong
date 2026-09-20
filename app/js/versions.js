@@ -6,6 +6,15 @@
 
 export default [
   {
+    v: '1.3.0', date: '2026-09-20',
+    what: [
+      'A banner at the head of the home screen, like the other apps have: the wordmark over your own Cantonese, faint — the words you most recently answered right, or the stage’s words before you have any.',
+      'A rail of ten pips under it showing which stage you are on, and one line naming it that opens the course.',
+      'Home simplified to four things: the banner, one button, three ways on, and a word to look at. The stage detail moved to The course, where you go when you want it.',
+      'Words, tones, grammar and sources folded behind one entry, Look things up — six equal-looking choices had made the one thing worth doing look optional.',
+    ],
+  },
+  {
     v: '1.2.0', date: '2026-09-20',
     what: [
       'A new palette: washed pink paper, pastel yellow and pastel blue washes, and one vibrant red that cuts through them. Dark mode is the inverse rather than a dimming — off-black with a plum cast, off-white type, and pastels that glow instead of pressing.',

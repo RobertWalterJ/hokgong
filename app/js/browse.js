@@ -225,6 +225,22 @@ function paceCard(k) {
   );
 }
 
+// ── look things up ───────────────────────────────────────────────────────
+// The reference shelf, behind one door. Home used to list all six of these,
+// which turned one thing worth doing into six equal-looking choices.
+function lookupScreen() {
+  const d = D();
+  const link = (label, note, to, render) => h('button', { class: 'row', type: 'button', onclick: () => show(to, render) },
+    h('div', {}, h('div', { class: 'rlabel' }, label), h('div', { class: 'note' }, note)), h('span', { class: 'chev', html: ICON.chev }));
+  return [header('Look things up'), h('main', {},
+    h('nav', { class: 'rows' },
+      link('Words', `${d.words.length.toLocaleString()} words, in the order people say them`, 'words', wordsScreen),
+      link('Tones', 'The six tones, and whether yours land', 'tones', tonesScreen),
+      link('Grammar', `${d.grammar.length} patterns, each with real examples`, 'grammar', grammarScreen),
+      link('Where the words come from', `${d.context.length} short cards: Cantonese in Canada, and at the table`, 'context', contextScreen),
+      link('About', 'Sources, licences, and what this app cannot do', 'about', aboutScreen)))];
+}
+
 // ── the course ───────────────────────────────────────────────────────────
 // The whole shape of it, open to read at any time. A learner who can see the
 // map is not being gated for the sake of it; they can see what the gate is for.
@@ -410,4 +426,4 @@ function aboutScreen() {
   )];
 }
 
-export const browseScreens = { course: courseScreen, words: wordsScreen, tones: tonesScreen, grammar: grammarScreen, context: contextScreen, progress: progressScreen, about: aboutScreen };
+export const browseScreens = { course: courseScreen, lookup: lookupScreen, words: wordsScreen, tones: tonesScreen, grammar: grammarScreen, context: contextScreen, progress: progressScreen, about: aboutScreen };
