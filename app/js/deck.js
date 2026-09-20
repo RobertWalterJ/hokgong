@@ -62,3 +62,19 @@ export function indexDeck() {
 }
 
 export const allIds = () => deck.items.map((it) => it.id);
+
+// Questions that need a Cantonese voice to be answerable at all. Without one,
+// "which of these did you hear?" plays nothing and cannot be answered, and
+// "what does this mean?" for a spoken word collapses into the reading question
+// that already exists. Both are set aside rather than asked — and the home
+// screen says so, with how to add a voice.
+const NEEDS_VOICE = new Set(['tone-pair', 'word-listen']);
+// And these need a recording: a sentence nobody can hear is not a listening
+// question, it is a blank.
+const NEEDS_RECORDING = new Set(['sentence-listen']);
+const askable = (it, hasVoice, hasRecordings) =>
+  (hasVoice || !NEEDS_VOICE.has(it.k)) && (hasRecordings || !NEEDS_RECORDING.has(it.k));
+export const askableIds = (hasVoice, hasRecordings = true) =>
+  deck.items.filter((it) => askable(it, hasVoice, hasRecordings)).map((it) => it.id);
+export const setAsideCount = (hasVoice, hasRecordings = true) =>
+  deck.items.filter((it) => !askable(it, hasVoice, hasRecordings)).length;

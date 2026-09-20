@@ -34,6 +34,7 @@ export const ICON = {
   settings: P('<circle cx="12" cy="12" r="3"/><path d="M19.4 13a7.6 7.6 0 0 0 0-2l2-1.5-2-3.4-2.3.9a7.6 7.6 0 0 0-1.7-1L15 2.5H9.9l-.4 2.5a7.6 7.6 0 0 0-1.7 1l-2.3-.9-2 3.4L5.5 11a7.6 7.6 0 0 0 0 2l-2 1.5 2 3.4 2.3-.9a7.6 7.6 0 0 0 1.7 1l.4 2.5H15l.4-2.5a7.6 7.6 0 0 0 1.7-1l2.3.9 2-3.4Z"/>'),
   aa: P('<path d="M3 19l5-14 5 14M5 14h6"/><path d="M15 19l3.5-9 3.5 9M16.2 16h4.6"/>'),
   focus: P('<rect x="3" y="9" width="18" height="6" rx="1.5"/><path d="M3 5h18M3 19h18" opacity=".4"/>'),
+  rise: '<svg viewBox="0 0 26 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M2 10 C 9 10, 15 7, 24 2"/></svg>',
   book: P('<path d="M2 5h7a3 3 0 0 1 3 3v12a2 2 0 0 0-2-2H2zM22 5h-7a3 3 0 0 0-3 3v12a2 2 0 0 1 2-2h8z"/>'),
 };
 
@@ -106,3 +107,13 @@ window.addEventListener('popstate', (e) => {
   if (render) { current = { name: st.name, render, arg: st.arg }; paint(); }
 });
 export const back = () => { try { history.back(); } catch { /* ignore */ } };
+
+// A disclosure: the plain fact stays in the open, the detail folds away one
+// tap behind a label. Used for the things the app must say but should not
+// open with — how to install a Cantonese voice, what a number does not mean.
+export function disclosure(label, ...kids) {
+  return h('details', { class: 'more' }, h('summary', {}, label), ...kids.flat(Infinity).filter(Boolean));
+}
+
+export const currentScreen = () => current?.name || null;
+export const repaint = () => { if (current) paint(); };

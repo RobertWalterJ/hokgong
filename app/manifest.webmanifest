@@ -1,0 +1,17 @@
+{
+  "name": "Hok Gong — learning to talk",
+  "short_name": "Hok Gong",
+  "description": "A Cantonese app built on recorded speech: spaced retrieval, tones you can hear and say, and progress you can check.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "lang": "en-CA",
+  "background_color": "#FBF7F0",
+  "theme_color": "#FBF7F0",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

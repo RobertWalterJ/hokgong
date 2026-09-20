@@ -227,6 +227,36 @@ const context = CONTEXT.map((c) => {
   return { ...c, found };
 }).filter((c) => !c.words || c.found.length >= 3);
 
+// ── the order things are taught in ───────────────────────────────────────
+// The scheduler introduces new questions in deck order, so deck order IS the
+// syllabus. Left as built, the deck taught six thousand words before it ever
+// mentioned a tone or a grammar point — the scheduler simulation played 120
+// days and never once reached either.
+//
+// So each item gets a place in a teaching sequence:
+//   - hearing a word comes first, saying it soon after, reading it much later
+//     (reading is not the priority; conversation is);
+//   - a tone pair arrives just after the second of its two words;
+//   - grammar points open one at a time, in corpus-frequency order, from the
+//     point where there are enough words to read the examples;
+//   - recorded sentences are spread right through.
+const place = (it) => {
+  switch (it.k) {
+    case 'word-listen': return it.i * 3;
+    case 'word-say': return it.i * 3 + 1;
+    case 'word-read': return it.i * 3 + 400;             // later, but still in rank order
+    case 'tone-pair': return Math.max(...it.choices.map((c) => c.i)) * 3 + 2;
+    case 'tone-say': return Math.max(...it.choices.map((c) => c.i)) * 3 + 90;
+    case 'sentence-listen': return 150 + items.filter((x) => x.k === 'sentence-listen').indexOf(it) * 18;
+    case 'grammar-mean': return 90 + GRAMMAR.findIndex((g) => g.id === it.gid) * 150;
+    case 'grammar-pick': return 130 + GRAMMAR.findIndex((g) => g.id === it.gid) * 150;
+    case 'grammar-build': return 160 + GRAMMAR.findIndex((g) => g.id === it.gid) * 150;
+    default: return 1e6;
+  }
+};
+const order = new Map(items.map((it) => [it.id, place(it)]));
+items.sort((a, b) => order.get(a.id) - order.get(b.id) || a.id.localeCompare(b.id));
+
 mkdirSync(join(ROOT, 'app', 'data'), { recursive: true });
 const deck = {
   built: new Date().toISOString().slice(0, 10),

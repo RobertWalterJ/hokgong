@@ -59,3 +59,24 @@ export function playWord(word, { onend = null } = {}) {
 }
 
 export const canPlayWord = () => cantoneseAvailable();
+
+// Are the recordings actually reachable? The single-file build carries no
+// audio folder and points at audio.tatoeba.org, which a strict content policy
+// (an Artifact, say) will block outright. Rather than serve a listening
+// question that plays nothing, the app checks once at startup and sets those
+// questions aside.
+let recordings = null;
+export function haveRecordings() { return recordings !== false; }
+export function probeRecordings(id, { timeout = 4000 } = {}) {
+  if (recordings !== null || !id) return Promise.resolve(recordings !== false);
+  return new Promise((resolve) => {
+    const a = new Audio(BUNDLED.size && BUNDLED.has(id) ? `${BASE}${id}.mp3` : `${REMOTE}${id}.mp3`);
+    const done = (ok) => { if (recordings === null) { recordings = ok; resolve(ok); } };
+    a.preload = 'metadata';
+    a.addEventListener('loadedmetadata', () => done(true));
+    a.addEventListener('canplaythrough', () => done(true));
+    a.addEventListener('error', () => done(false));
+    setTimeout(() => done(false), timeout);
+    try { a.load(); } catch { done(false); }
+  });
+}

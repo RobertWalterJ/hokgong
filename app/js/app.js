@@ -8,11 +8,11 @@
 // Screens live in browse.js; this file is the shell, the home screen and the
 // round.
 
-import { h, iconBtn, sayBtn, sheet, closeSheet, show, route, back, ICON, applyReading, READ_DEFAULTS } from './ui.js';
+import { h, iconBtn, sayBtn, sheet, closeSheet, disclosure, show, route, back, currentScreen, repaint, ICON, applyReading, READ_DEFAULTS } from './ui.js';
 import { initSpeech, say, unlock, available as speechAvailable, cantoneseAvailable, onSpeaking } from './speech.js';
-import { playRecording, playWord, stopAudio, onAudio, canPlayWord } from './audio.js';
+import { playRecording, playWord, stopAudio, onAudio, canPlayWord, haveRecordings, probeRecordings } from './audio.js';
 import { State, Round, cardState, isHolding, dayKey, newLeftToday, nextDueSentence, now, shuffle, DAY } from './schedule.js';
-import { loadDeck, indexDeck, D, wordOf, exampleOf, allIds, SKILL, SELF_RATED } from './deck.js';
+import { loadDeck, indexDeck, D, wordOf, exampleOf, allIds, askableIds, setAsideCount, SKILL, SELF_RATED } from './deck.js';
 import { setProgress, setEnglishOnly, t } from './lang.js';
 import { press as tick, right as correct, wrong, setSound as setSoundOn } from './sound.js';
 import { attempt as toneAttempt, rank as toneRank, toneName, toneChao } from './pitch.js';
@@ -54,6 +54,17 @@ function settingsSheet() {
     row('Always show Jyutping', 'The romanisation under every Cantonese word.', toggle('jyutping', s.jyutping !== false)),
     row('Keep the interface in English', 'Turns off the slow switch to Cantonese labels.', toggle('englishOnly', !!s.englishOnly, (v) => setEnglishOnly(v))),
     row('Larger text', 'Also available in your phone’s own settings.', toggle('big', !!s.big, (v) => document.documentElement.classList.toggle('big', v))),
+    h('div', { class: 'srow col' },
+      h('div', {}, h('div', { class: 'slabel' }, 'How fast to take on new words'),
+        h('div', { class: 'note' }, 'New words are the part you choose. Reviews then arrive as they fall due — which is why a keen week makes a busy fortnight.')),
+      h('div', { class: 'paces' }, ...Object.entries(PACES).map(([key, p]) => h('button', {
+        class: 'pace' + ((s.pace || 'steady') === key ? ' on' : ''), type: 'button',
+        onclick: (e) => {
+          s.pace = key; State.save();
+          for (const b of e.currentTarget.parentElement.children) b.classList.remove('on');
+          e.currentTarget.classList.add('on');
+        },
+      }, h('span', { class: 'plabel' }, p.label), h('span', { class: 'note' }, p.note))))),
     h('div', { class: 'note' }, 'Everything is stored on this phone only. Nothing is sent anywhere, including what the microphone hears.'),
     h('button', { class: 'wide', type: 'button', onclick: () => { closeSheet(); show('about', browseScreens.about); } }, 'Sources, licences and version'),
   );
@@ -64,7 +75,12 @@ function settingsSheet() {
 // ── the shell ────────────────────────────────────────────────────────────
 function header(title, { home = false } = {}) {
   return h('header', { class: 'bar' },
-    home ? h('div', { class: 'wordmark' }, h('span', { class: 'han' }, '學講'), h('span', {}, 'Hok Gong'))
+    home ? h('div', { class: 'wordmark' },
+      h('span', { class: 'han' }, '學講'),
+      h('span', { class: 'name' }, 'Hok Gong'),
+      // The rising line from the app's icon: tone 2, the contrast the app
+      // spends most of its time teaching.
+      h('span', { class: 'rise', html: ICON.rise }))
       : iconBtn('back', 'Back', back),
     h('h1', {}, title),
     iconBtn('settings', 'Settings', settingsSheet));
@@ -83,7 +99,7 @@ const phraseOfDay = () => {
 // ── home ─────────────────────────────────────────────────────────────────
 function homeScreen() {
   const d = D();
-  const ids = allIds();
+  const ids = askableIds(canPlayWord(), haveRecordings());
   const k = refreshLadder();
   const due = State.dueIds(ids).length;
   const fresh = ids.filter((id) => !State.card(id)).length;
@@ -101,7 +117,7 @@ function homeScreen() {
     start.sub ? h('span', { class: 'sub' }, start.sub) : null);
 
   const p = phraseOfDay();
-  const dayCard = p ? h('section', { class: 'card day' },
+  const dayCard = p ? h('section', { class: 'card sheet-card day' },
     h('div', { class: 'eyebrow' }, 'A word today'),
     wordCard(p.i, { example: true }),
   ) : null;
@@ -117,8 +133,9 @@ function homeScreen() {
         startBtn,
         met >= 12 ? h('button', { class: 'ghost wide', type: 'button', onclick: () => startRound({ practice: true }) }, 'Recall test — the words most likely to have slipped') : null,
         run > 1 ? h('p', { class: 'note centre' }, `${run} days in a row.`) : null,
-        !due && !room && fresh ? h('button', { class: 'ghost wide', type: 'button', onclick: () => startRound({ beyondDaily: true }) }, 'Learn more anyway') : null,
+        !due && !room && fresh ? h('button', { class: 'link', type: 'button', onclick: () => startRound({ beyondDaily: true }) }, 'Learn more anyway') : null,
         !due && !fresh && met ? h('p', { class: 'note centre' }, nextDueSentence(State.nextDue(ids) || now())) : null),
+      canPlayWord() && haveRecordings() ? null : noVoiceCard(),
       dayCard,
       h('nav', { class: 'rows' },
         link(t('words').text, `${d.words.length.toLocaleString()} words, in the order people say them`, 'words', browseScreens.words),
@@ -131,17 +148,40 @@ function homeScreen() {
   ];
 }
 
+// Said once, on the home screen, rather than inside a question the learner
+// cannot answer: without a Cantonese voice, "which of these did you hear?"
+// plays nothing at all.
+// One plain line in the open; the troubleshooting folded behind a label. It
+// used to open the app with eight lines of settings paths before a single word
+// of Cantonese (design audit, 20 Sept).
+function noVoiceCard() {
+  const voice = canPlayWord(), recs = haveRecordings();
+  const aside = setAsideCount(voice, recs);
+  return h('section', { class: 'card notice' },
+    h('p', { class: 'note' },
+      `${aside.toLocaleString()} question${aside === 1 ? '' : 's'} need ${voice ? 'a recording this phone cannot reach' : 'a Cantonese voice this phone does not have'}, and ${aside === 1 ? 'is' : 'are'} set aside.`),
+    disclosure(voice ? 'Why, and what still works' : 'How to add a Cantonese voice',
+      voice ? null : h('p', { class: 'note' }, 'On Android: Settings → System → Languages → Text-to-speech, and install Chinese (Hong Kong). On iPhone: Settings → Accessibility → Spoken Content → Voices → Chinese, Cantonese. On Windows: Settings → Time & language → Speech → Manage voices.'),
+      recs ? null : h('p', { class: 'note' }, 'This copy of the app carries no audio of its own and cannot reach Tatoeba’s. The installed version on your phone has all 545 recordings built in.'),
+      h('p', { class: 'note' }, 'Everything else still works. A Mandarin voice is never used as a stand-in: it would teach the wrong language.')));
+}
+
 // ── pace ─────────────────────────────────────────────────────────────────
 // Vocabulary apps that push new words regardless of the review backlog bury
 // the learner. The pace is set by how much is waiting.
-const pace = () => State.data.pace || { newPerRound: 5, newPerDay: 12 };
+export const PACES = {
+  gentle: { label: 'Gentle', note: 'About 8 new questions a day.', newPerRound: 3, newPerDay: 8 },
+  steady: { label: 'Steady', note: 'About 18 a day — the default.', newPerRound: 5, newPerDay: 18 },
+  keen: { label: 'Keen', note: 'Up to 40 a day. Expect a lot more reviewing tomorrow.', newPerRound: 8, newPerDay: 40 },
+};
+const pace = () => PACES[S().pace] || PACES.steady;
 
 // ── the round ────────────────────────────────────────────────────────────
 let session = { asked: new Set() };
 
 function startRound(opts) {
   unlock();
-  const r = new Round(allIds(), { ...opts, exclude: session.asked, pace: pace(), groupOf: D().groupOf });
+  const r = new Round(askableIds(canPlayWord(), haveRecordings()), { ...opts, exclude: session.asked, pace: pace(), groupOf: D().groupOf });
   if (r.empty) { show('round', () => emptyRound()); return; }
   show('round', () => roundScreen(r, { practice: !!opts.practice }), { arg: null });
 }
@@ -150,7 +190,7 @@ function emptyRound() {
   return [header('Round'), h('main', {}, h('section', { class: 'card' },
     h('p', {}, 'Nothing to ask just now — everything has been asked in the last few hours.'),
     h('p', { class: 'note' }, 'That wait is the point: a question you were shown ten minutes ago tests your short-term memory, not your Cantonese.'),
-    h('button', { class: 'wide', type: 'button', onclick: () => show('home', homeScreen) }, 'Back to the start')))];
+    h('button', { class: 'wide primary', type: 'button', onclick: () => show('home', homeScreen) }, 'Back to the start')))];
 }
 
 function roundScreen(round, { practice }) {
@@ -164,20 +204,20 @@ function roundScreen(round, { practice }) {
     dots.replaceChildren(...Array.from({ length: total }, (_, i) => h('span', { class: 'dot' + (i < done ? ' done' : '') })));
   };
   const finish = () => {
-    State.snapshot(allIds());
+    State.snapshot(allIds());   // progress counts the whole deck, not just what is askable today
     refreshLadder();
     box.replaceChildren(summary());
     window.scrollTo(0, 0);
   };
   const summary = () => {
     const card = D().context[Math.floor(Math.random() * D().context.length)];
-    const left = new Round(allIds(), { practice, exclude: session.asked, pace: pace(), groupOf: D().groupOf });
+    const left = new Round(askableIds(canPlayWord(), haveRecordings()), { practice, exclude: session.asked, pace: pace(), groupOf: D().groupOf });
     return h('section', { class: 'card' },
       h('h2', {}, `${right} of ${done}`),
       h('p', { class: 'note' }, practice ? 'A recall test does not change when a word comes back — it only tells you where you stand.' : byline(tally)),
       card ? h('div', { class: 'ctx' }, contextCard(card, { compact: true })) : null,
-      left.empty ? h('p', { class: 'note' }, nextDueSentence(State.nextDue(allIds()) || now()))
-        : h('button', { class: 'wide', type: 'button', onclick: () => startRound({ practice }) }, t('onceMore').text),
+      left.empty ? h('p', { class: 'note' }, nextDueSentence(State.nextDue(askableIds(canPlayWord(), haveRecordings())) || now()))
+        : h('button', { class: 'wide primary', type: 'button', onclick: () => startRound({ practice }) }, t('onceMore').text),
       h('button', { class: 'ghost wide', type: 'button', onclick: () => show('home', homeScreen) }, t('done').text));
   };
 
@@ -250,7 +290,7 @@ function choices(options, answer, onPick) {
 
 function afterCard(kids, { onNext }) {
   return h('div', { class: 'after' }, ...[].concat(kids).filter(Boolean),
-    h('button', { class: 'wide', type: 'button', onclick: onNext }, t('next').text));
+    h('button', { class: 'wide primary', type: 'button', onclick: onNext }, t('next').text));
 }
 
 // A play button that says what it is playing: a person, or a machine voice.
@@ -315,7 +355,7 @@ function sayWord(it, ctx) {
   const card = h('section', { class: 'card q' },
     prompt('Say this in Cantonese'),
     h('p', { class: 'gloss big' }, w.g));
-  const reveal = h('button', { class: 'wide', type: 'button', onclick: () => {
+  const reveal = h('button', { class: 'wide primary', type: 'button', onclick: () => {
     reveal.remove();
     card.append(
       wordCard(it.i, { example: true, reveal: true }),
@@ -388,7 +428,7 @@ function toneSay(it, ctx) {
     canPlayWord() ? playButton({ word: w.w, label: 'Hear it first' }) : null,
     h('p', { class: 'note' }, `Tone ${pick.tone}: ${toneName(pick.tone)} (${toneChao(pick.tone)}).`));
   const out = h('div', { class: 'toneout' });
-  const rec = h('button', { class: 'wide', type: 'button', onclick: async () => {
+  const rec = h('button', { class: 'wide primary', type: 'button', onclick: async () => {
     rec.disabled = true;
     rec.textContent = 'Listening…';
     let res;
@@ -528,6 +568,11 @@ async function boot() {
     return;
   }
   refreshLadder();
+  // Whether the recordings can be played here decides which questions can be
+  // asked, but it must not hold up the first screen: awaiting it left the app
+  // on "Loading the words…" for four seconds on a slow connection. It runs in
+  // the background and the home screen redraws when the answer arrives.
+  probeRecordings(D().audio[0], { timeout: 2500 }).then(() => { if (currentScreen() === "home") repaint(); });
   route('home', homeScreen);
   route('round', emptyRound);
   for (const [name, render] of Object.entries(browseScreens)) route(name, render);

@@ -5,7 +5,7 @@
 // long browsable lists sit at the foot of the home screen, so the app leans
 // towards the thing worth doing rather than the thing worth reading.
 
-import { h, sayBtn, sheet, show, ICON } from './ui.js';
+import { h, sayBtn, sheet, disclosure, show, ICON } from './ui.js';
 import { State, cardState, isHolding, dayKey, DAY, now } from './schedule.js';
 import { D, wordAt, allIds, SKILL, SKILL_NAMES } from './deck.js';
 import { playRecording, playWord, canPlayWord } from './audio.js';
@@ -107,6 +107,19 @@ function wordsScreen() {
     list)];
 }
 
+// The shape of a tone, drawn from its Chao numbers: 55 is a line along the
+// top, 25 climbs from near the bottom to the top, 21 falls. The same motif as
+// the app icon, and the same picture the app draws of your own voice.
+export function contourGlyph(tone) {
+  const chao = toneChao(tone);
+  const y = (n) => 15 - (n - 1) * 3.25;                 // 1 at the bottom, 5 at the top
+  const a = y(+chao[0]), b = y(+chao[1]);
+  return `<svg viewBox="0 0 34 18" fill="none" aria-hidden="true">
+    <path d="M1 ${y(3)} H33" stroke="currentColor" stroke-width="1" opacity=".18"/>
+    <path d="M3 ${a} C 12 ${a}, 22 ${b}, 31 ${b}" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+  </svg>`;
+}
+
 // ── tones ────────────────────────────────────────────────────────────────
 function tonesScreen() {
   const d = D();
@@ -119,6 +132,7 @@ function tonesScreen() {
     return h('div', { class: 'trow big' },
       h('span', { class: 'tnum' }, String(tone)),
       h('span', { class: 'chao' }, toneChao(tone)),
+      h('span', { class: 'glyph', html: contourGlyph(tone) }),
       h('span', { class: 'tname' }, toneName(tone)),
       w ? h('button', { class: 'wchip', type: 'button', onclick: () => canPlayWord() && playWord(w.w) },
         h('span', { class: 'han' }, w.w), h('span', { class: 'jyut' }, w.j), h('span', { class: 'gloss' }, w.g)) : null);
@@ -171,6 +185,36 @@ function contextScreen() {
     ...d.context.map((c) => h('section', { class: 'card' }, contextCard(c))))];
 }
 
+// How fast this is actually going, from the days actually played — and what
+// that rate means for the 4,000-to-6,000 words a conversation runs on. The
+// app would rather say "at this rate, four years" than promise a number it
+// has no way of delivering.
+function paceCard(k) {
+  const d = D();
+  const days = Object.entries(State.data.days).sort(([a], [b]) => a.localeCompare(b));
+  const recent = days.slice(-14);
+  const newSeen = recent.reduce((n, [, v]) => n + (v.newN || 0), 0);
+  const spanDays = Math.max(1, recent.length);
+  const perDay = newSeen / spanDays;
+  // Questions are not words: a word arrives with two or three questions, so
+  // the rate is converted using what this deck actually contains.
+  const perWord = d.items.length / d.words.length;
+  const wordsPerDay = perDay / perWord;
+  const toGo = (target) => (wordsPerDay > 0.05 ? Math.round((target - k.n) / wordsPerDay / 30.4) : null);
+  const months = toGo(4000);
+  return h('section', { class: 'card' },
+    h('h2', {}, 'How fast this is going'),
+    recent.length < 3
+      ? h('p', {}, 'Too early to say. After a few days of playing this will report the rate you are actually going at, not a promise.')
+      : h('div', {},
+        h('p', {}, `Over the last ${spanDays} day${spanDays === 1 ? '' : 's'} you have taken on ${perDay.toFixed(1)} new questions a day — about ${wordsPerDay.toFixed(1)} words a day.`),
+        months && months > 0
+          ? h('p', {}, `At that rate, the 4,000 words usually reckoned the start of a conversational vocabulary are about ${months < 24 ? `${months} months` : `${(months / 12).toFixed(1)} years`} away.`)
+          : h('p', {}, 'At that rate the list will not finish, which is fine: coverage matters more than completion.'),
+        h('p', { class: 'note' }, 'That number moves with how long you play, not with how the app feels. Settings can raise how many new words a day it offers; the reviews that follow are the price.')),
+  );
+}
+
 // ── progress ─────────────────────────────────────────────────────────────
 // The rule carried over from Palimpsest: report what was observed, and say
 // plainly what each number does and does not mean.
@@ -184,9 +228,12 @@ function progressScreen() {
   const k = knownWordSet();
 
   // What that vocabulary is worth, measured on the corpus rather than assumed.
+  // The mark reached, and the next one. Before the first mark there is no band
+  // to report, and saying "the first 100 words cover 66.6%" as though it had
+  // been reached would be a small lie about the learner's own progress.
   const cov = d.coverage.coverage;
-  const band = cov.filter((c) => c.words <= Math.max(100, k.n)).pop() || cov[0];
-  const next = cov.find((c) => c.words > k.n);
+  const band = cov.filter((c) => c.words <= k.n).pop() || null;
+  const next = cov.find((c) => c.words > k.n) || null;
 
   const bySkill = {};
   for (const it of d.items) {
@@ -206,8 +253,10 @@ function progressScreen() {
   return [header('Progress'), h('main', {},
     h('section', { class: 'card' },
       h('h2', {}, `${k.n.toLocaleString()} words you can answer`),
-      h('p', {}, `The first ${band.words.toLocaleString()} words of recorded Cantonese conversation cover ${band.pct}% of everything said in it.`),
-      next ? h('p', { class: 'note' }, `The next mark is ${next.words.toLocaleString()} words, which covers ${next.pct}%.`) : null,
+      band
+        ? h('p', {}, `The first ${band.words.toLocaleString()} words of recorded Cantonese conversation cover ${band.pct}% of everything said in it.`)
+        : h('p', {}, `The first mark is ${next ? next.words.toLocaleString() : '100'} words — ${next ? next.pct : 66.6}% of everything said in recorded conversation. ${next ? (next.words - k.n).toLocaleString() : ''} to go.`),
+      next && band ? h('p', { class: 'note' }, `The next mark is ${next.words.toLocaleString()} words, which covers ${next.pct}%.`) : null,
       h('p', { class: 'note' }, 'Coverage is counted on the 125,119 words of recorded conversation in the corpus — not borrowed from a study of English. It says how much of what you hear will be words you have met; it does not say you will follow the conversation.')),
 
     h('section', { class: 'card' },
@@ -229,18 +278,21 @@ function progressScreen() {
         : h('p', { class: 'note' }, 'Come back in a week and this will say what moved.'),
       h('p', { class: 'note' }, `${met.toLocaleString()} of ${ids.length.toLocaleString()} questions have come up so far, over ${days.length} day${days.length === 1 ? '' : 's'} of playing.`)),
 
+    paceCard(k),
+
     h('section', { class: 'card' },
       h('h2', {}, 'The interface'),
       h('p', {}, `${lad.on} of ${lad.total} interface phrases are in Cantonese now.`),
       lad.next ? h('p', { class: 'note' }, `The next one arrives at ${lad.next.at} words: ${lad.next.yue} (${lad.next.jyut}) — ${lad.next.en}.`) : h('p', { class: 'note' }, 'That is all of them.'),
       h('p', { class: 'note' }, 'A phrase only switches once you can answer its own words. Settings can put the whole interface back into English at any time.')),
 
+    // Folded, not dropped: every caveat is still here, one tap behind a label
+    // that says exactly what it holds.
     h('section', { class: 'card' },
-      h('h2', {}, 'What these numbers are not')),
-    h('section', { class: 'card note-card' },
-      h('p', {}, 'None of this measures whether you can hold a conversation. It measures whether you can answer these questions about these words — which is a real thing, and a narrower thing.'),
-      h('p', {}, 'Vocabulary size here counts words you have answered in this app. It is not an estimate of your whole Cantonese vocabulary, and it does not count anything you learnt from Pimsleur, from your wife, or from Peppa Pig.'),
-      h('p', {}, 'Tone feedback measures pitch only. Saying a word with the right pitch shape is not the same as saying it the way a Cantonese speaker would.')),
+      disclosure('What these numbers are not',
+        h('p', { class: 'note' }, 'None of this measures whether you can hold a conversation. It measures whether you can answer these questions about these words — which is a real thing, and a narrower thing.'),
+        h('p', { class: 'note' }, 'Vocabulary size here counts words you have answered in this app. It is not an estimate of your whole Cantonese vocabulary, and it does not count anything you learnt from Pimsleur, from your wife, or from Peppa Pig.'),
+        h('p', { class: 'note' }, 'Tone feedback measures pitch only. Saying a word with the right pitch shape is not the same as saying it the way a Cantonese speaker would.'))),
   )];
 }
 

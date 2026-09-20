@@ -30,8 +30,14 @@ export const DAY = 864e5;
 const NEW_PER_ROUND = 5;
 const MIN_NEW = 3;                   // new questions per round while some reviews are due
 const ROUND = 10;
-const NEW_PER_DAY = 12;              // new questions per day, across all rounds
-const BACKLOG = 14;                  // due reviews above which a round takes just one new question
+// Palimpsest's pack was 317 questions and these numbers suited it. This deck
+// is 13,826 questions towards a 6,000-word vocabulary, and a backlog threshold
+// of 14 throttled new words to three a day — sixteen years to the end of the
+// list. The thresholds now scale to what a language learner actually carries:
+// a few dozen reviews a day is ordinary, not a crisis.
+const NEW_PER_DAY = 18;              // new questions per day, across all rounds
+const EASING = 25;                   // due reviews above which a round eases to MIN_NEW
+const BACKLOG = 70;                  // …and above which it takes just one new question
 // Robert plays in short bursts while waiting, several times a day. A question
 // answered in the last COOLDOWN hours is not asked again — not in another
 // round, not in practice, not after closing and reopening the app — so its
@@ -287,7 +293,7 @@ export class Round {
     // New questions scale with the reviews waiting: five when little is due,
     // three when some is, and one — never none — under a backlog. (Forcing
     // three into every round starved the reviews: persona study, 18 Sept.)
-    const allowance = due.length > BACKLOG ? 1 : due.length > MIN_NEW + 2 ? Math.min(MIN_NEW, perRound) : perRound;
+    const allowance = due.length > BACKLOG ? 1 : due.length > EASING ? Math.min(MIN_NEW, perRound) : perRound;
     const nNew = Math.min(allowance, fresh.length, newRoom);
     // Reviews by due date, then new questions in the pack's teaching order.
     const reviews = take(due, ROUND - nNew);
