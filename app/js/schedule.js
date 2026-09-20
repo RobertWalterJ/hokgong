@@ -29,7 +29,7 @@ export const DAY = 864e5;
 // a later day — the spacing that actually builds memory.
 const NEW_PER_ROUND = 5;
 const MIN_NEW = 3;                   // new questions per round while some reviews are due
-const ROUND = 10;
+const ROUND = 25;              // about five minutes at ten seconds a question
 // Palimpsest's pack was 317 questions and these numbers suited it. This deck
 // is 13,826 questions towards a 6,000-word vocabulary, and a backlog threshold
 // of 14 throttled new words to three a day — sixteen years to the end of the
@@ -226,8 +226,10 @@ export class Round {
   // paragraphs its evidence quotes. Used to keep similar questions apart.
   // `beyondDaily`: the player chose "Learn more anyway" — the day's allowance
   // of new questions is lifted for this round (the per-round one still holds).
-  constructor(ids, { practice = false, exclude = new Set(), pace = null, groupOf = null, parasOf = null, beyondDaily = false, perGroup = PER_GROUP } = {}) {
+  constructor(ids, { practice = false, exclude = new Set(), pace = null, groupOf = null, parasOf = null, beyondDaily = false, perGroup = PER_GROUP, size = ROUND } = {}) {
     this.perGroup = perGroup;
+    this.size = size;
+    this.extra = new Set();
     this.beyondDaily = beyondDaily;
     this.practice = practice;
     this.queue = [];
@@ -262,7 +264,7 @@ export class Round {
       // (ties shuffled), so each reappearance tests memory.
       const seen = shuffle(pool.filter((id) => State.card(id)));
       seen.sort((x, y) => State.recall(x, t) - State.recall(y, t));
-      take(seen, ROUND);
+      take(seen, size);
       // The cool-down is a preference, never a wall (Robert: "I don't want to
       // 100% exhaust questions"). If a long spell of play has used up what's
       // cooled, fill from the cooling ones asked longest ago, then — only as
@@ -274,10 +276,10 @@ export class Round {
         byAge(met.filter((id) => !exclude.has(id) && cooling(id))),
         byAge(met.filter((id) => exclude.has(id))),
       ];
-      for (const tier of tiers) if (picked.length < ROUND) take(tier.filter((id) => !picked.includes(id)), ROUND - picked.length);
-      if (picked.length < Math.min(ROUND, met.length)) {
+      for (const tier of tiers) if (picked.length < size) take(tier.filter((id) => !picked.includes(id)), size - picked.length);
+      if (picked.length < Math.min(size, met.length)) {
         const loose = byAge(met.filter((id) => !picked.includes(id)));
-        picked.push(...loose.slice(0, Math.min(ROUND, met.length) - picked.length));
+        picked.push(...loose.slice(0, Math.min(size, met.length) - picked.length));
       }
       this.early = picked.filter((id) => cooling(id) || exclude.has(id)).length;
       this.queue = this.#spread(picked.slice(), groupOf);
@@ -296,8 +298,23 @@ export class Round {
     const allowance = due.length > BACKLOG ? 1 : due.length > EASING ? Math.min(MIN_NEW, perRound) : perRound;
     const nNew = Math.min(allowance, fresh.length, newRoom);
     // Reviews by due date, then new questions in the pack's teaching order.
-    const reviews = take(due, ROUND - nNew);
+    const reviews = take(due, size - nNew);
     const add = take(fresh, nNew);
+    // A round that runs out is a round that ends after two questions. Robert
+    // wants fifteen minutes a day in three sittings, and between the stage
+    // gate, the daily allowance of new words and the four-hour cool-down,
+    // there is often nothing "owed" left to ask. So the round is topped up
+    // with words already met, likeliest-forgotten first — and those answers
+    // are logged as PRACTICE, so filling the time never distorts the
+    // schedule or inflates what the app claims you know.
+    this.extra = new Set();
+    if (picked.length < size) {
+      const met = pool.filter((id) => State.card(id) && !due.includes(id));
+      met.sort((a, b) => State.recall(a, t) - State.recall(b, t));
+      const top = take(met, size - picked.length);
+      for (const id of top) this.extra.add(id);
+      reviews.push(...top);
+    }
     this.queue = this.#spread(shuffle([...reviews, ...add]), groupOf);
     // …except the very first question of a player's first round: the pack's
     // opening anchor, not a random one.

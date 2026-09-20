@@ -8,7 +8,7 @@
 // Screens live in browse.js; this file is the shell, the home screen and the
 // round.
 
-import { h, iconBtn, sayBtn, sheet, closeSheet, disclosure, show, route, back, currentScreen, repaint, ICON, applyReading, READ_DEFAULTS } from './ui.js';
+import { h, iconBtn, sayBtn, sheet, closeSheet, disclosure, flash, show, route, back, currentScreen, repaint, ICON, applyReading, READ_DEFAULTS } from './ui.js';
 import { initSpeech, say, unlock, available as speechAvailable, cantoneseAvailable, onSpeaking } from './speech.js';
 import { playRecording, playWord, stopAudio, onAudio, canPlayWord, haveRecordings, probeRecordings } from './audio.js';
 import { State, Round, cardState, isHolding, dayKey, newLeftToday, nextDueSentence, now, shuffle, DAY } from './schedule.js';
@@ -146,6 +146,13 @@ function settingsSheet() {
       toggle('asr', s.asr === true)) : null,
     row('Plain sans-serif for meanings', 'Meanings and quotations are set in a serif by default. This swaps them for the interface face, which some readers find easier.', toggle('sans', !!s.sans, (v) => applyReadingFont(v))),
     h('div', { class: 'srow col' },
+      h('div', {}, h('div', { class: 'slabel' }, 'How long a sitting is'),
+        h('div', { class: 'note' }, 'When there is nothing new or due left, a round fills up with words you have already met, so a sitting is never cut short. Those answers are practice: they never change when a word comes back.')),
+      h('div', { class: 'paces' }, ...Object.entries(SITTINGS).map(([key, p]) => h('button', {
+        class: 'pace' + ((s.sitting || 'five') === key ? ' on' : ''), type: 'button',
+        onclick: (e) => { s.sitting = key; State.save(); for (const b of e.currentTarget.parentElement.children) b.classList.remove('on'); e.currentTarget.classList.add('on'); },
+      }, h('span', { class: 'plabel' }, p.label), h('span', { class: 'note' }, p.note))))),
+    h('div', { class: 'srow col' },
       h('div', {}, h('div', { class: 'slabel' }, 'How fast to take on new words'),
         h('div', { class: 'note' }, 'New words are the part you choose. Reviews then arrive as they fall due — which is why a keen week makes a busy fortnight.')),
       h('div', { class: 'paces' }, ...Object.entries(PACES).map(([key, p]) => h('button', {
@@ -235,6 +242,7 @@ function hero() {
     ...c.stages.map((st, n) => h('span', { class: 'pip' + (n < c.current ? ' done' : n === c.current ? ' here' : '') })));
 
   return h('header', { class: 'hero' },
+    iconBtn('settings', 'Settings', settingsSheet, 'icon heroset'),
     under,
     h('div', { class: 'wordmark big' },
       h('span', { class: 'han' }, '學講'),
@@ -272,8 +280,9 @@ function homeScreen() {
       : due ? `${due} to come back to`
         : waiting ? `${waiting} new word${waiting === 1 ? '' : 's'} ready`
           : 'Today’s words are done';
-  const under = first ? 'Your first round — about five minutes'
-    : due || waiting ? 'About five minutes'
+  const minutes = Math.max(2, Math.round((sitting().size * 11) / 60));
+  const under = first ? `Your first round — about ${minutes} minutes`
+    : due || waiting ? `About ${minutes} minutes`
       : null;
 
   const start = t('start');
@@ -292,7 +301,6 @@ function homeScreen() {
   // these words — is one tap away on The course, where a learner goes when
   // they want it rather than every time they open the app.
   return [
-    h('div', { class: 'bar quiet' }, h('span', { class: 'spacer' }), iconBtn('settings', 'Settings', settingsSheet)),
     hero(),
     h('main', { class: 'home' },
       h('section', { class: 'today' },
@@ -372,6 +380,13 @@ function noVoiceCard() {
 // ── pace ─────────────────────────────────────────────────────────────────
 // Vocabulary apps that push new words regardless of the review backlog bury
 // the learner. The pace is set by how much is waiting.
+export const SITTINGS = {
+  short: { label: 'Short', note: 'About 12 questions — two minutes.', size: 12 },
+  five: { label: 'Five minutes', note: 'About 25 questions. Three of these is the fifteen minutes a day.', size: 25 },
+  long: { label: 'Longer', note: 'About 40 questions — seven or eight minutes.', size: 40 },
+};
+const sitting = () => SITTINGS[State.data.settings.sitting] || SITTINGS.five;
+
 export const PACES = {
   gentle: { label: 'Gentle', note: 'About 8 new questions a day.', newPerRound: 3, newPerDay: 8 },
   steady: { label: 'Steady', note: 'About 18 a day — the default.', newPerRound: 5, newPerDay: 18 },
@@ -384,7 +399,7 @@ let session = { asked: new Set() };
 
 function startRound(opts) {
   unlock();
-  const r = new Round(inPlay(), { ...opts, exclude: session.asked, pace: pace(), groupOf: D().groupOf });
+  const r = new Round(inPlay(), { ...opts, exclude: session.asked, pace: pace(), groupOf: D().groupOf, size: sitting().size });
   if (r.empty) { show('round', () => emptyRound()); return; }
   show('round', () => roundScreen(r, { practice: !!opts.practice }), { arg: null });
 }
@@ -406,7 +421,9 @@ function roundScreen(round, { practice }) {
   // can be said out loud at the end.
   const stageBefore = course().current;
 
+  const count = h('span', { class: 'n' });
   const paint = () => {
+    count.textContent = done >= total ? '' : `Question ${Math.min(done + 1, total)} of ${total}`;
     dots.replaceChildren(...Array.from({ length: total }, (_, i) => h('span', { class: 'dot' + (i < done ? ' done' : '') })));
   };
   const finish = () => {
@@ -419,18 +436,26 @@ function roundScreen(round, { practice }) {
     const after = course();
     const passed = after.current > stageBefore ? after.stages[stageBefore] : null;
     const card = D().context[Math.floor(Math.random() * D().context.length)];
-    const left = new Round(inPlay(), { practice, exclude: session.asked, pace: pace(), groupOf: D().groupOf });
-    return h('section', { class: 'card' },
-      h('h2', {}, `${right} of ${done}`),
+    const left = new Round(inPlay(), { practice, exclude: session.asked, pace: pace(), groupOf: D().groupOf, size: sitting().size });
+    // A summary has to look like a summary. This screen used to open with a
+    // bare "3 of 5" and then a card about dim sum, which read as another
+    // question (Robert, on his phone).
+    return h('section', { class: 'card summary' },
+      h('div', { class: 'eyebrow' }, practice ? 'Recall test finished' : 'Round finished'),
+      h('p', { class: 'score' }, `${right} right, out of ${done}`),
+      h('p', { class: 'note' }, practice ? 'A recall test does not change when a word comes back — it only tells you where you stand.' : byline(tally)),
       passed ? h('div', { class: 'passed' },
         h('div', { class: 'eyebrow' }, 'Stage passed'),
         h('p', {}, `${passed.title}. You can now ${passed.can.charAt(0).toLowerCase()}${passed.can.slice(1)}`),
         after.stages[after.current] ? h('p', { class: 'note' }, `Next: ${after.stages[after.current].title} — ${after.stages[after.current].can}`) : null) : null,
-      h('p', { class: 'note' }, practice ? 'A recall test does not change when a word comes back — it only tells you where you stand.' : byline(tally)),
-      card ? h('div', { class: 'ctx' }, contextCard(card, { compact: true })) : null,
       left.empty ? h('p', { class: 'note' }, nextDueSentence(State.nextDue(inPlay()) || now()))
         : h('button', { class: 'wide primary', type: 'button', onclick: () => startRound({ practice }) }, t('onceMore').text),
-      h('button', { class: 'ghost wide', type: 'button', onclick: () => show('home', homeScreen) }, t('done').text));
+      h('button', { class: 'ghost wide', type: 'button', onclick: () => show('home', homeScreen) }, t('done').text),
+      // Something to read, clearly labelled as that and put after the way out,
+      // so it is an offer rather than another thing being asked of you.
+      card ? h('div', { class: 'ctx' },
+        h('div', { class: 'eyebrow' }, 'Something to read, if you like'),
+        contextCard(card, { compact: true })) : null);
   };
 
   const ask = () => {
@@ -443,12 +468,13 @@ function roundScreen(round, { practice }) {
       const s = SKILL[it.k] || 'other';
       tally[s] = tally[s] || { n: 0, ok: 0 };
       tally[s].n++; if (ok) tally[s].ok++;
-      State.answer(id, ok, { practice });
+      State.answer(id, ok, { practice: practice || round.extra.has(id) });
       if (selfRated) { const c = State.card(id); if (c) { c.self = (c.self || 0) + 1; State.save(); } }
       (ok ? correct : wrong)();
+      flash(ok ? 'right' : 'wrong');
       paint();
     };
-    box.replaceChildren(dots, question(it, { onAnswer, onNext: ask, practice }));
+    box.replaceChildren(h('div', { class: 'qcount' }, count, dots), question(it, { onAnswer, onNext: ask, practice }));
     paint();
     window.scrollTo(0, 0);
   };
@@ -479,6 +505,15 @@ function question(it, ctx) {
   }
 }
 
+// A Chinese sentence as it should always be shown to someone who cannot read
+// characters: the characters, the reading under them, and the meaning under
+// that. The reading is built at build time from the same sources the words
+// come from.
+const sentenceBlock = (text, jyut, eng) => h('div', { class: 'sentence' },
+  h('p', { class: 'han big-s' }, text),
+  jyut ? h('p', { class: 'jyut' }, jyut) : null,
+  eng ? h('p', { class: 'gloss' }, eng) : null);
+
 const prompt = (text) => h('p', { class: 'prompt' }, text, sayBtn(text));
 
 // Four buttons, the right answer in a seeded-random place, and no colour-only
@@ -502,8 +537,14 @@ function choices(options, answer, onPick) {
   return wrap;
 }
 
-function afterCard(kids, { onNext }) {
-  return h('div', { class: 'after' }, ...[].concat(kids).filter(Boolean),
+// What comes after an answer, in one order every time: the verdict in words,
+// then the evidence, then the one button that moves you on — which sits in
+// the same place on every question and stays within reach without hunting.
+function afterCard(kids, { onNext, ok = null, answer = null }) {
+  const verdict = ok === null ? null : h('p', { class: 'verdict ' + (ok ? 'right' : 'wrong') },
+    h('span', { class: 'mark' }, ok ? '✓' : '✗'),
+    h('span', {}, ok ? t('right').text : answer ? `${t('wrong').text} — it is ${answer}` : t('wrong').text));
+  return h('div', { class: 'after' }, verdict, ...[].concat(kids).filter(Boolean),
     h('button', { class: 'wide primary', type: 'button', onclick: onNext }, t('next').text));
 }
 
@@ -548,7 +589,7 @@ function listenWord(it, ctx) {
     canPlayWord() ? null : h('p', { class: 'jyut' }, w.j));
   card.append(choices(it.options, w.g, (ok) => {
     ctx.onAnswer(ok);
-    card.append(afterCard([wordCard(it.i, { example: true, reveal: true }), voiceNote('tts')], ctx));
+    card.append(afterCard([wordCard(it.i, { example: true, reveal: true }), voiceNote('tts')], { ...ctx, ok, answer: w.g }));
   }));
   return card;
 }
@@ -562,7 +603,7 @@ function readWord(it, ctx) {
     S().jyutping !== false ? null : h('p', { class: 'note' }, 'Jyutping is hidden for this question.'));
   card.append(choices(it.options, w.g, (ok) => {
     ctx.onAnswer(ok);
-    card.append(afterCard([wordCard(it.i, { example: true, reveal: true })], ctx));
+    card.append(afterCard([wordCard(it.i, { example: true, reveal: true })], { ...ctx, ok, answer: w.g }));
   }));
   return card;
 }
@@ -577,9 +618,12 @@ function readWord(it, ctx) {
 function sayWord(it, ctx) {
   const w = wordOf(it);
   const checked = asrSupported() && S().asr === true;
+  const cue = D().cues?.[it.i];
   const card = h('section', { class: 'card q' },
     prompt('Say this in Cantonese'),
-    h('p', { class: 'gloss big' }, w.g));
+    h('p', { class: 'gloss big' }, w.g),
+    // Two words can share a meaning; the cue says which one is wanted.
+    cue ? h('p', { class: 'cue' }, cue) : null);
   const out = h('div', {});
 
   const selfRate = (lead) => h('div', {},
@@ -653,7 +697,7 @@ function notePick(it, ctx) {
         h('p', {}, note.plain, sayBtn(note.plain)),
         note.watch ? h('p', { class: 'watch' }, note.watch) : null,
         h('p', { class: 'evidence' }, 'The words and their readings come from the sources; this note about when to use which is mine.')) : null,
-    ], ctx));
+    ], { ...ctx, ok, answer: w.w }));
   }));
   return card;
 }
@@ -666,10 +710,9 @@ function listenSentence(it, ctx) {
   card.append(choices(it.options, it.eng, (ok) => {
     ctx.onAnswer(ok);
     card.append(afterCard([
-      h('p', { class: 'han big' }, it.text),
-      h('p', { class: 'gloss' }, it.eng),
+      sentenceBlock(it.text, it.jyut, it.eng),
       evidenceLine({ sentence: it.sid, by: it.by }),
-    ], ctx));
+    ], { ...ctx, ok, answer: it.eng }));
   }));
   return card;
 }
@@ -767,16 +810,16 @@ function contour(res) {
 function grammarMean(it, ctx) {
   const card = h('section', { class: 'card q' },
     prompt('What does this sentence mean?'),
-    h('p', { class: 'han big' }, it.text),
+    sentenceBlock(it.text, it.jyut, null),
     it.audio ? playButton({ sentenceId: it.sid, label: 'Play' }) : null);
   card.append(choices(it.options, it.eng, (ok) => {
     ctx.onAnswer(ok);
     const g = D().grammarById.get(it.gid);
     card.append(afterCard([
-      h('p', { class: 'gloss' }, it.eng),
+      sentenceBlock(it.text, it.jyut, it.eng),
       g ? h('div', { class: 'gpoint' }, h('h3', {}, g.title), h('p', {}, g.plain, sayBtn(g.plain))) : null,
       evidenceLine({ sentence: it.sid }),
-    ], ctx));
+    ], { ...ctx, ok, answer: it.eng }));
   }));
   return card;
 }
@@ -791,10 +834,10 @@ function grammarPick(it, ctx) {
     ctx.onAnswer(ok);
     const g = D().grammarById.get(it.gid);
     card.append(afterCard([
-      h('p', { class: 'han' }, it.text),
+      sentenceBlock(it.text, it.jyut, it.eng),
       g ? h('div', { class: 'gpoint' }, h('h3', {}, g.title), h('p', {}, g.plain), g.watch ? h('p', { class: 'watch' }, g.watch) : null) : null,
       evidenceLine({ sentence: it.sid }),
-    ], ctx));
+    ], { ...ctx, ok, answer: it.answer }));
   }));
   return card;
 }
@@ -813,8 +856,7 @@ function grammarBuild(it, ctx) {
     line.classList.add(ok ? 'right' : 'wrong');
     ctx.onAnswer(ok);
     card.append(afterCard([
-      h('p', { class: 'han big' }, it.text),
-      h('p', { class: 'gloss' }, it.eng),
+      sentenceBlock(it.text, it.jyut, it.eng),
       it.audio ? playButton({ sentenceId: it.sid, label: 'Hear it' }) : null,
       evidenceLine({ sentence: it.sid }),
     ], ctx));

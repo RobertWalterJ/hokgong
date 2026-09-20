@@ -8,7 +8,9 @@
 //
 //   - no question twice in one session (Robert: repeats made the pack feel
 //     small);
-//   - no round longer than ten;
+//   - no round longer than the sitting the learner chose, and few shorter —
+//     a sitting cut to two questions is what sent Robert back with 'the
+//     lessons are way too short';
 //   - new words keep arriving — at least one a day, every day, while any
 //     remain unseen (forcing three a round starved the reviews instead);
 //   - reviews are not buried: the due pile must not grow without limit;
@@ -52,7 +54,7 @@ S.State.load();
 const fails = [];
 const DAYS = 120;
 const skillsSeen = new Set();
-let worstBacklog = 0, roundsPlayed = 0, emptyRounds = 0, longestDryDay = 0, dryRun = 0;
+let worstBacklog = 0, roundsPlayed = 0, emptyRounds = 0, longestDryDay = 0, dryRun = 0, shortRounds = 0, topped = 0;
 const newByDay = [];
 
 for (let day = 0; day < DAYS; day++) {
@@ -66,7 +68,11 @@ for (let day = 0; day < DAYS; day++) {
     const round = new S.Round(ids, { exclude: asked, groupOf });
     if (round.empty) { emptyRounds++; continue; }
     roundsPlayed++;
-    if (round.queue.length > 10) fails.push(`day ${day}: a round of ${round.queue.length}`);
+    if (round.queue.length > round.size) fails.push(`day ${day}: a round of ${round.queue.length}, longer than the sitting`);
+    // A sitting cut to two questions is what sent Robert back with "the
+    // lessons are way too short". After the first few days there is always
+    // something to practise, so a round should fill.
+    if (round.queue.length < round.size && day > 3) shortRounds++;
     const seenHere = new Set();
     let id;
     while ((id = round.next())) {
@@ -80,7 +86,9 @@ for (let day = 0; day < DAYS; day++) {
       // A learner who gets most new things wrong at first and most reviews
       // right: 55% on first sight, 88% on review.
       const right = rand() < (card && card.st !== 'new' ? 0.88 : 0.55);
-      S.State.answer(id, right, {});
+      // A topped-up question is practice: it must not move the schedule.
+      S.State.answer(id, right, { practice: round.extra.has(id) });
+      if (round.extra.has(id)) topped++;
       t += 12e3;
     }
     S.State.snapshot(ids);
@@ -102,11 +110,13 @@ if (longestDryDay > 1) fails.push(`no new questions at all on ${longestDryDay} d
 if (totalNew / DAYS < 1) fails.push(`only ${(totalNew / DAYS).toFixed(1)} new questions a day on average`);
 if (worstBacklog > 400) fails.push(`the due pile reached ${worstBacklog} — reviews are being buried`);
 if (emptyRounds > DAYS) fails.push(`${emptyRounds} sittings had nothing to ask`);
+if (shortRounds > roundsPlayed * 0.25) fails.push(`${shortRounds} of ${roundsPlayed} rounds came up short of the sitting length`);
 if (skillsSeen.size < 5) fails.push(`only ${skillsSeen.size} of the five skills were ever started: ${[...skillsSeen].join(', ')}`);
 if (known < 100) fails.push(`only ${known} questions reached "known" in ${DAYS} days`);
 
 console.log(`test-schedule: ${DAYS} days, ${roundsPlayed} rounds, ${met.toLocaleString()} questions met, ${canAnswer.toLocaleString()} answerable, ${known.toLocaleString()} known`);
 console.log(`  new per day: ${(totalNew / DAYS).toFixed(1)} average, ${Math.max(...newByDay)} at most, ${Math.min(...newByDay)} at least`);
+console.log(`  topped up with practice: ${topped.toLocaleString()} questions; rounds short of the sitting: ${shortRounds}`);
 console.log(`  worst review backlog: ${worstBacklog}; sittings with nothing to ask: ${emptyRounds}`);
 console.log(`  skills started: ${[...skillsSeen].sort().join(', ')}`);
 if (fails.length) {

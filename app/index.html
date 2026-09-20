@@ -142,12 +142,10 @@ h1, h2, h3 { font-weight: 600; letter-spacing: -.011em; }
    faint text behind the wordmark, and a strip that says where you are.
    The undertext has its OWN band and fades out before the wordmark
    starts — text over text is the worst case for a dyslexic reader. */
-.bar.quiet { border: 0; margin-bottom: 0; }
-.bar.quiet::after { display: none; }
-.bar .spacer { flex: 1; }
+.heroset { position: absolute; top: var(--s3); right: var(--s3); z-index: 2; }
 .hero {
   position: relative; overflow: hidden; margin: 0 calc(var(--s4) * -1) var(--s5);
-  padding: var(--s2) var(--s5) var(--s5);
+  padding: max(var(--s5), env(safe-area-inset-top)) var(--s5) var(--s5);
   background: linear-gradient(180deg, var(--tint), transparent 82%);
   text-align: center;
 }
@@ -239,6 +237,8 @@ details.more > :not(summary) { animation: rise .2s var(--ease); }
 .prompt .icon { width: 32px; height: 32px; }
 .prompt .icon svg { width: 16px; height: 16px; }
 
+.cue { color: var(--muted); font-size: .95rem; margin-top: calc(var(--s3) * -1); margin-bottom: var(--s5); }
+
 /* ── home ─────────────────────────────────────────────────────────── */
 .today { text-align: center; padding: var(--s7) 0 var(--s6); }
 .lead { font-size: 1.25rem; line-height: 1.35; letter-spacing: -.01em; margin-bottom: var(--s4); font-weight: 500; }
@@ -307,6 +307,10 @@ html.playing .play { border-color: var(--accent); background: var(--tint); }
 .choice.tone .han { font-size: 1.6rem; }
 .after { margin-top: var(--s6); padding-top: var(--s5); border-top: 1px solid var(--line); text-align: left; animation: rise .22s var(--ease); }
 
+.sentence { margin: var(--s3) 0 var(--s4); }
+.sentence .han.big-s { font-family: var(--han); font-size: clamp(1.6rem, 8vw, 2.2rem); line-height: 1.4; letter-spacing: .04em; margin-bottom: var(--s2); }
+.sentence .jyut { margin-bottom: var(--s2); }
+
 /* pieces to tap into order */
 .built { min-height: 56px; display: flex; flex-wrap: wrap; gap: var(--s2); justify-content: center; border-bottom: 2px dashed var(--line); padding: var(--s3) 0; }
 .built.right { border-color: var(--right); }
@@ -318,6 +322,42 @@ html.playing .play { border-color: var(--accent); background: var(--tint); }
   transition: opacity .16s var(--ease);
 }
 .piece:disabled { opacity: .22; }
+
+
+/* The answer flash. These two colours are deliberately outside the palette's
+   information set: they say the same thing as the tick, the cross and the
+   words beside them, so they are reinforcement and nothing rides on them.
+   Green and red are what a person expects here, and the audit's rule is about
+   meaning that would be LOST without colour. */
+.flash {
+  position: fixed; inset: 0; z-index: 40; pointer-events: none;
+  animation: flashfade .48s var(--ease) forwards;
+}
+.flash.right { background: radial-gradient(120% 60% at 50% 0%, rgba(34, 160, 92, .28), transparent 70%); }
+.flash.wrong { background: radial-gradient(120% 60% at 50% 0%, rgba(214, 45, 45, .24), transparent 70%); }
+@keyframes flashfade { from { opacity: 1; } 70% { opacity: .7; } to { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .flash { opacity: .5; } }
+
+/* The verdict, said in words before anything is explained. */
+.verdict { font-size: 1.05rem; font-weight: 600; margin-bottom: var(--s3); display: flex; align-items: baseline; gap: var(--s2); }
+.verdict.right { color: var(--right); }
+.verdict.wrong { color: var(--wrong); }
+.verdict .mark { font-size: 1.2rem; }
+
+/* The button that moves you on sits in the same place every time, and stays
+   reachable without scrolling to find it. */
+.after .wide.primary, .q > .wide.primary {
+  position: sticky; bottom: calc(var(--s4) + env(safe-area-inset-bottom));
+  box-shadow: 0 6px 22px -10px rgba(0, 0, 0, .45);
+}
+
+/* The round's own head: which question you are on, in words. */
+.qcount { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); margin-bottom: var(--s3); }
+.qcount .n { font-size: .85rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.summary .score { font-size: 1.6rem; font-weight: 600; letter-spacing: -.02em; margin-bottom: var(--s2); }
+.summary .ctx { margin-top: var(--s7); padding-top: var(--s5); border-top: 1px solid var(--line); }
+.dots { margin: 0; }
 
 /* ── words, tones, context ────────────────────────────────────────── */
 .word > .wline, .word > .jyut, .word > .gloss { text-align: center; }

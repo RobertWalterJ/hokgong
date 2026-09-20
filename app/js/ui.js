@@ -41,9 +41,21 @@ export const ICON = {
 export const iconBtn = (icon, label, onclick, cls = 'icon') =>
   h('button', { class: cls, type: 'button', 'aria-label': label, title: label, html: ICON[icon], onclick });
 
+// What the ENGLISH voice should say. Handing it Chinese characters makes it
+// read them in Mandarin — which, to a learner who cannot read characters, is
+// an unrecognisable word in the wrong language in the middle of a sentence.
+// The build writes every character in the app's own prose with its Jyutping
+// after it, so speech keeps the romanisation and drops the characters.
+export const forSpeech = (text) => String(text)
+  .replace(/[㐀-鿿]+\s*\(([^)]+)\)/g, '$1')   // 飲茶 (jam2 caa4) → jam2 caa4
+  .replace(/[㐀-鿿]+/g, ' — ')            // anything left becomes a pause
+  .replace(/\s{2,}/g, ' ')
+  .replace(/\s+([,.;:!?])/g, '$1')
+  .trim();
+
 export const sayBtn = (text, label = 'Read aloud') => (speechAvailable()
   ? h('button', { class: 'icon', type: 'button', 'aria-label': label, title: label, html: ICON.speak,
-    onclick: (e) => { e.stopPropagation(); unlock(); say(typeof text === 'function' ? text() : text); } })
+    onclick: (e) => { e.stopPropagation(); unlock(); say(forSpeech(typeof text === 'function' ? text() : text)); } })
   : null);
 
 // ── bottom sheet ───────────────────────────────────────────────────────
@@ -117,3 +129,15 @@ export function disclosure(label, ...kids) {
 
 export const currentScreen = () => current?.name || null;
 export const repaint = () => { if (current) paint(); };
+
+// A short, soft wash of colour over the whole screen when an answer lands:
+// green for right, red for not. Robert asked for it, and it is worth being
+// clear about what it is — REINFORCEMENT, never the signal itself. The tick
+// or cross, the word "Right" or "Not quite", and the marked option all carry
+// the verdict on their own, so nothing is lost if you cannot see the colour
+// or the flash never renders.
+export function flash(kind) {
+  const el = h('div', { class: 'flash ' + kind, 'aria-hidden': 'true' });
+  document.body.append(el);
+  setTimeout(() => el.remove(), 480);
+}

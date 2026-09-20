@@ -78,6 +78,62 @@ const pickOthers = (self, i, n, rnd) => {
   return pool.slice(0, n).map((x) => x.g);
 };
 
+// ── every Chinese word in my own prose gets its reading ──────────────────
+// Robert cannot read characters. A note that says 飲茶 is literally "drink
+// tea" is, to him, a blank followed by an explanation of the blank — and when
+// he presses read-aloud, the English voice pronounces the characters as
+// Mandarin, which is worse than silence.
+//
+// So every run of Chinese in prose I wrote is annotated with its Jyutping at
+// build time, from the same lexicon the questions use. Longest match first, so
+// 飲茶 is one word rather than two characters, and only the first time each
+// word appears in a given string.
+const readings = new Map(LEX.filter((e) => e.gloss.length).map((e) => [e.w, e.jyut]));
+const spaced = (j) => j.replace(/([a-z]+[1-6])(?=[a-z])/g, '$1 ');
+const annotate = (text) => {
+  if (!text) return text;
+  const seen = new Set();
+  return text.replace(/[㐀-鿿]+/g, (run) => {
+    let out = '';
+    let i = 0;
+    while (i < run.length) {
+      let took = 0;
+      for (let n = Math.min(4, run.length - i); n >= 1; n--) {
+        const part = run.slice(i, i + n);
+        if (readings.has(part)) {
+          out += part + (seen.has(part) ? '' : ` (${spaced(readings.get(part))})`);
+          seen.add(part);
+          took = n;
+          break;
+        }
+      }
+      if (!took) { out += run[i]; took = 1; }
+      i += took;
+    }
+    return out;
+  });
+};
+
+// ── every sentence the app shows gets a reading line ─────────────────────
+// A sentence in characters is, to a learner who cannot read them, a picture of
+// a sentence. So each one carries its Jyutping, segmented longest-match-first
+// against the readings the sources give.
+const romanise = (text) => {
+  const out = [];
+  let i = 0;
+  while (i < text.length) {
+    if (!/[㐀-鿿]/.test(text[i])) { i++; continue; }     // punctuation is dropped
+    let took = 0;
+    for (let n = Math.min(4, text.length - i); n >= 1; n--) {
+      const part = text.slice(i, i + n);
+      if (readings.has(part)) { out.push(spaced(readings.get(part))); took = n; break; }
+    }
+    if (!took) { out.push('?'); took = 1; }                      // no source gives this character a reading
+    i += took;
+  }
+  return out.join(' ');
+};
+
 // A sentence that shows the word, with its translation and, if there is one,
 // its recording: Tatoeba, shortest first. Indexed once — scanning 7,120
 // sentences per word for six thousand words is an hour of work for nothing.
@@ -100,7 +156,7 @@ for (const [i, e] of chosen.entries()) {
   const rnd = seeded('w' + e.w);
   const ex = exampleFor(e.w);
   if (ex) {
-    examples[i] = { id: ex.id, t: ex.text, e: ex.eng, a: ex.audio ? 1 : 0 };
+    examples[i] = { id: ex.id, t: ex.text, j: romanise(ex.text), e: ex.eng, a: ex.audio ? 1 : 0 };
     if (ex.audio && i < AUDIO_WORDS) audioNeeded.add(ex.id);
   }
   const options = pickOthers(e.gloss[0], i, 3, rnd);
@@ -149,7 +205,7 @@ for (const s of listenPool) {
   const options = pickEng(s.eng, engPool, 3, rnd);
   if (options.length < 3) continue;
   audioNeeded.add(s.id);
-  items.push({ id: `sl/${s.id}`, k: 'sentence-listen', sid: s.id, text: s.text, eng: s.eng, by: s.audio.by, options, level: 3 });
+  items.push({ id: `sl/${s.id}`, k: 'sentence-listen', sid: s.id, text: s.text, jyut: romanise(s.text), eng: s.eng, by: s.audio.by, options, level: 3 });
 }
 
 // ── tones: minimal pairs from words being learnt ─────────────────────────
@@ -203,19 +259,19 @@ for (const g of GRAMMAR) {
   const hits = SENT.filter((s) => s.eng && re.test(s.text) && !(no && no.test(s.text)));
   const examples6 = hits.sort((a, b) => (b.audio ? 1 : 0) - (a.audio ? 1 : 0) || chars(a.text) - chars(b.text)).slice(0, 6);
   for (const s of examples6) if (s.audio) audioNeeded.add(s.id);
-  grammar.push({ id: g.id, title: g.title, plain: g.plain, watch: g.watch || null, corpus: g.corpus,
-    examples: examples6.map((s) => ({ id: s.id, text: s.text, eng: s.eng, audio: s.audio ? 1 : 0 })) });
+  grammar.push({ id: g.id, title: annotate(g.title), plain: annotate(g.plain), watch: annotate(g.watch) || null, corpus: g.corpus,
+    examples: examples6.map((s) => ({ id: s.id, text: s.text, jyut: romanise(s.text), eng: s.eng, audio: s.audio ? 1 : 0 })) });
   for (const s of examples6.slice(0, 3)) {
     const rnd = seeded('g' + g.id + s.id);
     const options = pickEng(s.eng, engPool.concat(hits.map((h) => h.eng)), 3, rnd);
-    if (options.length === 3) items.push({ id: `gm/${g.id}/${s.id}`, k: 'grammar-mean', gid: g.id, sid: s.id, text: s.text, eng: s.eng, audio: s.audio ? 1 : 0, options, level: 3 });
+    if (options.length === 3) items.push({ id: `gm/${g.id}/${s.id}`, k: 'grammar-mean', gid: g.id, sid: s.id, text: s.text, jyut: romanise(s.text), eng: s.eng, audio: s.audio ? 1 : 0, options, level: 3 });
   }
   // Choose the right form: blank the marker in a real sentence, and offer the
   // markers it is confused with.
   if (g.contrast) {
     const marker = g.match.length <= 2 ? g.match : null;
     const ex = examples6.find((s) => marker && s.text.includes(marker));
-    if (ex) items.push({ id: `gp/${g.id}/${ex.id}`, k: 'grammar-pick', gid: g.id, sid: ex.id, text: ex.text, eng: ex.eng, audio: ex.audio ? 1 : 0,
+    if (ex) items.push({ id: `gp/${g.id}/${ex.id}`, k: 'grammar-pick', gid: g.id, sid: ex.id, text: ex.text, jyut: romanise(ex.text), eng: ex.eng, audio: ex.audio ? 1 : 0,
       blank: marker, answer: marker, options: [g.contrast, '過', '住'].filter((x) => x !== marker).slice(0, 3), level: 4 });
   }
   // Build the sentence: the pieces, shuffled. A production test that doesn't
@@ -223,7 +279,7 @@ for (const g of GRAMMAR) {
   for (const s of examples6.filter((x) => chars(x.text) <= 10).slice(0, 2)) {
     const pieces = seg(s.text.replace(/[。？！，]/g, ''));
     if (pieces.length >= 3 && pieces.length <= 7) {
-      items.push({ id: `gb/${g.id}/${s.id}`, k: 'grammar-build', gid: g.id, sid: s.id, text: s.text, eng: s.eng, audio: s.audio ? 1 : 0, pieces, level: 4 });
+      items.push({ id: `gb/${g.id}/${s.id}`, k: 'grammar-build', gid: g.id, sid: s.id, text: s.text, jyut: romanise(s.text), eng: s.eng, audio: s.audio ? 1 : 0, pieces, level: 4 });
     }
   }
 }
@@ -232,7 +288,10 @@ for (const g of GRAMMAR) {
 // Short cards on Cantonese in Canada and on the food the words name. They are
 // not questions; they appear between rounds, and every one is either a quoted
 // passage with its source or a set of words with the dictionary's own glosses.
-const context = CONTEXT.map((c) => {
+const context = CONTEXT.map((c0) => {
+  // The quote itself is never touched — it is someone else's words. The note
+  // under it is mine, so it is annotated.
+  const c = { ...c0, note: annotate(c0.note) };
   if (!c.words) return c;
   // A word card only shows words the corpus and dictionaries actually carry.
   const found = c.words.map((w) => {
@@ -282,15 +341,51 @@ const notes = [];
 for (const n of NOTES) {
   const idx = n.words.map((w) => index.get(w));
   if (idx.some((i) => i == null)) continue;
-  notes.push({ id: n.id, title: n.title, plain: n.plain, watch: n.watch || null, words: idx });
+  notes.push({ id: n.id, title: annotate(n.title), plain: annotate(n.plain), watch: annotate(n.watch) || null, words: idx });
   const answer = index.get(n.ask.answer);
   const others = n.ask.with.map((w) => index.get(w)).filter((i) => i != null);
   if (answer == null || !others.length) continue;
   items.push({
     id: `np/${n.id}`, k: 'note-pick', nid: n.id,
-    prompt: n.ask.prompt, i: answer, options: others.map((i) => chosen[i].w),
+    prompt: annotate(n.ask.prompt), i: answer, options: others.map((i) => chosen[i].w),
     level: 3,
   });
+}
+
+// ── a question with two right answers is not a question ──────────────────
+// "Say this in Cantonese: to thank" has two answers, 多謝 and 唔該, and the app
+// was not saying which it meant (Robert, playing it). 574 English meanings in
+// this deck are carried by more than one word, so this is not one word's
+// problem.
+//
+// Each word that shares its meaning with another gets a cue, and the cue goes
+// into the question. Best first: a note that explains the pair, then the
+// word's own second sense from the dictionary, and if neither exists the word
+// keeps no cue and the accuracy audit lists it.
+const cueFromNotes = new Map();
+for (const n of NOTES) for (const [w, cue] of Object.entries(n.cues || {})) cueFromNotes.set(w, cue);
+const byMeaning = new Map();
+for (const [i, e] of chosen.entries()) {
+  const key = e.gloss[0].toLowerCase().trim();
+  if (!byMeaning.has(key)) byMeaning.set(key, []);
+  byMeaning.get(key).push(i);
+}
+const cues = {};
+let cued = 0, stillAmbiguous = 0;
+for (const [, group] of byMeaning) {
+  if (group.length < 2) continue;
+  for (const i of group) {
+    const e = chosen[i];
+    const cue = cueFromNotes.get(e.w) || e.gloss[1] || null;
+    if (cue) { cues[i] = cue; cued++; } else stillAmbiguous++;
+  }
+}
+// And every word a note covers gets its cue whether or not the glosses
+// literally collide. 多謝 is "to thank" and 唔該 is "please", which do not
+// collide as strings and are the same question in a learner's head.
+for (const [w, cue] of cueFromNotes) {
+  const i = index.get(w);
+  if (i != null && !cues[i]) { cues[i] = cue; cued++; }
 }
 
 // ── the stages, resolved to what is actually in the deck ─────────────────
@@ -299,8 +394,8 @@ for (const n of NOTES) {
 const stages = SYLLABUS.map((st) => ({
   id: st.id,
   title: st.title,
-  can: st.can,
-  why: st.why,
+  can: annotate(st.can),
+  why: annotate(st.why),
   gate: st.gate,
   grammar: st.grammar,
   words: st.words.map((w) => index.get(w)).filter((i) => i != null),
@@ -323,6 +418,7 @@ const deck = {
   coverage: COVERAGE,
   stages,
   notes,
+  cues,
   words: chosen.map((e) => ({ w: e.w, j: e.jyut, g: e.gloss[0], alt: e.gloss.slice(1, 3), r: e.rank, t: e.tier, c: e.glossConf, s: e.glossSrc })),
   examples,
   grammar,
@@ -338,5 +434,6 @@ for (const [k, n] of Object.entries(byKind)) console.log(`  ${k.padEnd(16)} ${n.
 console.log(`  tier 1 (recorded speech) ${chosen.filter((e) => e.tier === 1).length.toLocaleString()}, tier 2 (written frequency) ${chosen.filter((e) => e.tier === 2).length.toLocaleString()}`);
 console.log(`  words with an example sentence: ${Object.keys(examples).length.toLocaleString()}`);
 console.log(`grammar points: ${grammar.length}; context cards: ${context.length}; recordings to fetch: ${audioNeeded.size}`);
+console.log(`words sharing a meaning with another: ${cued + stillAmbiguous} — ${cued} now carry a cue, ${stillAmbiguous} still ambiguous`);
 console.log(`notes on confusable words: ${notes.length}`);
 console.log(`the course: ${stages.length} stages, ${stages.reduce((n, s) => n + s.words.length, 0)} words gated, ${items.filter((i) => i.stage != null).length.toLocaleString()} questions inside them`);

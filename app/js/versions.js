@@ -6,6 +6,18 @@
 
 export default [
   {
+    v: '1.4.0', date: '2026-09-20',
+    what: [
+      'Every Chinese sentence now carries its Jyutping underneath, and every Chinese word in the app’s own explanations is written with its reading beside it. A sentence in characters is a picture of a sentence if you cannot read them.',
+      'Read-aloud no longer hands characters to the English voice, which pronounced them as Mandarin. It speaks the romanisation instead.',
+      'An answer says what happened in words — "Right", or "Not quite — it is X" — with a short sound and a soft green or red wash across the screen.',
+      'The button that moves you on sits in the same place on every question and stays within reach without scrolling to find it.',
+      'Each question says which number it is, and the end of a round reads as a summary rather than as another question.',
+      'A sitting is now about 25 questions rather than 10 — roughly five minutes, so three of them make fifteen minutes a day. Short and longer sittings are in Settings.',
+      'A round no longer runs out after two questions. When nothing is new or due, it fills up with words you have already met, and those answers are logged as practice so filling the time never moves the schedule.',
+    ],
+  },
+  {
     v: '1.3.0', date: '2026-09-20',
     what: [
       'A banner at the head of the home screen, like the other apps have: the wordmark over your own Cantonese, faint — the words you most recently answered right, or the stage’s words before you have any.',
@@ -25,12 +37,13 @@ export default [
     v: '1.1.0', date: '2026-09-20',
     what: [
       'The home screen rebuilt around one journey: what there is to do, where that sits in the course, then everything else. It used to open with "Nothing due" above a Start button, which told a new learner there was nothing to do.',
-      'The app no longer speaks on its own when you open it. Sound now only plays when you press it, or inside a listening question where hearing it is the question.',
+      'The app no longer speaks on its own when you open it. Sound plays when you press it, or inside a listening question where hearing it is the question.',
       'The word of the day comes from the stage you are on, instead of anywhere in six thousand words.',
-      'Dark mode softened: less weight, smaller headings, and a lighter verdict colour that stays distinct from the accent under every colour vision.',
-      'Your progress can be saved to a file and restored from one, in Settings. It lives in this phone’s browser and nothing else keeps a copy.',
+      'Speaking can be checked by the phone, if you turn it on: "say this in Cantonese" becomes a question the app marks. Off by default, because it is the one thing here that leaves your phone.',
+      'Notes for words a gloss cannot separate — 多謝 thanks for a thing given, 唔該 for something done — each with a question that asks the distinction.',
+      'Your progress can be saved to a file and restored from one, in Settings.',
       'The app notices when a new version is deployed and offers to reload.',
-      'The ten stages now appear on Progress with a mark against each.',
+      'The ten stages appear on Progress with a mark against each.',
     ],
   },
   {
@@ -38,7 +51,7 @@ export default [
     what: [
       'First version. Six thousand words from recorded Hong Kong conversation, 585 recordings by a person, nine kinds of question across five skills, and tone production measured by pitch tracking.',
       'A course in ten stages, each gated on the one before it.',
-      'Every reading, meaning, sentence and quotation checked against its source at every build — 101,869 checks — with twelve deliberate faults planted to prove the checks can fail.',
+      'Every reading, meaning, sentence and quotation checked against its source at every build, with twelve deliberate faults planted to prove the checks can fail.',
     ],
   },
 ];
