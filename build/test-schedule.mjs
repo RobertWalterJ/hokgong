@@ -43,7 +43,7 @@ const groupOf = (id) => {
   if (it.syll) return 't' + it.syll;
   return 's' + it.id;
 };
-const SKILL = { 'word-listen': 'listening', 'sentence-listen': 'listening', 'word-say': 'speaking', 'tone-say': 'tones', 'tone-pair': 'tones', 'word-read': 'reading', 'grammar-mean': 'grammar', 'grammar-pick': 'grammar', 'grammar-build': 'grammar' };
+const SKILL = { 'word-listen': 'listening', 'sentence-listen': 'listening', 'word-say': 'speaking', 'tone-say': 'tones', 'tone-pair': 'tones', 'word-read': 'reading', 'word-cloze': 'grammar', 'grammar-mean': 'grammar', 'grammar-pick': 'grammar', 'grammar-build': 'grammar' };
 
 let seed = 42;
 const rand = () => ((seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648);

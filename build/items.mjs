@@ -216,6 +216,76 @@ for (const [i, e] of chosen.entries()) {
   if (i < READING) items.push({ id: `wr/${e.w}`, k: 'word-read', i, options, level: level + 1 });
 }
 
+// ── the gap: which word belongs here? ────────────────────────────────────
+// Robert, 20 Sept: "maybe even some questions that have blanks in them, as in
+// what is the correct word in this context to fill out the sentence — that
+// would be something good and a type of question that I've not seen come up
+// so far."
+//
+// He had not seen one because there were two in the whole deck: they were
+// built only for grammar markers that had a named contrast, and only ten
+// grammar points exist. This builds one for every word that appears exactly
+// once in a sentence long enough to carry a context — which is also what he
+// asked for in the same breath, "longer stretches of sentences".
+//
+// It is the hardest question in the app and the most useful: recognising a
+// word is not the same as knowing where it goes. Nation calls this the
+// difference between receptive and productive knowledge, and only production
+// gets you talking.
+const CLOZE_WORDS = 2000;     // how far down the list gap questions are built
+const CLOZE_MIN = 6;          // characters — a gap needs a sentence around it
+
+// Distractors are real words of the SAME length from nearby in the frequency
+// list, and never a word already in the sentence — one that is already there
+// reads as the answer.
+const wordOthers = (i, text, n, rnd) => {
+  const self = chosen[i].w;
+  const len = chars(self);
+  const lo = Math.max(0, i - 400), hi = Math.min(chosen.length, i + 400);
+  const pool = [];
+  const seen = new Set([self]);
+  for (let k = lo; k < hi; k++) {
+    if (k === i) continue;
+    const w = chosen[k].w;
+    if (seen.has(w) || chars(w) !== len || text.includes(w)) continue;
+    seen.add(w);
+    pool.push({ w, r: rnd() });
+  }
+  pool.sort((a, b) => a.r - b.r);
+  return pool.slice(0, n).map((x) => x.w);
+};
+
+// The same sentence can carry more than one gap — seeing 唔該你唔好煩我 with the
+// gap in three different places teaches the shape of it. Three in one round
+// would just feel repetitive, so two is the limit.
+const gapsPerSentence = new Map();
+for (const [i, e] of chosen.entries()) {
+  if (i >= CLOZE_WORDS) continue;
+  // The word must appear exactly once, or blanking it leaves the answer
+  // printed elsewhere in the same sentence. Longest first: the longer the
+  // sentence, the more context there is to decide the gap from.
+  const cands = (examples[i] || [])
+    .filter((x) => chars(x.t) >= CLOZE_MIN && x.t.split(e.w).length === 2)
+    .sort((a, b) => chars(b.t) - chars(a.t));
+  const ex = cands.find((x) => (gapsPerSentence.get(x.id) || 0) < 2);
+  if (!ex) continue;
+  gapsPerSentence.set(ex.id, (gapsPerSentence.get(ex.id) || 0) + 1);
+  const rnd = seeded('cz' + e.w);
+  const options = wordOthers(i, ex.t, 3, rnd);
+  if (options.length < 3) continue;
+  const at = ex.t.indexOf(e.w);
+  items.push({
+    id: `cz/${e.w}`, k: 'word-cloze', i, sid: ex.id,
+    text: ex.t, eng: ex.e, audio: ex.a, jyut: romanise(ex.t),
+    blank: e.w, answer: e.w, options,
+    // The reading line keeps the gap in its place, so the learner can hear
+    // what goes either side of the missing word.
+    blanked: (romanise(ex.t.slice(0, at)) + ' ___ ' + romanise(ex.t.slice(at + e.w.length))).replace(/\s+/g, ' ').trim(),
+    reads: Object.fromEntries([e.w, ...options].map((w) => [w, spaced(readings.get(w) || '')])),
+    level: Math.min(9, Math.ceil((i + 1) / 700)) + 2,
+  });
+}
+
 // ── listening: real recorded sentences ───────────────────────────────────
 // Short ones first, and only those made of words in the first 1,000 — so
 // listening starts in week one rather than after months.
@@ -518,7 +588,38 @@ for (const it of items) {
     if (stagesOf.length === it.choices.length) n = Math.max(...stagesOf);
     else it.needs = it.choices.map((c) => c.i);
   } else if (it.text) n = stageForText(it.text);
+  // A question that SHOWS a sentence is only in reach once the SENTENCE is.
+  // Being about a word or a grammar point the learner has reached is not
+  // enough, and treating it as enough is how a beginner was asked what
+  // "SFX 啫係咩呀?" means as his third question (Robert, 20 Sept). The two
+  // rules are combined rather than either one trusted alone.
+  if (it.text && (it.i != null || it.gid != null)) {
+    const ts = stageForText(it.text);
+    n = n != null && ts != null ? Math.max(n, ts) : undefined;
+  }
   if (n != null) it.stage = n;
+}
+// A stage is passed on its words AND its grammar points, so if a grammar
+// point's only questions are locked behind a sentence the learner cannot
+// reach yet, that stage can never be passed and the course stops dead. That
+// is what the coverage rule above did on its first run: stage one asks for
+// two grammar points, both of their questions were out of reach, and eight
+// rounds of solid work passed no stage at all (caught by build/test-keen.mjs).
+//
+// So each grammar point keeps one question open at its own stage: the one
+// whose sentence the learner can read most of. A taught example is not a
+// listening test — it arrives with its reading line and its translation, and
+// being shown a sentence slightly beyond you is how you get past it.
+for (const [gid, gs] of stageOfGrammar) {
+  const mine = items.filter((it) => it.gid === gid && it.text);
+  if (!mine.length || mine.some((it) => it.stage != null && it.stage <= gs)) continue;
+  const readable = (t) => {
+    const cs = [...t.replace(/[^㐀-鿿]/g, '')];
+    const set = charsByStage[gs] || new Set();
+    return cs.length ? cs.filter((c) => set.has(c)).length / cs.length : 0;
+  };
+  const best = mine.slice().sort((a, b) => readable(b.text) - readable(a.text) || chars(a.text) - chars(b.text))[0];
+  best.stage = gs;
 }
 
 mkdirSync(join(ROOT, 'app', 'data'), { recursive: true });

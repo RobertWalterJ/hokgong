@@ -32,6 +32,7 @@ export const SKILL = {
   'tone-say': 'tones',
   'tone-pair': 'tones',
   'word-read': 'reading',
+  'word-cloze': 'grammar',
   'grammar-mean': 'grammar',
   'grammar-pick': 'grammar',
   'grammar-build': 'grammar',

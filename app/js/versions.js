@@ -6,6 +6,17 @@
 
 export default [
   {
+    v: '1.7.0', date: '2026-09-20',
+    what: [
+      'A new kind of question, the one you asked for: a real sentence with one word taken out, and four words to choose from. There are 1,346 of them, up from two — the old ones were built only for grammar markers, so ten grammar points meant almost none. Recognising a word and knowing where it goes are different things, and only the second gets you talking.',
+      'The gap keeps its place in the reading line — ngo5 nam2 nei5 ___ hou2 zung1 ji3 — so you can hear what goes either side of the missing word, and every option carries its own reading.',
+      'The sentences behind them are longer: at least six characters, and the longest one available for each word, because a gap needs a sentence around it to be decidable.',
+      'Sentences whose Chinese contains Latin letters are gone — 776 of them. "SFX 啫係咩呀?" came out as "ze1 hai6 me1 aa4", the reading line silently dropping the part the question was about, and the answer was "What does SFX stand for?", which teaches no Cantonese at all.',
+      'A question that shows a sentence now waits until that SENTENCE is in reach. Being about a word or a grammar point you had reached was treated as enough, which is how that one arrived as a third question.',
+      'And a new check that no stage can ever become unpassable: the first version of the rule above locked every stage-one grammar question, so an evening of solid work passed no stage at all. The build now walks all ten gates and fails if any of them asks for something the learner cannot reach.',
+    ],
+  },
+  {
     v: '1.6.0', date: '2026-09-20',
     what: [
       'Removed sentences that should never have been taught. The listening questions come from Tatoeba, a general corpus of whatever people have contributed, and nothing in the build was reading them for what they SAY — only for their length, their recording and which characters they use. So "You might as well go kill yourself" passed every check there was. 533 sentences about death, violence, illness, sex, politics and religion are now set aside before anything else looks at them, and the build fails if one reaches the deck.',

@@ -1,6 +1,6 @@
 {
   "name": "hokgong",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "description": "Hok Gong — a Cantonese app built on recorded speech.",
   "private": true,
   "type": "module",

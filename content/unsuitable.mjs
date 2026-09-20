@@ -54,8 +54,18 @@ const CHARS = /[死殺杀屍尸殯喪葬毒姦淫妓娼賭鴉煙槍炮砲刀劍�
 
 export const UNSUITABLE = [...HARM, ...DISTRESS, ...COARSE, ...CONTENTIOUS];
 
+// A sentence the app cannot fully romanise cannot be taught to someone who
+// reads only the romanisation. "SFX 啫係咩呀?" came out as "ze1 hai6 me1 aa4" —
+// the reading line silently dropped the part the question was ABOUT, and the
+// answer was "What does SFX stand for?", which teaches no Cantonese at all
+// (Robert, 20 Sept). Real Hong Kong speech does code-switch — 阿 Paul, out 咗 —
+// and those sentences are perfectly good Cantonese; they just cannot carry an
+// honest reading line, so they wait.
+const LATIN = /[A-Za-z0-9]/;
+
 // `eng` is the English translation, `text` the Chinese. Either can disqualify.
 export function unsuitable(eng, text = '') {
+  if (text && LATIN.test(text)) return 'Latin letters the reading line cannot show';
   if (text && CHARS.test(text)) return 'a character about death, crime or vice';
   for (const re of HARM) if (re.test(eng)) return 'harm or violence';
   for (const re of DISTRESS) if (re.test(eng)) return 'illness or distress';

@@ -539,6 +539,7 @@ function question(it, ctx) {
     case 'tone-pair': return tonePair(it, ctx);
     case 'tone-say': return toneSay(it, ctx);
     case 'grammar-mean': return grammarMean(it, ctx);
+    case 'word-cloze': return wordCloze(it, ctx);
     case 'grammar-pick': return grammarPick(it, ctx);
     case 'grammar-build': return grammarBuild(it, ctx);
     case 'note-pick': return notePick(it, ctx);
@@ -871,6 +872,30 @@ function grammarMean(it, ctx) {
       evidenceLine({ sentence: it.sid }),
     ], { ...ctx, ok, answer: it.eng }));
   }));
+  return card;
+}
+
+// The gap. Robert asked for this one by name: "what is the correct word in
+// this context to fill out the sentence". Recognising a word and knowing where
+// it goes are different things, and only the second gets you talking — so this
+// shows a real sentence with one word taken out, the reading line with the gap
+// kept in its place, and what the whole thing means.
+function wordCloze(it, ctx) {
+  const w = wordOf(it);
+  const card = h('section', { class: 'card q' },
+    prompt('Which word goes in the gap?'),
+    h('p', { class: 'han big-s' }, it.text.replace(it.blank, '＿＿')),
+    it.blanked ? h('p', { class: 'jyut' }, it.blanked) : null,
+    h('p', { class: 'gloss' }, it.eng));
+  card.append(choices(it.options, it.answer, (ok) => {
+    ctx.onAnswer(ok);
+    card.append(afterCard([
+      sentenceBlock(it.text, it.jyut, it.eng),
+      it.audio ? playButton({ sentenceId: it.sid, label: 'Hear the whole sentence' }) : null,
+      w ? wordCard(it.i, { reveal: true }) : null,
+      evidenceLine({ sentence: it.sid }),
+    ], { ...ctx, ok, answer: `${it.answer} (${it.reads?.[it.answer] || ''})` }));
+  }, { reads: it.reads }));
   return card;
 }
 

@@ -80,15 +80,31 @@ for (const it of DECK.items) {
   // A note question is a choice between the two or three words the note is
   // about, so it has fewer wrong answers by design — and its answer is the
   // word itself rather than an English meaning.
-  const pair = it.k === 'note-pick';
+  // Which of these a question's buttons actually say. The gap questions are
+  // the odd ones out: they carry a word index like a vocabulary question, but
+  // what is on the buttons is Chinese words, not English meanings.
+  const pair = it.k === 'note-pick' || it.k === 'word-cloze';
   const answer = it.k === 'sentence-listen' || it.k === 'grammar-mean' ? it.eng
-    : it.k === 'grammar-pick' ? it.answer
+    : it.k === 'grammar-pick' || it.k === 'word-cloze' ? it.answer
       : pair ? DECK.words[it.i]?.w
         : DECK.words[it.i]?.g;
   check(pair ? it.options.length >= 1 && it.options.length <= 3 : it.options.length === 3, 'wrong number of wrong answers', `${it.id}: ${it.options.length}`);
   check(new Set(it.options).size === it.options.length, 'the same wrong answer twice', it.id);
   check(!it.options.includes(answer), 'the right answer is also offered as a wrong one', it.id);
-  if (pair) continue;   // the length rule below is about English options
+  // The length rule below counts English words, so it only applies to English
+  // options. A Chinese button is balanced by CHARACTERS instead, which the
+  // build already does when it picks the distractors.
+  if (pair) {
+    if (it.k === 'word-cloze') {
+      const cs = (x) => [...String(x).replace(/[^㐀-䶿一-鿿]/g, '')].length;
+      const lens = [answer, ...it.options].map(cs);
+      check(new Set(lens).size === 1, 'a gap question offers words of different lengths', `${it.id}: ${lens.join('/')}`);
+      for (const o of it.options) check(!it.text.includes(o), 'a wrong answer already appears in the sentence', `${it.id}: ${o}`);
+      check(it.text.split(it.answer).length === 2, 'the answer appears more than once in the sentence', it.id);
+      check(/___/.test(it.blanked || ''), 'the gap question has no reading line with the gap in it', it.id);
+    }
+    continue;
+  }
   // Option length gives the answer away if one is much longer than the rest —
   // the oldest tell in multiple choice.
   const len = (s) => String(s).split(/\s+/).length;
@@ -299,6 +315,26 @@ for (const it of DECK.items) {
   for (const [n, p] of (it.pieces || []).entries()) {
     if (!hanOnly.test(p)) continue;
     check(!!it.pieceReads?.[n], 'a Chinese piece to arrange has no reading', `${it.id}: ${p}`);
+  }
+}
+
+// ── 8d. every stage can actually be passed ───────────────────────────────
+// A stage is passed on enough of its words plus ALL of its grammar points, and
+// only questions in reach can be answered. So if a stage asks for a grammar
+// point whose questions are all locked behind a later stage, the course stops
+// dead there — which is exactly what happened when sentence coverage was first
+// applied to grammar items: eight rounds of solid work passed no stage at all.
+//
+// This walks the ten gates and checks each one is satisfiable by questions the
+// learner can actually reach by then.
+for (const [n, st] of DECK.stages.entries()) {
+  const open = DECK.items.filter((it) => it.stage != null && it.stage <= n);
+  const wordsAnswerable = new Set(open.filter((it) => it.i != null).map((it) => it.i));
+  const have = st.words.filter((i) => wordsAnswerable.has(i)).length;
+  const need = Math.max(1, Math.ceil(st.words.length * st.gate));
+  check(have >= need, 'a stage asks for more words than it opens questions for', `stage ${n + 1}: ${have} of ${need}`);
+  for (const gid of st.grammar) {
+    check(open.some((it) => it.gid === gid), 'a stage asks for a grammar point with no question in reach', `stage ${n + 1}: ${gid}`);
   }
 }
 
