@@ -1,6 +1,6 @@
 {
   "name": "hokgong",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Hok Gong — a Cantonese app built on recorded speech.",
   "private": true,
   "type": "module",
@@ -9,5 +9,7 @@
     "verify": "node build/verify.mjs",
     "build": "node build/single.mjs && node build/make-deploy.mjs"
   },
-  "devDependencies": { "esbuild": "^0.23.0" }
+  "devDependencies": {
+    "esbuild": "^0.23.0"
+  }
 }

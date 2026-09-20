@@ -180,7 +180,10 @@ const rimeWords = readRime('jyut6ping3.words.dict.yaml');
 const rimeChars = readRime('jyut6ping3.chars.dict.yaml');
 const rimeSays = (w) => ([...w].length === 1 ? rimeChars.get(w) : rimeWords.get(w) || rimeChars.get(w)) || [];
 
-const uselessGloss = /^(variant of|old variant of|surname |abbr\. for|see |used in|erhua variant|another name for|an alternative form|alternative form|\(archaic\)|\(literary\))/i;
+// "also pr." is CC-CEDICT noting an alternative pronunciation; once the pinyin
+// in brackets is stripped it reads "also pr. etc", which was being offered as
+// a second meaning of 拜拜.
+const uselessGloss = /^(variant of|old variant of|surname |abbr\. for|see |used in|erhua variant|another name for|an alternative form|alternative form|also pr\b|\(archaic\)|\(literary\))/i;
 
 // ── which sense is the right one ─────────────────────────────────────────
 // Matching the pronunciation is not enough. 都 is dou1 both as "all/also" (what

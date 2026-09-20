@@ -11,6 +11,7 @@ import { D, wordAt, allIds, SKILL, SKILL_NAMES } from './deck.js';
 import { playRecording, playWord, canPlayWord } from './audio.js';
 import { toneName, toneChao, voiceCentre, forgetVoice } from './pitch.js';
 import { ladder } from './lang.js';
+import VERSIONS from './versions.js';
 import { header, playButton, S, VERSION, knownWordSet, course } from './app.js';
 
 // ── small shared pieces ──────────────────────────────────────────────────
@@ -60,7 +61,11 @@ export function wordCard(i, { example = false, reveal = false } = {}) {
       evidenceLine({ sentence: ex.id })) : null,
     reveal ? h('p', { class: 'evidence' },
       `${w.t === 1 ? 'Recorded in conversation' : 'From written-Cantonese frequency'}, rank ${w.r.toLocaleString()}. Meaning from ${SRC_NAME[w.s] || w.s}.`) : null,
-    reveal && CONF_NOTE[w.c] ? h('p', { class: 'note' }, CONF_NOTE[w.c]) : null);
+    reveal && CONF_NOTE[w.c] ? h('p', { class: 'note' }, CONF_NOTE[w.c]) : null,
+    ...(d.notesForWord?.get(i) || []).map((n) => h('div', { class: 'gpoint' },
+      h('h3', {}, n.title),
+      h('p', {}, n.plain, sayBtn(n.plain)),
+      n.watch ? h('p', { class: 'watch' }, n.watch) : null)));
 }
 
 export function contextCard(card, { compact = false } = {}) {
@@ -261,6 +266,7 @@ function progressScreen() {
   const known = ids.filter((id) => ['known', 'secure'].includes(cardState(State.card(id)))).length;
   const holding = ids.filter((id) => isHolding(State.card(id))).length;
   const k = knownWordSet();
+  const cs = course();
 
   // What that vocabulary is worth, measured on the corpus rather than assumed.
   // The mark reached, and the next one. Before the first mark there is no band
@@ -293,6 +299,22 @@ function progressScreen() {
         : h('p', {}, `The first mark is ${next ? next.words.toLocaleString() : '100'} words — ${next ? next.pct : 66.6}% of everything said in recorded conversation. ${next ? (next.words - k.n).toLocaleString() : ''} to go.`),
       next && band ? h('p', { class: 'note' }, `The next mark is ${next.words.toLocaleString()} words, which covers ${next.pct}%.`) : null,
       h('p', { class: 'note' }, 'Coverage is counted on the 125,119 words of recorded conversation in the corpus — not borrowed from a study of English. It says how much of what you hear will be words you have met; it does not say you will follow the conversation.')),
+
+    // The course, as a list of modules with a mark against each — the plainest
+    // answer to "how far have I got".
+    h('section', { class: 'card' },
+      h('h2', {}, 'The ten stages'),
+      ...cs.stages.map((st, n) => {
+        const pctW = Math.round((Math.min(st.have, st.need) / st.need) * 100);
+        return h('div', { class: 'skill' },
+          h('div', { class: 'srow' },
+            h('span', {}, `${st.passed ? '✓ ' : ''}${n + 1}. ${st.title}`),
+            h('span', { class: 'num' }, st.passed ? 'passed' : n === cs.current ? `${st.have}/${st.need}` : 'not open yet')),
+          h('div', { class: 'bar' }, h('div', { class: 'fill', style: `width:${n < cs.current ? 100 : n === cs.current ? pctW : 0}%` })));
+      }),
+      h('p', { class: 'note' }, cs.done
+        ? 'All ten passed. The rest of the word list is open, in frequency order.'
+        : `Stage ${cs.current + 1} is open. A stage passes when you can answer ${Math.round((cs.stages[cs.current].gate) * 100)}% of its words and have met its grammar points.`)),
 
     h('section', { class: 'card' },
       h('h2', {}, 'Where each skill stands'),
@@ -345,7 +367,11 @@ function aboutScreen() {
     h('section', { class: 'card' },
       h('h2', {}, '學講 Hok Gong'),
       h('p', {}, ABOUT_LEAD, sayBtn(ABOUT_LEAD)),
-      h('p', { class: 'evidence' }, `Version ${VERSION.v}${VERSION.date ? ` · ${VERSION.date}` : ''}${VERSION.commit ? ` · ${VERSION.commit}` : ''} · deck built ${d.built}`)),
+      h('p', { class: 'evidence' }, `Version ${VERSION.v}${VERSION.date ? ` · built ${VERSION.date}` : ''}${VERSION.commit ? ` · ${VERSION.commit}` : ''} · word list built ${d.built}`),
+      disclosure('What changed, and when',
+        ...VERSIONS.map((r) => h('div', { class: 'gpoint' },
+          h('h3', {}, `${r.v} — ${r.date}`),
+          h('ul', { class: 'changes' }, ...r.what.map((line) => h('li', {}, line))))))),
 
     h('section', { class: 'card' },
       h('h2', {}, 'Where everything comes from'),

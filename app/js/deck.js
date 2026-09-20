@@ -31,6 +31,7 @@ export const SKILL = {
   'grammar-mean': 'grammar',
   'grammar-pick': 'grammar',
   'grammar-build': 'grammar',
+  'note-pick': 'grammar',
 };
 export const SKILL_NAMES = {
   listening: 'Understanding what you hear',
@@ -48,6 +49,13 @@ export function indexDeck() {
   deck.byId = new Map(deck.items.map((it) => [it.id, it]));
   deck.wordIndex = new Map(deck.words.map((w, i) => [w.w, i]));
   deck.grammarById = new Map(deck.grammar.map((g) => [g.id, g]));
+  deck.noteById = new Map((deck.notes || []).map((n) => [n.id, n]));
+  // Every word a note names can show that note on its card.
+  deck.notesForWord = new Map();
+  for (const n of deck.notes || []) for (const i of n.words) {
+    if (!deck.notesForWord.has(i)) deck.notesForWord.set(i, []);
+    deck.notesForWord.get(i).push(n);
+  }
   // The word an item is about, used to keep two questions on one word out of
   // the same round.
   deck.groupOf = (id) => {

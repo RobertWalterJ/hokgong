@@ -58,17 +58,17 @@
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #14110F;
-    --card: #1E1A17;
+    --bg: #131211;
+    --card: #1C1A18;
     --ink: #F2EBE2;
     --muted: #B3A79A;
     --line: #38302A;
-    --accent: #E9776A;
-    --accent-ink: #1B1714;
+    --accent: #E4837A;
+    --accent-ink: #17140F;
     --tint: rgba(233, 119, 106, .12);
     --right: #6FC9D8;
     --right-bg: #17323A;
-    --wrong: #F3968B;
+    --wrong: #FFB8AC;
     --wrong-bg: #3A2320;
     --dot-met: #888076;
     --chip: #29231F;
@@ -76,10 +76,10 @@
   }
 }
 :root[data-theme="dark"] {
-  --bg: #14110F; --card: #1E1A17; --ink: #F2EBE2; --muted: #B3A79A; --line: #38302A;
-  --accent: #E9776A; --accent-ink: #1B1714; --tint: rgba(233, 119, 106, .12);
+  --bg: #131211; --card: #1C1A18; --ink: #F2EBE2; --muted: #B3A79A; --line: #38302A;
+  --accent: #E4837A; --accent-ink: #17140F; --tint: rgba(233, 119, 106, .12);
   --right: #6FC9D8; --right-bg: #17323A;
-  --wrong: #F3968B; --wrong-bg: #3A2320; --dot-met: #888076; --chip: #29231F; --focus: #93B4FF;
+  --wrong: #FFB8AC; --wrong-bg: #3A2320; --dot-met: #888076; --chip: #29231F; --focus: #93B4FF;
 }
 
 * { box-sizing: border-box; }
@@ -132,7 +132,7 @@ h1, h2, h3 { font-weight: 600; letter-spacing: -.011em; }
    hairline. A filled sheet is kept for the few places that earn it. */
 .card { margin: 0 0 var(--s6); }
 .card + .card { padding-top: var(--s6); border-top: 1px solid var(--line); }
-.card h2 { margin: 0 0 var(--s3); font-size: 1.15rem; }
+.card h2 { margin: 0 0 var(--s3); font-size: 1.05rem; }
 .card h3 { margin: var(--s5) 0 var(--s2); font-size: 1rem; }
 .eyebrow {
   font-size: .78rem; font-weight: 600; letter-spacing: .06em;
@@ -188,12 +188,12 @@ details.more > :not(summary) { animation: rise .2s var(--ease); }
 .prompt .icon svg { width: 16px; height: 16px; }
 
 /* ── home ─────────────────────────────────────────────────────────── */
-.today { text-align: center; padding: var(--s6) 0 var(--s5); }
-.lead { font-size: 1.45rem; line-height: 1.3; letter-spacing: -.015em; margin-bottom: var(--s5); font-weight: 500; }
+.today { text-align: center; padding: var(--s7) 0 var(--s6); }
+.lead { font-size: 1.25rem; line-height: 1.35; letter-spacing: -.01em; margin-bottom: var(--s4); font-weight: 500; }
 .start {
   display: inline-flex; flex-direction: column; align-items: center; gap: 1px;
   background: var(--accent); color: var(--accent-ink); border-radius: 999px;
-  padding: var(--s3) var(--s7); font-size: 1.05rem; font-weight: 600; cursor: pointer;
+  padding: var(--s3) var(--s6); font-size: 1rem; font-weight: 600; cursor: pointer;
   transition: transform .16s var(--ease), filter .16s var(--ease);
 }
 .start:hover { transform: translateY(-1px); filter: brightness(1.06); }
@@ -327,6 +327,19 @@ input[type="search"] {
   border: 1px solid var(--line); border-radius: 999px; padding: var(--s3) var(--s4);
   margin-bottom: var(--s3);
 }
+
+.update {
+  position: fixed; left: var(--s4); right: var(--s4); bottom: calc(var(--s4) + env(safe-area-inset-bottom)); z-index: 30;
+  display: flex; align-items: center; gap: var(--s3); justify-content: center;
+  background: var(--card); border: 1px solid var(--line); border-radius: 999px;
+  padding: var(--s3) var(--s4); max-width: 34rem; margin: 0 auto;
+  box-shadow: 0 8px 30px -12px rgba(0,0,0,.35); animation: rise .24s var(--ease);
+}
+.update .link { margin: 0; }
+.update .dismiss { width: 32px; height: 32px; transform: rotate(180deg); }
+.filebtn { display: block; text-align: center; cursor: pointer; }
+.filebtn input { display: none; }
+.under { margin-top: calc(var(--s3) * -1); margin-bottom: var(--s5); }
 
 /* ── the settings sheet ───────────────────────────────────────────── */
 .scrim { position: fixed; inset: 0; background: rgba(20, 17, 15, .4); z-index: 20; animation: fade .18s var(--ease); backdrop-filter: blur(2px); }

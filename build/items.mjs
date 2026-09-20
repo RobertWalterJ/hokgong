@@ -24,6 +24,7 @@ const COVERAGE = read('corpus/coverage.json');
 const GRAMMAR = await load('content/grammar.mjs');
 const CONTEXT = await load('content/context.mjs');
 const SYLLABUS = await load('content/syllabus.mjs');
+const NOTES = await load('content/notes.mjs');
 
 const WORDS = 6000;        // the conversational vocabulary the app is built to reach
 const READING = 1200;      // how far read-the-characters items go: reading matters, but later
@@ -265,11 +266,32 @@ const place = (it) => {
     case 'grammar-mean': return 90 + GRAMMAR.findIndex((g) => g.id === it.gid) * 150;
     case 'grammar-pick': return 130 + GRAMMAR.findIndex((g) => g.id === it.gid) * 150;
     case 'grammar-build': return 160 + GRAMMAR.findIndex((g) => g.id === it.gid) * 150;
+    // A note about two words can only be asked once both are taught.
+    case 'note-pick': return Math.max(it.i, ...(NOTES.find((n) => n.id === it.nid)?.words || []).map((w) => index.get(w) ?? 0)) * 3 + 6;
     default: return 1e6;
   }
 };
 const order = new Map(items.map((it) => [it.id, place(it)]));
 items.sort((a, b) => order.get(a.id) - order.get(b.id) || a.id.localeCompare(b.id));
+
+// ── words that are easy to mix up ────────────────────────────────────────
+// A note travels with every word it names, and becomes a question of its own
+// that asks the distinction rather than the gloss. A note whose words are not
+// all in the deck is dropped rather than half-taught.
+const notes = [];
+for (const n of NOTES) {
+  const idx = n.words.map((w) => index.get(w));
+  if (idx.some((i) => i == null)) continue;
+  notes.push({ id: n.id, title: n.title, plain: n.plain, watch: n.watch || null, words: idx });
+  const answer = index.get(n.ask.answer);
+  const others = n.ask.with.map((w) => index.get(w)).filter((i) => i != null);
+  if (answer == null || !others.length) continue;
+  items.push({
+    id: `np/${n.id}`, k: 'note-pick', nid: n.id,
+    prompt: n.ask.prompt, i: answer, options: others.map((i) => chosen[i].w),
+    level: 3,
+  });
+}
 
 // ── the stages, resolved to what is actually in the deck ─────────────────
 // A stage carries the positions of its own words, so the app can measure the
@@ -300,6 +322,7 @@ const deck = {
   built: new Date().toISOString().slice(0, 10),
   coverage: COVERAGE,
   stages,
+  notes,
   words: chosen.map((e) => ({ w: e.w, j: e.jyut, g: e.gloss[0], alt: e.gloss.slice(1, 3), r: e.rank, t: e.tier, c: e.glossConf, s: e.glossSrc })),
   examples,
   grammar,
@@ -315,4 +338,5 @@ for (const [k, n] of Object.entries(byKind)) console.log(`  ${k.padEnd(16)} ${n.
 console.log(`  tier 1 (recorded speech) ${chosen.filter((e) => e.tier === 1).length.toLocaleString()}, tier 2 (written frequency) ${chosen.filter((e) => e.tier === 2).length.toLocaleString()}`);
 console.log(`  words with an example sentence: ${Object.keys(examples).length.toLocaleString()}`);
 console.log(`grammar points: ${grammar.length}; context cards: ${context.length}; recordings to fetch: ${audioNeeded.size}`);
+console.log(`notes on confusable words: ${notes.length}`);
 console.log(`the course: ${stages.length} stages, ${stages.reduce((n, s) => n + s.words.length, 0)} words gated, ${items.filter((i) => i.stage != null).length.toLocaleString()} questions inside them`);

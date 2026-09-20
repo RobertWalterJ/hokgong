@@ -67,12 +67,18 @@ for (const [i, ex] of Object.entries(DECK.examples)) {
 for (const it of DECK.items) {
   if (it.i != null) check(DECK.words[it.i], 'item points at a word that is not there', it.id);
   if (!it.options) continue;
+  // A note question is a choice between the two or three words the note is
+  // about, so it has fewer wrong answers by design — and its answer is the
+  // word itself rather than an English meaning.
+  const pair = it.k === 'note-pick';
   const answer = it.k === 'sentence-listen' || it.k === 'grammar-mean' ? it.eng
     : it.k === 'grammar-pick' ? it.answer
-      : DECK.words[it.i]?.g;
-  check(it.options.length === 3, 'wrong number of wrong answers', it.id);
-  check(new Set(it.options).size === 3, 'the same wrong answer twice', it.id);
+      : pair ? DECK.words[it.i]?.w
+        : DECK.words[it.i]?.g;
+  check(pair ? it.options.length >= 1 && it.options.length <= 3 : it.options.length === 3, 'wrong number of wrong answers', `${it.id}: ${it.options.length}`);
+  check(new Set(it.options).size === it.options.length, 'the same wrong answer twice', it.id);
   check(!it.options.includes(answer), 'the right answer is also offered as a wrong one', it.id);
+  if (pair) continue;   // the length rule below is about English options
   // Option length gives the answer away if one is much longer than the rest —
   // the oldest tell in multiple choice.
   const len = (s) => String(s).split(/\s+/).length;
@@ -197,6 +203,31 @@ for (const [n, st] of SYLLABUS.entries()) {
 const staged = new Set(SYLLABUS.flatMap((st) => st.grammar));
 const unstaged = DECK.grammar.filter((g) => !staged.has(g.id)).map((g) => g.id);
 check(unstaged.length === 0, 'a grammar point belongs to no stage', unstaged.join(', '));
+
+// ── 7c. the notes about confusable words ─────────────────────────────────
+// A note is my own writing, so the check is that it is ABOUT real words: every
+// word it names must be one the deck teaches, and its question's answer must
+// be one of the note's own words rather than something invented for it.
+const NOTES = (await import(pathToFileURL(join(ROOT, 'content', 'notes.mjs')).href)).default;
+for (const n of NOTES) {
+  const built = (DECK.notes || []).find((x) => x.id === n.id);
+  const inDeck = n.words.every((w) => deckWords.has(w));
+  check(!inDeck || !!built, 'a note whose words are all taught was dropped from the deck', n.id);
+  if (!built) continue;
+  check(!!n.plain && n.plain.length > 40, 'a note with no explanation', n.id);
+  check(n.words.length >= 2, 'a note about fewer than two words', n.id);
+  for (const w of n.words) check(deckWords.has(w), 'a note names a word the deck does not teach', `${n.id}: ${w}`);
+  check(n.words.includes(n.ask.answer), 'a note question whose answer is not one of its own words', `${n.id}: ${n.ask.answer}`);
+  for (const w of n.ask.with) check(n.words.includes(w), 'a note question offering a word the note does not cover', `${n.id}: ${w}`);
+  check(!n.ask.with.includes(n.ask.answer), 'a note question offering its own answer twice', n.id);
+  check(n.ask.prompt.includes('?'), 'a note question that is not a question', n.id);
+}
+const notePicks = DECK.items.filter((it) => it.k === 'note-pick');
+check(notePicks.length === (DECK.notes || []).length, 'a note without a question', `${notePicks.length} questions for ${(DECK.notes || []).length} notes`);
+for (const it of notePicks) {
+  check(!!DECK.words[it.i], 'a note question pointing at no word', it.id);
+  check(!it.options.includes(DECK.words[it.i].w), 'a note question offering its own answer', it.id);
+}
 
 // ── 8. the recordings are recordings ─────────────────────────────────────
 const audioDir = join(ROOT, 'app', 'audio');
