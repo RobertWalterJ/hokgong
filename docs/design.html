@@ -1,0 +1,176 @@
+<title>Cantonese learning engine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+HK:wght@400;600;800&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+  :root {
+    --paper: #F7F5F0; --card: #FFFFFF; --sunk: #EFECE4; --rule: #E2DDD2;
+    --ink: #17201C; --ink-2: #4A574F; --ink-3: #6E7A72;
+    --jade: #0F6B52; --jade-2: #12896A; --jade-soft: #E4F0EA;
+    --clay: #A8442C; --clay-soft: #F7E9E4;
+    --serif: 'Noto Serif HK', Georgia, serif;
+    --sans: 'Inter', system-ui, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+    --paper: #12160F; --card: #1A201B; --sunk: #232A24; --rule: #2E3730;
+    --ink: #ECF1EC; --ink-2: #BAC6BD; --ink-3: #93A197;
+    --jade: #6FD0AE; --jade-2: #57BE9A; --jade-soft: #17291F;
+    --clay: #E39178; --clay-soft: #2A1D18;
+  } }
+  :root[data-theme="dark"] {
+    --paper: #12160F; --card: #1A201B; --sunk: #232A24; --rule: #2E3730;
+    --ink: #ECF1EC; --ink-2: #BAC6BD; --ink-3: #93A197;
+    --jade: #6FD0AE; --jade-2: #57BE9A; --jade-soft: #17291F;
+    --clay: #E39178; --clay-soft: #2A1D18;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 400 16px/1.6 var(--sans); }
+  .wrap { max-width: 760px; margin: 0 auto; padding-inline: 18px; padding-block: 30px 72px; display: grid; gap: 26px; }
+  h1 { margin: 0; font: 800 clamp(2rem, 7vw, 3rem)/1.05 var(--serif); letter-spacing: -.02em; text-wrap: balance; }
+  h1 .zh { color: var(--jade); }
+  h2 { margin: 0; font: 600 1.35rem/1.25 var(--serif); text-wrap: balance; }
+  h3 { margin: 0; font: 600 1.05rem/1.3 var(--sans); }
+  p { margin: 0; }
+  .eyebrow { font: 600 .76rem/1 var(--sans); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 10px; }
+  .lede { font: 400 1.14rem/1.6 var(--sans); color: var(--ink-2); max-width: 62ch; margin-top: 12px; }
+  .card { background: var(--card); border-radius: 16px; padding: 22px; display: grid; gap: 14px; }
+  .verdict { background: var(--jade-soft); border-left: 5px solid var(--jade); }
+  .muted { color: var(--ink-2); }
+  .small { font-size: .9rem; color: var(--ink-3); }
+  .figures { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+  .fig { background: var(--sunk); border-radius: 12px; padding: 14px; display: grid; gap: 2px; }
+  .fig b { font: 700 1.7rem/1 var(--serif); color: var(--jade); font-variant-numeric: tabular-nums; }
+  .fig span { font-size: .88rem; color: var(--ink-2); }
+  table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+  .tbl { overflow-x: auto; }
+  th, td { text-align: left; padding: 8px 12px 8px 0; border-bottom: 1px solid var(--rule); font-size: .95rem; vertical-align: top; }
+  th { font: 600 .78rem var(--sans); letter-spacing: .05em; text-transform: uppercase; color: var(--ink-3); }
+  .zh { font-family: var(--serif); font-size: 1.25rem; }
+  .jy { color: var(--jade); font-weight: 600; }
+  .chart svg { width: 100%; height: auto; display: block; }
+  .ax { fill: var(--ink-3); font: 500 11px var(--sans); }
+  .grid { stroke: var(--rule); }
+  .curve { fill: none; stroke: var(--jade); stroke-width: 3; stroke-linecap: round; }
+  .mark { fill: var(--clay); }
+  .marklab { fill: var(--ink-2); font: 600 11px var(--sans); }
+  ol.steps, ul.plain { margin: 0; padding-left: 1.25em; display: grid; gap: 10px; }
+  ul.none { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+  .skill { display: grid; gap: 4px; padding: 14px 16px; background: var(--sunk); border-radius: 12px; }
+  .skill b { font: 600 1.02rem var(--sans); }
+  .skill .how { color: var(--ink-2); font-size: .95rem; }
+  .cite { font-size: .88rem; color: var(--ink-3); }
+  .warn { background: var(--clay-soft); border-left: 5px solid var(--clay); }
+  .pairs { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pair { background: var(--sunk); border-radius: 10px; padding: 8px 12px; font-family: var(--serif); }
+  .pair i { font-style: normal; color: var(--jade); font-family: var(--sans); font-size: .85rem; font-weight: 600; }
+  footer { color: var(--ink-3); font-size: .88rem; }
+</style>
+<div class="wrap">
+<header>
+  <p class="eyebrow">Design and evidence · 20 September 2026</p>
+  <h1>Learning <span class="zh">廣東話</span>, measured</h1>
+  <p class="lede">Can the learning engine behind Palimpsest be turned to Cantonese — reading, listening and speaking — in a way that is scientifically defensible and honest about progress? Yes. Here is the method, the evidence behind it, what has already been built, and what it can't do.</p>
+</header>
+
+<section class="card verdict">
+  <p class="eyebrow">The short answer</p>
+  <p>Three things carry over unchanged: <b>retrieval practice</b> (being asked, not shown), <b>spacing</b> (asked again as you are about to forget), and <b>honest measurement</b> (what you answered, not what you were exposed to). All three are among the best-supported findings in the study of memory, and vocabulary is the material they were most often tested on.</p>
+  <p>Three things are new: <b>audio</b>, <b>speaking</b>, and a <b>frequency-ordered core</b>. The corpus work is done: a word list built from recorded Hong Kong conversation, joined to dictionaries, with 1,784 sentences recorded by a human speaker.</p>
+</section>
+
+<section class="card">
+  <h2>What one thousand words is worth</h2>
+  <p class="muted">Counted, not assumed. Every word in 58 transcripts of recorded Hong Kong conversation was ranked by how often people actually said it, then the running coverage was computed.</p>
+  <div class="chart">
+    <svg viewBox="0 0 640 260" role="img" aria-label="Coverage curve: 100 words cover 66.6% of spoken words, 300 cover 80.7%, 1,000 cover 90.5%, 2,000 cover 94.8%, 3,000 cover 96.8%.">
+      <line class="grid" x1="52" x2="616" y1="30" y2="30"/><text class="ax" x="44" y="34" text-anchor="end">100%</text>
+      <line class="grid" x1="52" x2="616" y1="86" y2="86"/><text class="ax" x="44" y="90" text-anchor="end">85%</text>
+      <line class="grid" x1="52" x2="616" y1="142" y2="142"/><text class="ax" x="44" y="146" text-anchor="end">70%</text>
+      <line class="grid" x1="52" x2="616" y1="198" y2="198"/><text class="ax" x="44" y="202" text-anchor="end">55%</text>
+      <path class="curve" d="M52,155 L96,119 L140,103 L184,93 L228,86 L272,80 L316,73 L360,68 L404,59 L448,54 L492,50 L616,30"/>
+      <circle class="mark" cx="140" cy="103" r="5"/><text class="marklab" x="140" y="124" text-anchor="middle">300 words · 80.7%</text>
+      <circle class="mark" cx="272" cy="80" r="5"/><text class="marklab" x="272" y="70" text-anchor="middle">1,000 · 90.5%</text>
+      <circle class="mark" cx="360" cy="68" r="5"/><text class="marklab" x="368" y="58" text-anchor="middle">2,000 · 94.8%</text>
+      <text class="ax" x="52" y="230">100 words</text><text class="ax" x="616" y="230" text-anchor="end">6,399 (all)</text>
+    </svg>
+  </div>
+  <div class="figures">
+    <div class="fig"><b>125,119</b><span>spoken words counted, from 58 recorded conversations</span></div>
+    <div class="fig"><b>90.5%</b><span>of everything said, covered by the top 1,000 words</span></div>
+    <div class="fig"><b>1,784</b><span>sentences with real recorded audio, not synthesised</span></div>
+    <div class="fig"><b>343</b><span>of those short enough and inside the first 300 words — week one</span></div>
+  </div>
+  <p class="small">Sources: HKCanCor (Luke &amp; Wong, CC BY 4.0), CC-Canto (CC BY-SA 3.0), CC-CEDICT (CC BY-SA 4.0), Tatoeba (CC BY). A caution on the coverage figure: 90.5% of <i>words</i> is not 90.5% of <i>understanding</i> — the missing one word in ten is usually the content word carrying the point. It is a measure of the ground covered, not of comprehension.</p>
+</section>
+
+<section class="card">
+  <h2>The evidence</h2>
+  <ul class="none">
+    <li class="skill"><b>Retrieval beats review — and dropping items is what kills recall</b>
+      <span class="how">Karpicke &amp; Roediger (2008, <i>Science</i>) taught foreign-language word pairs. Items kept in <i>testing</i> were recalled about 80% a week later; items dropped from testing once learnt, but still restudied, fell to about 35%. The engine's rule — a word stays in rotation until you get it right after a real gap — comes straight from this.</span></li>
+    <li class="skill"><b>Spacing, with gaps that grow</b>
+      <span class="how">Cepeda, Pashler, Vul, Wixted &amp; Rohrer (2006) reviewed 254 studies: spaced practice beat massed practice, and the advantage grew with how long you needed to remember. Cepeda et al. (2008) put numbers on the gap: to remember for months, review at intervals of roughly a tenth to a fifth of that period. Pimsleur's "graduated interval recall" (1967) was the same idea, hard-coded into a tape.</span></li>
+    <li class="skill"><b>Why you ran out of Pimsleur</b>
+      <span class="how">Pimsleur fixes the schedule to the recording. Every learner gets the same intervals, and when the tapes end, the schedule ends. An adaptive scheduler sets each word's interval from <i>your</i> answers, and never runs out while the corpus has words left.</span></li>
+    <li class="skill"><b>Tones can be trained, and the training transfers</b>
+      <span class="how">Wang, Spence, Jongman &amp; Sereno (1999) trained English speakers on Mandarin tones with many different voices ("high-variability" training): identification rose about 21 percentage points, held six months later, and transferred to new voices, new words, and to their own pronunciation. Cantonese-specific evidence is thinner, and Cantonese is harder — six tones, with T2/T5 and T3/T6 close enough that learners and even some speakers merge them.</span></li>
+    <li class="skill"><b>Pronunciation teaching works when it is explicit and gives feedback</b>
+      <span class="how">Lee, Jang &amp; Plonsky (2015) meta-analysed 86 studies of pronunciation instruction and found a large average improvement, bigger when feedback was given. Speech recognition as a feedback channel is weaker evidence, and for Cantonese the recognisers are less reliable than for Mandarin; it is used here as a rough check plus your own judgement, never as a grade.</span></li>
+    <li class="skill"><b>Input matters, but input alone is slow</b>
+      <span class="how">Watching Peppa Pig in Cantonese is genuinely useful — narrow, repetitive, child-directed input is close to ideal listening material. What it lacks is retrieval: you recognise without being asked to produce. The design pairs them, with words drawn from what you are actually hearing at home.</span></li>
+  </ul>
+  <p class="cite">Effect sizes come from controlled studies, most of them short. None of them promise a result from an app: what they support is that this method is the right one to build, and that its progress should be measured rather than assumed.</p>
+</section>
+
+<section class="card">
+  <h2>The four skills, and how each is tested</h2>
+  <ul class="none">
+    <li class="skill"><b>Listening</b><span class="how">A real recorded sentence plays; you choose what it means, or type what you heard. Audio first, text second — the opposite of most apps. 1,784 recorded sentences, 343 of them within the first 300 words.</span></li>
+    <li class="skill"><b>Tones</b><span class="how">Minimal pairs drawn from words you are learning, not nonsense syllables: <span class="zh">係 hai6</span> against <span class="zh">喺 hai2</span>, <span class="zh">噉 gam2</span> against <span class="zh">咁 gam3</span>. Which tone did you hear? A confusion matrix shows which pairs you actually mix up.</span></li>
+    <li class="skill"><b>Speaking</b><span class="how">You see a prompt or hear a model, then record. The phone's recogniser transcribes it, and the app scores the match syllable by syllable. Its verdict is advisory — the real check is whether your wife understands you, which the app asks you to report.</span></li>
+    <li class="skill"><b>Reading</b><span class="how">Traditional characters as used in Hong Kong, with Jyutping that you can turn off once you no longer need it. Sentence reading, not single characters, because a character's meaning depends on its pronunciation and its neighbours.</span></li>
+  </ul>
+  <div class="pairs">
+    <span class="pair">係 <i>hai6</i></span><span class="pair">喺 <i>hai2</i></span><span class="pair">噉 <i>gam2</i></span><span class="pair">咁 <i>gam3</i></span><span class="pair">都 <i>dou1</i></span><span class="pair">到 <i>dou2</i></span><span class="pair">度 <i>dou6</i></span>
+  </div>
+  <p class="small">78 tone minimal-pair sets exist inside the first 1,000 spoken words alone — high-frequency words that differ only in tone, which is exactly what tone training needs.</p>
+</section>
+
+<section class="card">
+  <h2>What progress will mean</h2>
+  <p class="muted">Everything shown is something you did, with the uncertainty stated. Nothing is a streak or a badge.</p>
+  <div class="tbl"><table>
+    <tr><th>Measure</th><th>How it is taken</th></tr>
+    <tr><td><b>Words you can answer</b></td><td>Right the last time asked, after a gap of at least a day. Reported against the frequency list.</td></tr>
+    <tr><td><b>Conversation covered</b></td><td>The share of running words in the recorded corpus your known words account for. Today's estimate, recomputed nightly.</td></tr>
+    <tr><td><b>Listening accuracy</b></td><td>First-try score on recorded sentences you have not heard before — the only honest listening test.</td></tr>
+    <tr><td><b>Tone identification</b></td><td>Six-way accuracy and a confusion matrix, tracked over weeks.</td></tr>
+    <tr><td><b>Speaking</b></td><td>Recogniser agreement plus your own "was I understood?" — reported separately, never merged into one score.</td></tr>
+    <tr><td><b>Checkpoint</b></td><td>Monthly, a fixed sample stratified by frequency, giving a vocabulary-size estimate with a confidence interval — the same method as the vocabulary estimator in Wordhoard.</td></tr>
+  </table></div>
+</section>
+
+<section class="card warn">
+  <h2>What this can't do, and what it needs from you</h2>
+  <ul class="plain">
+    <li><b>It is not a class or a tutor.</b> It builds vocabulary, listening and tone discrimination, and gives speaking practice a machine can check only roughly. Conversation with a person is a different skill and this doesn't replace it.</li>
+    <li><b>The corpus is from 1997–98.</b> Everyday grammar and conversation hold up; anything about technology or money may be dated.</li>
+    <li><b>About a third of the commonest words have no good English gloss</b> in the open dictionaries — the gloss on file belongs to another reading or to literary Chinese (都 given as "city" when it means "also"). Those need a Cantonese speaker to check. Your wife is the right reviewer, and the app will show exactly which words need her, a few at a time.</li>
+    <li><b>Speech recognition for Cantonese is imperfect.</b> A poor score may be the recogniser's fault, and the app will say so rather than marking you down.</li>
+    <li><b>Your son is the best reason to start with the right words.</b> A "what he hears" list — food, body, animals, bath, sleep, the Peppa Pig vocabulary — can be built and put first, so that what you practise is what you can use at home that day.</li>
+  </ul>
+</section>
+
+<section class="card">
+  <h2>Build order</h2>
+  <ol class="steps">
+    <li><b>Core loop, listening first.</b> The 300 most frequent spoken words, recorded sentences, the scheduler already built and tested (no repeats in a session, a cool-down, growth shown from what you answered).</li>
+    <li><b>Tones.</b> Minimal-pair drills from the words you are learning, with the confusion matrix.</li>
+    <li><b>Speaking.</b> Record, compare, self-report; shadowing against the recorded sentences.</li>
+    <li><b>Reading.</b> Sentences with Jyutping that can be switched off; characters by frequency.</li>
+    <li><b>Your own material.</b> Words your son is hearing; the vocabulary from your Complete Cantonese book, typed in and checked against the dictionaries.</li>
+    <li><b>Review pass with a speaker.</b> The words whose glosses are uncertain, in small batches.</li>
+  </ol>
+</section>
+
+<footer>Built on the Palimpsest engine: retrieval practice, spaced intervals, no repeats within a session, and progress measured from answers. Corpus and licences in SOURCES.md. Citations above are to published studies; the coverage figures are computed from HKCanCor in this repository and can be re-run with <code>node build/extract.mjs</code>.</footer>
+</div>
