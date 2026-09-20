@@ -1,6 +1,6 @@
-// Palimpsest — what to ask, and when.
+// Hok Gong — what to ask, and when.
 //
-// Ported from Landfall's scheduler, keeping the rules that were measured there
+// Ported from Palimpsest's scheduler, which came from Landfall's, keeping the rules that were measured there
 // rather than re-deriving them:
 //   - SM-2-lite intervals, ease 1.35–3.0, capped at 270 days;
 //   - no repeats inside a session: a miss comes back on a later day
@@ -10,10 +10,11 @@
 //     climbs past it (the "pawl");
 //   - practice never moves the schedule;
 //   - days are the player's local calendar days, not UTC's.
-// What is dropped is everything about places and facets. A card here is one
-// question.
+// A card here is one question about one word, sentence, tone or grammar
+// point. `groupOf` is the word, so hearing a word and then saying it do not
+// land in the same round.
 
-const KEY = 'palimpsest.v1';
+const KEY = 'hokgong.v1';
 
 export const MAX_INTERVAL = 270;
 export const EASE_START = 2.2;
@@ -36,7 +37,7 @@ const BACKLOG = 14;                  // due reviews above which a round takes ju
 // round, not in practice, not after closing and reopening the app — so its
 // next appearance is a test of recall, not of what was on screen minutes ago.
 export const COOLDOWN = 4 * 3600e3;
-const PER_GROUP = 2;                 // at most this many from one big question in a round
+const PER_GROUP = 1;                 // at most this many questions about one word in a round
 
 let clock = () => Date.now();
 export const now = () => clock();
@@ -219,7 +220,8 @@ export class Round {
   // paragraphs its evidence quotes. Used to keep similar questions apart.
   // `beyondDaily`: the player chose "Learn more anyway" — the day's allowance
   // of new questions is lifted for this round (the per-round one still holds).
-  constructor(ids, { practice = false, exclude = new Set(), pace = null, groupOf = null, parasOf = null, beyondDaily = false } = {}) {
+  constructor(ids, { practice = false, exclude = new Set(), pace = null, groupOf = null, parasOf = null, beyondDaily = false, perGroup = PER_GROUP } = {}) {
+    this.perGroup = perGroup;
     this.beyondDaily = beyondDaily;
     this.practice = practice;
     this.queue = [];
@@ -239,7 +241,7 @@ export class Round {
       for (const id of cands) {
         if (out.length >= n) break;
         const g = groupOf?.(id);
-        if (g && (groups.get(g) || 0) >= PER_GROUP) continue;
+        if (g && (groups.get(g) || 0) >= perGroup) continue;
         const ps = parasOf?.(id) || [];
         if (ps.some((p) => paras.has(p))) continue;
         out.push(id); picked.push(id);

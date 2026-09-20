@@ -62,6 +62,24 @@ for (const f of readdirSync(DIR)) {
 // character's meaning depends on how it is SAID: 噉 is "to eat" as daam6 and
 // "like this" as gam2, and the corpus says which one people used.
 const dict = new Map();
+// Split on a separator, but only outside brackets. CC-Canto writes part of
+// speech as "(noun / adverb) tomorrow", so splitting the definitions on every
+// slash cut the bracket in half and left words glossed "(noun".
+const splitOutside = (text, isSep) => {
+  const out = [];
+  let depth = 0, from = 0;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (c === '(' || c === '[') depth++;
+    else if (c === ')' || c === ']') depth = Math.max(0, depth - 1);
+    else if (depth === 0) {
+      const cut = isSep(c, i, text);
+      if (cut) { out.push(text.slice(from, i)); from = cut === 'keep' ? i : i + 1; }
+    }
+  }
+  out.push(text.slice(from));
+  return out.filter((s) => s.trim());
+};
 const readEntries = (file, src) => {
   // CC-CEDICT ships with Windows line endings; a stray \r is a line terminator
   // in JS regex, so `(.*)$` rejected every line of it.
@@ -76,7 +94,7 @@ const readEntries = (file, src) => {
     if (!m) continue;
     const [, trad, simp, , jyut, rest] = m;
     const defs = rest.replace(/\s*#.*$/, '').replace(/^\//, '').replace(/\/\s*$/, '');
-    const glosses = defs ? defs.split('/').map((d) => d.trim()).filter(Boolean) : [];
+    const glosses = defs ? splitOutside(defs, (c) => c === '/').map((d) => d.trim()).filter(Boolean) : [];
     // A single entry may offer two readings — 來 is written {lai4 / loi4} — so
     // the readings are kept as a list rather than one run-together string.
     const jyuts = (jyut || '').split('/').map((j) => j.replace(/\s+/g, '')).filter(Boolean);
@@ -141,13 +159,22 @@ const tidy = (s) => s
   .replace(/\s+/g, ' ')
   .replace(/^[;,\s]+|[;,\s]+$/g, '')
   .trim();
+// Senses are separated by a semicolon, by a numbered marker, or by both — but
+// only outside brackets. Splitting on every semicolon cut "(phrase; said when…)"
+// in half and left 33 words glossed "(phrase".
+const splitSenses = (g) => splitOutside(g, (c, i, text) => {
+  if (c === ';') return true;                                   // drop the semicolon
+  if (/\s/.test(c) && /^\d+[.)]\s/.test(text.slice(i + 1))) return 'keep';   // keep the number for tidy() to strip
+  return false;
+});
+
 // One entry becomes a list of senses, each carrying the part of speech the
 // dictionary last declared — the tag applies until another one appears.
 const sensesOf = (entry) => {
   const out = [];
   let cls = null;
   for (const g of entry.glosses) {
-    for (const piece of g.split(';')) {
+    for (const piece of splitSenses(g)) {
       const m = /^\s*\(([^)]{1,24})\)/.exec(piece);
       if (m) { const c = classOf(m[1]); if (c) cls = c; }
       const text = tidy(piece);

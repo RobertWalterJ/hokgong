@@ -6,6 +6,10 @@
 // gloss a dictionary gives that pronunciation; a sentence is a Tatoeba sentence
 // with its own human translation, and, where one exists, its recording.
 // build/verify.mjs checks all of that again before the app is built.
+//
+// The deck is stored as a word list plus items that point into it, because at
+// six thousand words repeating the word, reading and gloss inside every item
+// tripled the file for nothing.
 
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
@@ -13,92 +17,146 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const read = (f) => JSON.parse(readFileSync(join(ROOT, f), 'utf8'));
+const load = async (f) => (await import(pathToFileURL(join(ROOT, f)).href)).default;
 const LEX = read('corpus/lexicon.json');
 const SENT = read('corpus/sentences.json');
-const GRAMMAR = (await import(pathToFileURL(join(ROOT, 'content', 'grammar.mjs')).href)).default;
+const COVERAGE = read('corpus/coverage.json');
+const GRAMMAR = await load('content/grammar.mjs');
+const CONTEXT = await load('content/context.mjs');
 
-const WORDS = 400;                       // how far down the frequency list v1 goes
+const WORDS = 6000;        // the conversational vocabulary the app is built to reach
+const READING = 1200;      // how far read-the-characters items go: reading matters, but later
+const AUDIO_WORDS = 600;   // bundle recordings for example sentences this far down the list
+
 const words = (s) => s.split(/\s+/).length;
 const chars = (s) => [...s.replace(/[^㐀-鿿]/g, '')].length;
 // A seeded shuffle, so the deck is the same every build.
 const seeded = (str) => { let h = 2166136261; for (const c of str) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return () => ((h = Math.imul(h ^ (h >>> 15), 2246822507) >>> 0) / 4294967296); };
-const pickOthers = (pool, self, n, rnd, key = (x) => x) => {
-  const len = words(key(self));
-  return pool.filter((x) => key(x) !== key(self) && Math.abs(words(key(x)) - len) <= Math.max(2, len * 0.5))
-    .map((x) => ({ x, r: rnd() })).sort((a, b) => a.r - b.r).slice(0, n).map((o) => o.x);
-};
 
 // ── the words worth learning first ───────────────────────────────────────
-// Frequency order, but only words whose gloss belongs to the pronunciation the
-// corpus recorded — the rest wait for a Cantonese speaker to check them.
-const pool = LEX.filter((e) => e.gloss.length && e.glossMatchesSaid && chars(e.w) <= 3
-  && !/^[A-Za-z]/.test(e.gloss[0]) === false ? true : true);
-const usable = LEX.filter((e) => e.gloss.length && e.glossMatchesSaid && chars(e.w) <= 3);
+// Recorded speech first, in the order people actually say them; then written
+// frequency. Only words whose gloss belongs to the pronunciation recorded —
+// the rest wait for a Cantonese speaker to check them.
+const usable = LEX.filter((e) => e.gloss.length && e.glossMatchesSaid && chars(e.w) <= 4);
 const chosen = usable.slice(0, WORDS);
-const glossPool = chosen.map((e) => e.gloss[0]);
+const index = new Map(chosen.map((e, i) => [e.w, i]));
+
+// Distractors come from the same part of the frequency list, so a question is
+// a choice between words a learner plausibly knows, not between a common word
+// and something from the far tail.
+// Length is the oldest tell in multiple choice: the long answer is the right
+// one. So candidates are ranked by how close their length is to the answer's,
+// shuffled within each length, and the closest are taken — which keeps the
+// spread inside what build/verify.mjs will accept.
+const pickOthers = (self, i, n, rnd) => {
+  const len = words(self);
+  const lo = Math.max(0, i - 250), hi = Math.min(chosen.length, i + 250);
+  const pool = [];
+  const seen = new Set([self]);
+  for (let k = lo; k < hi; k++) {
+    const g = chosen[k].gloss[0];
+    if (k === i || seen.has(g)) continue;
+    seen.add(g);
+    pool.push({ g, d: Math.abs(words(g) - len), r: rnd() });
+  }
+  pool.sort((a, b) => a.d - b.d || a.r - b.r);
+  return pool.slice(0, n).map((x) => x.g);
+};
 
 // A sentence that shows the word, with its translation and, if there is one,
-// its recording: Tatoeba, shortest first.
-const exampleFor = (w) => SENT.filter((s) => s.eng && s.text.includes(w) && chars(s.text) <= 14)
+// its recording: Tatoeba, shortest first. Indexed once — scanning 7,120
+// sentences per word for six thousand words is an hour of work for nothing.
+const byChar = new Map();
+for (const s of SENT) {
+  if (!s.eng || chars(s.text) > 14) continue;
+  for (const c of new Set(s.text)) {
+    if (!byChar.has(c)) byChar.set(c, []);
+    byChar.get(c).push(s);
+  }
+}
+const exampleFor = (w) => (byChar.get(w[0]) || [])
+  .filter((s) => s.text.includes(w))
   .sort((a, b) => (b.audio ? 1 : 0) - (a.audio ? 1 : 0) || chars(a.text) - chars(b.text))[0] || null;
 
 const items = [];
-const audioNeeded = new Set();
-for (const e of chosen) {
+const audioNeeded = new Set();     // Tatoeba sentence ids: audio.tatoeba.org/sentences/yue/<id>.mp3
+const examples = {};
+for (const [i, e] of chosen.entries()) {
   const rnd = seeded('w' + e.w);
   const ex = exampleFor(e.w);
-  if (ex?.audio) audioNeeded.add(ex.id);
-  const options = pickOthers(glossPool, e.gloss[0], 3, rnd);
+  if (ex) {
+    examples[i] = { id: ex.id, t: ex.text, e: ex.eng, a: ex.audio ? 1 : 0 };
+    if (ex.audio && i < AUDIO_WORDS) audioNeeded.add(ex.id);
+  }
+  const options = pickOthers(e.gloss[0], i, 3, rnd);
   if (options.length < 3) continue;
-  const base = { w: e.w, jyut: e.jyut, gloss: e.gloss[0], rank: e.rank, pos: e.pos, ex: ex ? { id: ex.id, text: ex.text, eng: ex.eng, audio: ex.audio?.audioId || null } : null };
-  // Hear it, and know what it means (the phone speaks the word).
-  items.push({ id: `wl/${e.w}`, kind: 'word-listen', ...base, options, level: Math.ceil(e.rank / 100) });
-  // See it, say it: the reveal gives the Jyutping and the model pronunciation.
-  items.push({ id: `ws/${e.w}`, kind: 'word-say', ...base, level: Math.ceil(e.rank / 100) });
+  const level = Math.min(9, Math.ceil((i + 1) / 700));
+  // Hear it, and know what it means — the skill he wants first.
+  items.push({ id: `wl/${e.w}`, k: 'word-listen', i, options, level });
+  // See the meaning, say the word: the reveal gives the Jyutping and a model.
+  items.push({ id: `ws/${e.w}`, k: 'word-say', i, level });
+  // See the characters, know the word. Reading is not the priority, so it
+  // covers the first WORDS only and arrives later in the schedule.
+  if (i < READING) items.push({ id: `wr/${e.w}`, k: 'word-read', i, options, level: level + 1 });
 }
 
 // ── listening: real recorded sentences ───────────────────────────────────
 // Short ones first, and only those made of words in the first 1,000 — so
 // listening starts in week one rather than after months.
 const known = new Set(LEX.slice(0, 1000).map((e) => e.w));
+const knownChars = new Set([...known].flatMap((w) => [...w]));
 const covered = (text) => {
   const cs = [...text.replace(/[^㐀-鿿]/g, '')];
   if (!cs.length) return 0;
-  return cs.filter((c) => [...known].some((w) => w.includes(c))).length / cs.length;
+  return cs.filter((c) => knownChars.has(c)).length / cs.length;
 };
 const listenPool = SENT.filter((s) => s.audio && s.eng && chars(s.text) <= 12)
   .map((s) => ({ s, cov: covered(s.text) }))
   .filter((x) => x.cov >= 0.85)
   .sort((a, b) => b.cov - a.cov || chars(a.s.text) - chars(b.s.text))
-  .slice(0, 250)
+  .slice(0, 300)
   .map((x) => x.s);
 const engPool = listenPool.map((s) => s.eng);
+const pickEng = (self, pool, n, rnd) => {
+  const len = words(self);
+  const seen = new Set([self]);
+  const cand = [];
+  for (const x of pool) {
+    if (seen.has(x)) continue;
+    seen.add(x);
+    cand.push({ x, d: Math.abs(words(x) - len), r: rnd() });
+  }
+  cand.sort((a, b) => a.d - b.d || a.r - b.r);
+  return cand.slice(0, n).map((c) => c.x);
+};
 for (const s of listenPool) {
   const rnd = seeded('s' + s.id);
-  const options = pickOthers(engPool, s.eng, 3, rnd);
+  const options = pickEng(s.eng, engPool, 3, rnd);
   if (options.length < 3) continue;
   audioNeeded.add(s.id);
-  items.push({ id: `sl/${s.id}`, kind: 'sentence-listen', sid: s.id, text: s.text, eng: s.eng, audio: s.audio.audioId, by: s.audio.by, options, level: 3 });
+  items.push({ id: `sl/${s.id}`, k: 'sentence-listen', sid: s.id, text: s.text, eng: s.eng, by: s.audio.by, options, level: 3 });
 }
 
 // ── tones: minimal pairs from words being learnt ─────────────────────────
-// Same syllable, different tone, both inside the first 600 words: the contrast
-// that matters is between words you will actually say.
+// Same syllable, different tone, both inside the words he is learning: the
+// contrast that matters is between words you will actually say.
 const bySyll = new Map();
-for (const e of usable.slice(0, 600)) {
+for (const [i, e] of chosen.slice(0, 1500).entries()) {
   if (!/^[a-z]+[1-6]$/.test(e.jyut)) continue;
   const k = e.jyut.slice(0, -1);
   if (!bySyll.has(k)) bySyll.set(k, []);
-  if (!bySyll.get(k).some((x) => x.jyut === e.jyut)) bySyll.get(k).push(e);
+  if (!bySyll.get(k).some((x) => x.jyut === e.jyut)) bySyll.get(k).push({ ...e, i });
 }
 const toneSets = [...bySyll.entries()].filter(([, v]) => v.length >= 2)
-  .sort((a, b) => b[1].length - a[1].length || a[1][0].rank - b[1][0].rank);
+  .sort((a, b) => b[1].length - a[1].length || a[1][0].i - b[1][0].i);
 for (const [syll, group] of toneSets) {
   items.push({
-    id: `tp/${syll}`, kind: 'tone-pair', syll,
-    choices: group.slice(0, 4).map((e) => ({ w: e.w, jyut: e.jyut, gloss: e.gloss[0], tone: +e.jyut.slice(-1) })),
+    id: `tp/${syll}`, k: 'tone-pair', syll,
+    choices: group.slice(0, 4).map((e) => ({ i: e.i, tone: +e.jyut.slice(-1) })),
     level: 2,
   });
+  // Say it, not just hear it: the phone listens and checks the pitch shape.
+  items.push({ id: `tsay/${syll}`, k: 'tone-say', syll, choices: group.slice(0, 4).map((e) => ({ i: e.i, tone: +e.jyut.slice(-1) })), level: 4 });
 }
 
 // ── grammar ──────────────────────────────────────────────────────────────
@@ -128,44 +186,63 @@ const grammar = [];
 for (const g of GRAMMAR) {
   const re = new RegExp(g.match), no = g.notMatch ? new RegExp(g.notMatch) : null;
   const hits = SENT.filter((s) => s.eng && re.test(s.text) && !(no && no.test(s.text)));
-  const examples = hits.sort((a, b) => (b.audio ? 1 : 0) - (a.audio ? 1 : 0) || chars(a.text) - chars(b.text)).slice(0, 6);
+  const examples6 = hits.sort((a, b) => (b.audio ? 1 : 0) - (a.audio ? 1 : 0) || chars(a.text) - chars(b.text)).slice(0, 6);
+  for (const s of examples6) if (s.audio) audioNeeded.add(s.id);
   grammar.push({ id: g.id, title: g.title, plain: g.plain, watch: g.watch || null, corpus: g.corpus,
-    examples: examples.map((s) => ({ id: s.id, text: s.text, eng: s.eng, audio: s.audio?.audioId || null })) });
-  for (const s of examples.slice(0, 3)) {
+    examples: examples6.map((s) => ({ id: s.id, text: s.text, eng: s.eng, audio: s.audio ? 1 : 0 })) });
+  for (const s of examples6.slice(0, 3)) {
     const rnd = seeded('g' + g.id + s.id);
-    if (s.audio) audioNeeded.add(s.id);
-    const options = pickOthers(engPool.concat(hits.map((h) => h.eng)), s.eng, 3, rnd);
-    if (options.length === 3) items.push({ id: `gm/${g.id}/${s.id}`, kind: 'grammar-mean', gid: g.id, sid: s.id, text: s.text, eng: s.eng, audio: s.audio?.audioId || null, options, level: 3 });
+    const options = pickEng(s.eng, engPool.concat(hits.map((h) => h.eng)), 3, rnd);
+    if (options.length === 3) items.push({ id: `gm/${g.id}/${s.id}`, k: 'grammar-mean', gid: g.id, sid: s.id, text: s.text, eng: s.eng, audio: s.audio ? 1 : 0, options, level: 3 });
   }
   // Choose the right form: blank the marker in a real sentence, and offer the
   // markers it is confused with.
   if (g.contrast) {
     const marker = g.match.length <= 2 ? g.match : null;
-    const ex = examples.find((s) => marker && s.text.includes(marker));
-    if (ex) items.push({ id: `gp/${g.id}/${ex.id}`, kind: 'grammar-pick', gid: g.id, sid: ex.id, text: ex.text, eng: ex.eng, audio: ex.audio?.audioId || null,
+    const ex = examples6.find((s) => marker && s.text.includes(marker));
+    if (ex) items.push({ id: `gp/${g.id}/${ex.id}`, k: 'grammar-pick', gid: g.id, sid: ex.id, text: ex.text, eng: ex.eng, audio: ex.audio ? 1 : 0,
       blank: marker, answer: marker, options: [g.contrast, '過', '住'].filter((x) => x !== marker).slice(0, 3), level: 4 });
   }
   // Build the sentence: the pieces, shuffled. A production test that doesn't
   // ask you to type Chinese.
-  for (const s of examples.filter((x) => chars(x.text) <= 10).slice(0, 2)) {
+  for (const s of examples6.filter((x) => chars(x.text) <= 10).slice(0, 2)) {
     const pieces = seg(s.text.replace(/[。？！，]/g, ''));
     if (pieces.length >= 3 && pieces.length <= 7) {
-      items.push({ id: `gb/${g.id}/${s.id}`, kind: 'grammar-build', gid: g.id, sid: s.id, text: s.text, eng: s.eng, audio: s.audio?.audioId || null, pieces, level: 4 });
+      items.push({ id: `gb/${g.id}/${s.id}`, k: 'grammar-build', gid: g.id, sid: s.id, text: s.text, eng: s.eng, audio: s.audio ? 1 : 0, pieces, level: 4 });
     }
   }
 }
 
+// ── where the words come from ────────────────────────────────────────────
+// Short cards on Cantonese in Canada and on the food the words name. They are
+// not questions; they appear between rounds, and every one is either a quoted
+// passage with its source or a set of words with the dictionary's own glosses.
+const context = CONTEXT.map((c) => {
+  if (!c.words) return c;
+  // A word card only shows words the corpus and dictionaries actually carry.
+  const found = c.words.map((w) => {
+    const e = LEX.find((x) => x.w === w);
+    return e && e.gloss.length ? { w, jyut: e.jyut, gloss: e.gloss[0], src: e.glossSrc } : null;
+  }).filter(Boolean);
+  return { ...c, found };
+}).filter((c) => !c.words || c.found.length >= 3);
+
 mkdirSync(join(ROOT, 'app', 'data'), { recursive: true });
 const deck = {
   built: new Date().toISOString().slice(0, 10),
-  words: chosen.length,
-  coverage: read('corpus/coverage.json'),
+  coverage: COVERAGE,
+  words: chosen.map((e) => ({ w: e.w, j: e.jyut, g: e.gloss[0], alt: e.gloss.slice(1, 3), r: e.rank, t: e.tier, c: e.glossConf, s: e.glossSrc })),
+  examples,
   grammar,
+  context,
   items,
   audio: [...audioNeeded],
 };
 writeFileSync(join(ROOT, 'app', 'data', 'deck.json'), JSON.stringify(deck));
-const byKind = items.reduce((m, i) => ({ ...m, [i.kind]: (m[i.kind] || 0) + 1 }), {});
-console.log(`deck: ${items.length} items from ${chosen.length} words`);
-for (const [k, n] of Object.entries(byKind)) console.log(`  ${k.padEnd(16)} ${n}`);
-console.log(`grammar points: ${grammar.length}; recordings needed: ${audioNeeded.size}`);
+const byKind = items.reduce((m, i) => ({ ...m, [i.k]: (m[i.k] || 0) + 1 }), {});
+const size = (JSON.stringify(deck).length / 1e6).toFixed(1);
+console.log(`deck: ${items.length.toLocaleString()} items from ${chosen.length.toLocaleString()} words (${size} MB)`);
+for (const [k, n] of Object.entries(byKind)) console.log(`  ${k.padEnd(16)} ${n.toLocaleString()}`);
+console.log(`  tier 1 (recorded speech) ${chosen.filter((e) => e.tier === 1).length.toLocaleString()}, tier 2 (written frequency) ${chosen.filter((e) => e.tier === 2).length.toLocaleString()}`);
+console.log(`  words with an example sentence: ${Object.keys(examples).length.toLocaleString()}`);
+console.log(`grammar points: ${grammar.length}; context cards: ${context.length}; recordings to fetch: ${audioNeeded.size}`);

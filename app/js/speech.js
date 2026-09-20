@@ -1,39 +1,44 @@
-// Palimpsest — read aloud (from Landfall).
+// Hok Gong — the two voices.
 //
-// This is an accessibility feature, not a flourish. It also has one hard
-// gotcha: mobile browsers refuse speechSynthesis until it has been called once
-// inside a real user gesture. Without unlock() on the first pointerdown, speech
-// silently does nothing and looks broken.
+// English, for reading the interface aloud (Robert is dyslexic; read-aloud is
+// built in, not an afterthought), and Cantonese, for speaking a word when no
+// human recording exists.
+//
+// One hard gotcha: mobile browsers refuse speechSynthesis until it has been
+// called once inside a real user gesture. Without unlock() on the first
+// pointerdown, speech silently does nothing and looks broken.
+//
+// And one honest limitation, which the app states rather than hides: a
+// text-to-speech voice is a synthetic approximation. Tones come out roughly
+// right, but a recording of a person is better, and this only stands in where
+// there is no recording.
 
-let voice = null;
+const voices = { en: null, yue: null };
 let unlocked = false;
-// Who to tell when speaking starts and stops. A callback rather than an import
-// of sound.js: the single-file bundler refuses two modules that both declare
-// the same top-level binding, and `import * as sound` in two places is exactly
-// that. It has frozen the boot screen three times; not a fourth.
 let onState = null;
 export function onSpeaking(fn) { onState = fn; }
 
+const pick = (all, score) => all.slice().sort((a, b) => score(b) - score(a))[0] || null;
 function choose() {
   const all = speechSynthesis.getVoices?.() || [];
-  if (!all.length) return null;
-  const score = (v) => {
-    let s = 0;
-    if (/^en[-_]CA/i.test(v.lang)) s += 6;
-    if (/^en[-_]GB/i.test(v.lang)) s += 5;
-    if (/^en/i.test(v.lang)) s += 3;
-    if (v.localService) s += 2;
-    if (/natural|neural/i.test(v.name)) s += 2;
-    return s;
-  };
-  return all.slice().sort((a, b) => score(b) - score(a))[0] || null;
+  if (!all.length) return;
+  voices.en = pick(all.filter((v) => /^en/i.test(v.lang)),
+    (v) => (/^en[-_]CA/i.test(v.lang) ? 6 : /^en[-_]GB/i.test(v.lang) ? 5 : 3) + (v.localService ? 2 : 0) + (/natural|neural/i.test(v.name) ? 2 : 0));
+  // yue-* and zh-HK are Cantonese. zh-TW and zh-CN are Mandarin and would
+  // teach the wrong language, so they are never used: no Cantonese voice means
+  // no synthetic Cantonese, and the app says so instead of faking it.
+  const yue = all.filter((v) => /^yue/i.test(v.lang) || /^zh[-_].*HK/i.test(v.lang) || /cantonese|粵|廣東/i.test(v.name));
+  voices.yue = pick(yue, (v) => (/^yue/i.test(v.lang) ? 4 : 0) + (/HK/i.test(v.lang) ? 3 : 0) + (v.localService ? 1 : 0));
 }
 
 export function initSpeech() {
   if (!('speechSynthesis' in window)) return;
-  voice = choose();
-  speechSynthesis.addEventListener?.('voiceschanged', () => { voice = choose(); });
+  choose();
+  speechSynthesis.addEventListener?.('voiceschanged', choose);
 }
+export const available = () => 'speechSynthesis' in window && !!voices.en;
+export const cantoneseAvailable = () => 'speechSynthesis' in window && !!voices.yue;
+export const cantoneseVoiceName = () => voices.yue?.name || null;
 
 export function unlock() {
   if (unlocked || !('speechSynthesis' in window)) return;
@@ -45,60 +50,23 @@ export function unlock() {
   } catch { /* nothing to do */ }
 }
 
-export function available() { return 'speechSynthesis' in window; }
-
-// The reading speed is a setting, not a constant. Being able to slow a voice
-// down is a standard accommodation, and 0.97 is only right for whoever picked
-// it. Set by app.js from the stored preference.
-let rate = 0.97;
-export function setRate(r) { rate = Math.max(0.6, Math.min(1.3, Number(r) || 0.97)); }
-
-export function say(text, opts = {}) {
-  const spoken = opts.rate || rate;
-  if (!text || !('speechSynthesis' in window)) return;
-  try {
-    speechSynthesis.cancel();
-    onState?.(false);
-    const u = new SpeechSynthesisUtterance(String(text));
-    if (!voice) voice = choose();
-    if (voice) { u.voice = voice; u.lang = voice.lang; }
-    u.rate = spoken;
-    u.onstart = () => { onState?.(true); armGuard(4 + String(text).split(/\s+/).length * 0.9); };
-    u.onend = () => { clearTimeout(guard); onState?.(false); };
-    u.onerror = () => { clearTimeout(guard); onState?.(false); };
-    speechSynthesis.speak(u);
-  } catch { /* nothing to do */ }
-}
-
 export function stop() {
-  try { speechSynthesis.cancel(); } catch { /* nothing to do */ }
+  try { speechSynthesis.cancel(); } catch { /* ignore */ }
   onState?.(false);
 }
 
-// A watchdog, because `onend` is not reliable. Android's speech service drops
-// it under interruption and Safari has historically not fired it after
-// cancel() — and a single missed `onend` leaves the effects ducked to 22% for
-// the rest of the session, which presents as "the sound went quiet" with no
-// way back but a reload.
-let guard = null;
-function armGuard(seconds) {
-  clearTimeout(guard);
-  guard = setTimeout(() => onState?.(false), seconds * 1000);
+function speak(text, voice, { rate = 1, lang = null, onend = null } = {}) {
+  if (!('speechSynthesis' in window) || !text) { onend?.(); return false; }
+  stop();
+  const u = new SpeechSynthesisUtterance(String(text));
+  if (voice) { u.voice = voice; u.lang = voice.lang; }
+  if (lang) u.lang = lang;
+  u.rate = rate;
+  u.onstart = () => onState?.(true);
+  u.onend = u.onerror = () => { onState?.(false); onend?.(); };
+  try { speechSynthesis.speak(u); return true; } catch { onState?.(false); onend?.(); return false; }
 }
 
-// One utterance with callbacks, for the sentence-by-sentence reader. Kept here
-// so the voice choice, rate and ducking stay in one place.
-export function speakOne(text, { onStart, onEnd, onWord } = {}) {
-  if (!text || !('speechSynthesis' in window)) { onEnd?.(); return null; }
-  const u = new SpeechSynthesisUtterance(String(text));
-  if (!voice) voice = choose();
-  if (voice) { u.voice = voice; u.lang = voice.lang; }
-  u.rate = rate;
-  u.onstart = () => { onState?.(true); armGuard(6 + String(text).split(/\s+/).length * 1.2); onStart?.(); };
-  u.onboundary = (e) => { if (e.name === 'word' || e.name === undefined) onWord?.(e.charIndex, e.charLength || 0); };
-  u.onend = () => { clearTimeout(guard); onState?.(false); onEnd?.(); };
-  u.onerror = (e) => { clearTimeout(guard); onState?.(false); if (e.error !== 'interrupted' && e.error !== 'canceled') onEnd?.(); };
-  try { speechSynthesis.speak(u); } catch { onEnd?.(); }
-  return u;
-}
-export function getRate() { return rate; }
+export const say = (text, opts = {}) => speak(text, voices.en, opts);
+// Slower than natural by default: a learner needs the syllable, not the speed.
+export const sayYue = (text, opts = {}) => speak(text, voices.yue, { rate: 0.85, lang: 'zh-HK', ...opts });

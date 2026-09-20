@@ -1,8 +1,8 @@
-// Palimpsest — small shared pieces: the DOM helper, icons, read-aloud buttons,
+// Hok Gong — small shared pieces: the DOM helper, icons, read-aloud buttons,
 // bottom sheets, reading preferences and a history-aware router.
 
 import { say, unlock, available as speechAvailable, stop as stopSpeech } from './speech.js';
-import { stopAllReading } from './reader.js';
+import { stopAudio } from './audio.js';
 
 export function h(tag, attrs = {}, ...kids) {
   const el = document.createElement(tag);
@@ -42,7 +42,7 @@ export const iconBtn = (icon, label, onclick, cls = 'icon') =>
 
 export const sayBtn = (text, label = 'Read aloud') => (speechAvailable()
   ? h('button', { class: 'icon', type: 'button', 'aria-label': label, title: label, html: ICON.speak,
-    onclick: (e) => { e.stopPropagation(); unlock(); stopAllReading(); say(typeof text === 'function' ? text() : text); } })
+    onclick: (e) => { e.stopPropagation(); unlock(); say(typeof text === 'function' ? text() : text); } })
   : null);
 
 // ── bottom sheet ───────────────────────────────────────────────────────
@@ -85,7 +85,7 @@ let current = null;
 let guard = null;                 // () => boolean: return true to block leaving
 export function setLeaveGuard(fn) { guard = fn; }
 export function show(name, render, { replace = false, arg = null } = {}) {
-  stopSpeech(); stopAllReading(); closeSheet();
+  stopSpeech(); stopAudio(); closeSheet();
   current = { name, render, arg };
   const state = { name, arg };
   try { replace || !history.state ? history.replaceState(state, '') : history.pushState(state, ''); } catch { /* sandboxed */ }
@@ -102,7 +102,7 @@ window.addEventListener('popstate', (e) => {
   if (guard && guard()) { try { history.pushState(history.state, ''); } catch { /* ignore */ } return; }
   const st = e.state;
   const render = st && routes.get(st.name);
-  stopSpeech(); stopAllReading(); closeSheet();
+  stopSpeech(); stopAudio(); closeSheet();
   if (render) { current = { name: st.name, render, arg: st.arg }; paint(); }
 });
 export const back = () => { try { history.back(); } catch { /* ignore */ } };
