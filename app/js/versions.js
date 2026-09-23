@@ -6,6 +6,15 @@
 
 export default [
   {
+    v: '1.10.0', date: '2026-09-23',
+    what: [
+      'The course no longer goes backwards. A stage was judged live from your answers, so missing three stage-one words in a review un-passed stage one: the rail, the title and the word of the day all fell back to where they were weeks ago. A fortnight simulation showed it oscillating 3, 1, 3, 1 on consecutive days. What has been opened now stays open; the count towards the current stage still moves both ways, because that is honest.',
+      '係 was being taught as "to bind". So was 咩 as "the bleating of sheep" and 諗 as "to reprimand", with 想 and 諗 inverted inside one stage. Ranking meanings by how many dictionaries agree fixed the concrete words and broke the grammatical ones — what makes a word Cantonese is often that its sense is the MINORITY one, and 係 is also a literary Mandarin word meaning "to bind". All 166 course words now carry a meaning chosen by hand, and the build fails if any is missing or is not a sense the sources give.',
+      'Jyutping is spaced wherever it appears — deoi3 m4 zyu6, not deoi3m4zyu6. Sentences already were; single words were not, anywhere.',
+      'New words arrive at the rate the app was retuned to last week. The pace presets were overriding the scheduler and still shipping the old number, so the fix for the repetition loop never reached the default setting: 26% of a day was new material where the measurement claimed 32%. Now it really is 32%.',
+    ],
+  },
+  {
     v: '1.9.0', date: '2026-09-23',
     what: [
       'The app teaches before it tests. Every word used to be met for the first time as a question — 妹 arrived as "what does this mean?" with four options, you guessed, and then you were told. Now a word is shown first: the characters, the reading spaced out to read aloud, what it means, a sentence it lives in, and the note if it has one. Then it asks.',

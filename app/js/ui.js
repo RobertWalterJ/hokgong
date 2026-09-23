@@ -141,3 +141,7 @@ export function flash(kind) {
   document.body.append(el);
   setTimeout(() => el.remove(), 480);
 }
+
+// Jyutping as a person reads it: the corpus stores do1ze6, a learner needs
+// do1 ze6. Every syllable ends in a tone number, so the split is exact.
+export const readable = (j) => String(j || '').replace(/([a-z]+[1-6])(?=[a-z])/g, '$1 ');

@@ -346,7 +346,21 @@ for (const [n, st] of DECK.stages.entries()) {
 // value must be a meaning the sources already give that word. A re-ordering,
 // never an invention.
 const CHOSEN = (await import(pathToFileURL(join(ROOT, 'content', 'glosses.mjs')).href)).default;
+const { UNGLOSSABLE: UNGLOSSED } = await import(pathToFileURL(join(ROOT, 'content', 'glosses.mjs')).href);
+const SYLL = (await import(pathToFileURL(join(ROOT, 'content', 'syllabus.mjs')).href)).default;
 const lexFor = new Map(LEX.map((e) => [e.w, e]));
+// No course word may take its meaning from the automatic ranking. The ranking
+// is right about concrete words and wrong about grammatical ones — it elected
+// "to bind" for 係, the copula the whole of stage one is built on — and no
+// mechanical rule can tell those two cases apart. A person can, and must.
+const skip = new Set(UNGLOSSED);
+for (const st of SYLL) {
+  for (const word of st.words) {
+    if (skip.has(word)) continue;
+    check(Object.prototype.hasOwnProperty.call(CHOSEN, word),
+      'a course word has no hand-checked meaning', `${word} (stage "${st.id}") — add it to content/glosses.mjs`);
+  }
+}
 for (const [word, want] of Object.entries(CHOSEN)) {
   const e = lexFor.get(word);
   if (!e) { fail('the hand-checked list names a word not in the corpus', word); continue; }

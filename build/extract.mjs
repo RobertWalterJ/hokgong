@@ -423,8 +423,12 @@ const lexicon = [...counts.entries()]
     // 四 was "labourer", 快 had lost "fast" — all the same shape of error.
     //
     // Counted across every entry for the word, including ones whose reading
-    // fits less well, because agreement about MEANING is evidence even when
-    // the reading is not the one recorded.
+    // fits less well: agreement about MEANING is evidence even when the
+    // reading is not the one recorded, and it is what fixed 水, 四, 杯, 茶 and
+    // 街. It is also why 係 comes out as "to bind" — the literary Mandarin
+    // sense has more dictionaries behind it than the Cantonese copula. That is
+    // not fixable by weighting, and it is not left to weighting: every word
+    // the course teaches has a hand-checked meaning in content/glosses.mjs.
     const plain = (t) => tidy(t).toLowerCase().replace(/[^a-z ]+/g, ' ').replace(/\s+/g, ' ').trim();
     const agree = new Map();
     for (const x of entries) {
@@ -437,6 +441,9 @@ const lexicon = [...counts.entries()]
       }
     }
     const backing = (sn) => Math.min(3, ((agree.get(plain(sn.text)) || new Set()).size - 1));
+    // A sense a dictionary has explicitly marked Cantonese outranks one it has
+    // not, for a word people were recorded saying.
+    const cantoMarked = (src) => /Cantonese sense|CC-Canto/.test(src) ? 1 : 0;
     const tier = pick ? ranked.filter((x) => x.conf === pick.conf) : [];
     const pool = [];
     const already = new Set();
@@ -446,7 +453,7 @@ const lexicon = [...counts.entries()]
       already.add(key);
       pool.push({ sn, src: x.src, w: weigh(x) });
     }
-    pool.sort((a, b) => (senseScore(b.sn, cls) + backing(b.sn)) - (senseScore(a.sn, cls) + backing(a.sn)) || b.w - a.w);
+    pool.sort((a, b) => (senseScore(b.sn, cls) + backing(b.sn) + cantoMarked(b.src)) - (senseScore(a.sn, cls) + backing(a.sn) + cantoMarked(a.src)) || b.w - a.w);
     const kept = pool.filter(({ sn }) => !/^used in transliteration/i.test(sn.text) && !uselessGloss.test(sn.text) && !coarseGloss.test(sn.text) && !obscureGloss.test(sn.text));
     const ordered = kept.map(({ sn }) => tidy(sn.text)).filter(Boolean);
     // The source named is the one that printed the meaning actually taught.

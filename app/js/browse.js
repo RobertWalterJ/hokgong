@@ -5,7 +5,7 @@
 // long browsable lists sit at the foot of the home screen, so the app leans
 // towards the thing worth doing rather than the thing worth reading.
 
-import { h, sayBtn, sheet, disclosure, show, ICON } from './ui.js';
+import { h, sayBtn, sheet, disclosure, show, ICON , readable } from './ui.js';
 import { State, cardState, isHolding, dayKey, DAY, now } from './schedule.js';
 import { D, wordAt, allIds, examplesOf, SKILL, SKILL_NAMES } from './deck.js';
 import { playRecording, playWord, canPlayWord } from './audio.js';
@@ -54,7 +54,7 @@ export function wordCard(i, { example = false, reveal = false } = {}) {
     h('div', { class: 'wline' },
       h('span', { class: 'han big' }, w.w),
       canPlayWord() ? h('button', { class: 'icon', type: 'button', 'aria-label': `Hear ${w.w}`, html: ICON.speak, onclick: () => playWord(w.w) }) : null),
-    showJyut ? h('p', { class: 'jyut' }, w.j) : null,
+    showJyut ? h('p', { class: 'jyut' }, readable(w.j)) : null,
     h('p', { class: 'gloss' }, w.g, sayBtn(w.g)),
     w.alt?.length ? h('p', { class: 'note' }, 'also: ' + w.alt.join('; ')) : null,
     ex ? h('div', { class: 'example' },
@@ -86,7 +86,7 @@ export function contextCard(card, { compact = false } = {}) {
     h('h3', {}, card.title),
     card.note ? h('p', {}, card.note, sayBtn(card.note)) : null,
     h('div', { class: 'wordset' }, ...words.map((f) => h('button', { class: 'wchip', type: 'button', onclick: () => canPlayWord() && playWord(f.w) },
-      h('span', { class: 'han' }, f.w), h('span', { class: 'jyut' }, f.jyut), h('span', { class: 'gloss' }, f.gloss)))),
+      h('span', { class: 'han' }, f.w), h('span', { class: 'jyut' }, readable(f.jyut)), h('span', { class: 'gloss' }, f.gloss)))),
     h('p', { class: 'evidence' }, 'Readings and meanings from CC-Canto and the recorded corpus; the words shown are only those the sources carry.'));
 }
 
@@ -106,7 +106,7 @@ function wordsScreen() {
       : `${d.words.length.toLocaleString()} words, most-spoken first. Showing the first 300 — search to go deeper.`;
     list.replaceChildren(...hits.map(({ w, i }) => h('button', { class: 'row word-row', type: 'button', onclick: () => sheet(wordCard(i, { example: true, reveal: true })) },
       h('span', { class: 'han' }, w.w),
-      h('span', { class: 'jyut' }, w.j),
+      h('span', { class: 'jyut' }, readable(w.j)),
       h('span', { class: 'gloss' }, w.g),
       stateDot('wl/' + w.w))));
   };
@@ -150,7 +150,7 @@ function tonesScreen() {
       h('span', { class: 'glyph', html: contourGlyph(tone) }),
       h('span', { class: 'tname' }, toneName(tone)),
       w ? h('button', { class: 'wchip', type: 'button', onclick: () => canPlayWord() && playWord(w.w) },
-        h('span', { class: 'han' }, w.w), h('span', { class: 'jyut' }, w.j), h('span', { class: 'gloss' }, w.g)) : null);
+        h('span', { class: 'han' }, w.w), h('span', { class: 'jyut' }, readable(w.j)), h('span', { class: 'gloss' }, w.g)) : null);
   });
   const centre = voiceCentre();
   return [header('Tones'), h('main', {},
@@ -267,7 +267,7 @@ function courseScreen() {
           h('div', { class: 'wordset' }, ...st.words.map((i) => {
             const w = D().words[i];
             return h('button', { class: 'wchip', type: 'button', onclick: () => sheet(wordCard(i, { example: true, reveal: true })) },
-              h('span', { class: 'han' }, w.w), h('span', { class: 'jyut' }, w.j), h('span', { class: 'gloss' }, w.g));
+              h('span', { class: 'han' }, w.w), h('span', { class: 'jyut' }, readable(w.j)), h('span', { class: 'gloss' }, w.g));
           })))
         : h('p', { class: 'note' }, `${st.words.length} words, waiting until the stage before it is passed.`),
       h('p', { class: 'note' }, st.why))),

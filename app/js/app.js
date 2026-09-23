@@ -8,7 +8,7 @@
 // Screens live in browse.js; this file is the shell, the home screen and the
 // round.
 
-import { h, iconBtn, sayBtn, sheet, closeSheet, disclosure, flash, show, route, back, currentScreen, repaint, ICON, applyReading, READ_DEFAULTS } from './ui.js';
+import { h, iconBtn, sayBtn, sheet, closeSheet, disclosure, flash, show, route, back, currentScreen, repaint, ICON, applyReading, READ_DEFAULTS, readable } from './ui.js';
 import { initSpeech, say, unlock, available as speechAvailable, cantoneseAvailable, onSpeaking } from './speech.js';
 import { playRecording, playWord, stopAudio, onAudio, canPlayWord, haveRecordings, probeRecordings } from './audio.js';
 import { State, Round, cardState, isHolding, dayKey, newLeftToday, nextDueSentence, untilText, now, shuffle, DAY } from './schedule.js';
@@ -52,7 +52,10 @@ export function course() {
     if (it.i != null) wordRight.add(it.i);
     if (it.gid != null) grammarRight.add(it.gid);
   }
-  return stageState({ canAnswerWord: (i) => wordRight.has(i), grammarMet: (g) => grammarRight.has(g) });
+  const st = stageState({ canAnswerWord: (i) => wordRight.has(i), grammarMet: (g) => grammarRight.has(g), floor: State.data.maxStage || 0 });
+  // The high-water mark, kept in the saved state so it survives a reload.
+  if (st.current > (State.data.maxStage || 0)) { State.data.maxStage = st.current; State.save(); }
+  return st;
 }
 const isMet = (id) => !!State.card(id);
 // What the app may ask right now: what this phone can play, and what the
@@ -432,10 +435,16 @@ export const SITTINGS = {
 };
 const sitting = () => SITTINGS[State.data.settings.sitting] || SITTINGS.five;
 
+// These OVERRIDE the scheduler's own constants, which is worth saying plainly:
+// v1.8.0 retuned NEW_PER_DAY from 18 to 32 to break the repetition loop, and
+// the app went on shipping 18, because `steady` is passed on every round and
+// wins. The measurement that said the loop was fixed was run without a pace
+// and so measured a regime nobody was in — 32% of a day new, where the real
+// default gave 26%. These now carry the retuned numbers.
 export const PACES = {
-  gentle: { label: 'Gentle', note: 'About 8 new questions a day.', newPerRound: 3, newPerDay: 8 },
-  steady: { label: 'Steady', note: 'About 18 a day — the default.', newPerRound: 5, newPerDay: 18 },
-  keen: { label: 'Keen', note: 'Up to 40 a day. Expect a lot more reviewing tomorrow.', newPerRound: 8, newPerDay: 40 },
+  gentle: { label: 'Gentle', note: 'About 12 new questions a day.', newPerRound: 4, newPerDay: 12 },
+  steady: { label: 'Steady', note: 'About 30 a day — the default, and about a third of a sitting.', newPerRound: 9, newPerDay: 30 },
+  keen: { label: 'Keen', note: 'Up to 60 a day. Expect a lot more reviewing tomorrow.', newPerRound: 14, newPerDay: 60 },
 };
 const pace = () => PACES[S().pace] || PACES.steady;
 
@@ -595,7 +604,7 @@ function choices(options, answer, onPick, { reads = null } = {}) {
   const all = shuffle([answer, ...options]);
   const label = (o) => {
     const j = reads && reads[o];
-    return j ? [h('span', { class: 'han' }, o), h('span', { class: 'jyut' }, j)] : [o];
+    return j ? [h('span', { class: 'han' }, o), h('span', { class: 'jyut' }, readable(j))] : [o];
   };
   for (const o of all) {
     const b = h('button', { class: 'choice' + (reads && reads[o] ? ' withread' : ''), type: 'button', onclick: () => {
@@ -767,7 +776,7 @@ function notePick(it, ctx) {
   card.append(choices(it.options, w.w, (ok) => {
     ctx.onAnswer(ok);
     card.append(afterCard([
-      h('p', { class: 'han' }, w.w, ' ', h('span', { class: 'jyut' }, w.j)),
+      h('p', { class: 'han' }, w.w, ' ', h('span', { class: 'jyut' }, readable(w.j))),
       note ? h('div', { class: 'gpoint' },
         h('h3', {}, note.title),
         h('p', {}, note.plain, sayBtn(note.plain)),
@@ -899,10 +908,6 @@ function grammarMean(it, ctx) {
   }));
   return card;
 }
-
-// Jyutping as a person reads it. The corpus stores do1ze6; a learner who can
-// only read the romanisation needs do1 ze6.
-const readable = (j) => String(j || '').replace(/([a-z]+[1-6])(?=[a-z])/g, '$1 ');
 
 // Has this WORD been met before, in any of the ways the app asks about it?
 // Per word, not per question: 妹 is introduced once, not again when its

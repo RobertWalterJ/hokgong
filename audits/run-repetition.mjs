@@ -34,6 +34,11 @@ globalThis.localStorage = { getItem: (k) => store.get(k) ?? null, setItem: (k, v
 let mseed = 7;
 Math.random = () => ((mseed = (mseed * 16807) % 2147483647) / 2147483647);
 const S = await import('../app/js/schedule.js');
+// The app's default pace, not the scheduler's bare constants. The first
+// version of this audit passed no `pace` at all and so measured 32 new a day,
+// while the app ships "steady" at 18 — so the gate built to catch Robert's
+// complaint was measuring a regime he is not in.
+const PACE = { newPerRound: 9, newPerDay: 30 };   // PACES.steady in app.js
 const D = await import('../app/js/deck.js');
 
 const deck = JSON.parse(readFileSync(join(ROOT, 'app', 'data', 'deck.json'), 'utf8'));
@@ -83,8 +88,8 @@ for (let day = 0; day < DAYS; day++) {
     const ids = D.askableIds(true, true, stage, metCard, wordMet);
     const due = S.State.dueIds(ids).length;
     const unseen = ids.filter((id) => !S.State.card(id)).length;
-    const owed = due || Math.min(S.newLeftToday(), unseen);
-    const round = new S.Round(ids, { exclude: today, beyondDaily: !owed && unseen > 0, practice: !owed && unseen === 0, groupOf, size: SITTING });
+    const owed = due || Math.min(S.newLeftToday(PACE), unseen);
+    const round = new S.Round(ids, { exclude: today, pace: PACE, beyondDaily: !owed && unseen > 0, practice: !owed && unseen === 0, groupOf, size: SITTING });
     let id;
     while ((id = round.next())) {
       asks++;

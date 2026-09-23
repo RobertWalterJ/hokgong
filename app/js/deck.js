@@ -85,7 +85,19 @@ export const allIds = () => deck.items.map((it) => it.id);
 // A stage is passed when enough of its own words can be answered and each of
 // its grammar points has been met. Only NEW material is gated: reviews of
 // anything already met keep coming whatever stage you are on.
-export function stageState({ canAnswerWord, grammarMet }) {
+// `floor`: the furthest the learner has ever got. A stage is judged from
+// answers, and an answer can change — miss three stage-one words in a review
+// and "have >= need" stops being true, the stage un-passes, and the rail, the
+// title, the word of the day and the whole sense of having got somewhere fall
+// back to where they were weeks ago. The fortnight simulation showed the stage
+// oscillating 3, 1, 3, 1 on consecutive days.
+//
+// No app a learner has used revokes a finished unit, and none should: the
+// point of a gate is to open something, and a gate that shuts again is a
+// punishment for the ordinary act of forgetting. The live have/need count
+// still moves both ways — that is honest reporting of the current stage — but
+// what has been opened stays open.
+export function stageState({ canAnswerWord, grammarMet, floor = 0 }) {
   const stages = deck.stages.map((st) => {
     const have = st.words.filter(canAnswerWord).length;
     const need = Math.max(1, Math.ceil(st.words.length * st.gate));
@@ -95,7 +107,7 @@ export function stageState({ canAnswerWord, grammarMet }) {
   // The first stage not yet passed. Once they are all passed the course is
   // over and the rest of the word list opens, in the order people speak.
   const i = stages.findIndex((s) => !s.passed);
-  const current = i < 0 ? stages.length : i;
+  const current = Math.max(i < 0 ? stages.length : i, floor);
   return { stages, current, done: current >= stages.length };
 }
 
