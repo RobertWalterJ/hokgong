@@ -6,6 +6,18 @@
 
 export default [
   {
+    v: '1.8.0', date: '2026-09-23',
+    what: [
+      'The same questions no longer come back over and over. Over a fortnight the app used to ask 1,015 questions of which only 202 were different — the median one five times, one of them thirteen. The cause was mine: the stage gate opened about forty-five questions and v1.5.0 made every round fill to twenty-five, so three sittings a day drew seventy-five from a pool of forty-five. The course now decides the ORDER new words arrive in, not how many exist, and there is always a supply of unseen material within reach. Same fortnight now: 339 different questions, the median asked three times, no day without something new.',
+      'New material arrives about three times faster. The pacing came from a sister app whose whole pack was 317 questions; against 15,000 it left five sixths of every day as things you had already seen.',
+      'The practice fill rotates by what you have not seen longest, rather than by weakest memory. Weakest-memory looked right and caused the loop: a practice answer deliberately does not move the schedule, so the weakest questions were still the weakest tomorrow.',
+      'Quiet mode, in Settings: for a bus or a waiting room. Sets aside every question that asks you to say something or hear something; reading, the gap questions and grammar carry on.',
+      'The meanings were being chosen for a reader looking a word up, not a speaker trying to say something. 水 was taught as "money", 四 as "labourer", 杯 as "to boycott", 湯 as "Chinese surname", and 對唔住 as "sorry." with the dictionary’s full stop on it. Meanings are now ranked by how many independent dictionaries agree on them, which fixed most of it, and the 166 words the course teaches have a meaning chosen by hand from the senses the sources already give.',
+      'Senses no beginner’s app should print are gone: 細佬 is a younger brother, and the dictionaries also record it as slang for a part of the body.',
+      '湯 is no longer taught. It means soup, not one open dictionary in this build says so for the reading people use, and the app will not invent it.',
+    ],
+  },
+  {
     v: '1.7.0', date: '2026-09-20',
     what: [
       'A new kind of question, the one you asked for: a real sentence with one word taken out, and four words to choose from. There are 1,346 of them, up from two — the old ones were built only for grammar markers, so ten grammar points meant almost none. Recognising a word and knowing where it goes are different things, and only the second gets you talking.',

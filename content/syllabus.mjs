@@ -75,7 +75,7 @@ export default [
     title: 'At the table',
     can: 'Order food and drink, say what you like eating, and say you have already eaten.',
     why: 'Food is the safest conversation in any language, and 咗 — the marker for something finished — is easiest to learn on a verb you use three times a day.',
-    words: ['食', '飲', '食飯', '飲茶', '飯', '茶', '水', '奶茶', '咖啡', '麵', '肉', '魚', '菜', '湯', '好味', '好食', '飽', '餐', '早餐', '食嘢', '單'],
+    words: ['食', '飲', '食飯', '飲茶', '飯', '茶', '水', '奶茶', '咖啡', '麵', '肉', '魚', '菜', '好味', '好食', '飽', '餐', '早餐', '食嘢', '單'],
     grammar: ['zo2'],
     gate: 0.75,
   },

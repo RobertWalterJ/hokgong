@@ -103,8 +103,14 @@ const NEEDS_VOICE = new Set(['tone-pair', 'word-listen']);
 // And these need a recording: a sentence nobody can hear is not a listening
 // question, it is a blank.
 const NEEDS_RECORDING = new Set(['sentence-listen']);
-const askable = (it, hasVoice, hasRecordings) =>
-  (hasVoice || !NEEDS_VOICE.has(it.k)) && (hasRecordings || !NEEDS_RECORDING.has(it.k));
+// Questions that need the learner to make a noise, or to hear one. On a bus,
+// in a waiting room, beside someone sleeping, all of these are impossible —
+// and being asked them anyway is what makes an app something you can only use
+// at home.
+export const OUT_LOUD = new Set(['word-say', 'tone-say', 'word-listen', 'sentence-listen', 'tone-pair']);
+const askable = (it, hasVoice, hasRecordings, quiet = false) =>
+  (hasVoice || !NEEDS_VOICE.has(it.k)) && (hasRecordings || !NEEDS_RECORDING.has(it.k))
+  && !(quiet && OUT_LOUD.has(it.k));
 // A question is in reach if its stage is open, or if it has been met already —
 // a card you have seen never disappears because of where you are in the
 // course. Items belonging to no stage are the tail after the course.
@@ -117,7 +123,43 @@ const inReach = (it, current, met, wordMet) => {
   if (it.needs) return it.needs.every((i) => wordMet(i));
   return current >= deck.stages.length;
 };
-export const askableIds = (hasVoice, hasRecordings = true, current = Infinity, met = () => false, wordMet = () => false) =>
-  deck.items.filter((it) => askable(it, hasVoice, hasRecordings) && inReach(it, current, met, wordMet)).map((it) => it.id);
+// How much material a learner has never seen must be reachable at any moment.
+//
+// The stage gate was deciding both the ORDER new words arrive in and HOW MANY
+// exist, and the second of those was never the intention. Stage one opens
+// about forty-five questions; three sittings of twenty-five draw seventy-five
+// a day. Robert, 23 Sept: "the same questions keep coming back over and over
+// and over and over day after day after day." Measured over a fortnight:
+// 1,015 questions asked, 202 of them different, the median one asked five
+// times. That is not spacing, it is a loop.
+//
+// So the horizon widens past the current stage until there is a real supply
+// of unseen material. The course still decides what comes next — the order is
+// untouched — it just no longer decides that nothing comes next.
+const SUPPLY = 150;
+export const askableIds = (hasVoice, hasRecordings = true, current = Infinity, met = () => false, wordMet = () => false, quiet = false) => {
+  const ok = (it) => askable(it, hasVoice, hasRecordings, quiet);
+  // The earliest stage at which each item comes within reach, in one pass.
+  const tail = deck.stages.length;
+  const opensAt = (it) => {
+    if (met(it.id)) return 0;
+    if (it.stage != null) return it.stage;
+    if (it.needs) return it.needs.every((i) => wordMet(i)) ? 0 : Infinity;
+    return tail;
+  };
+  let horizon = current;
+  if (horizon < tail) {
+    const unseenAt = new Array(tail + 1).fill(0);
+    for (const it of deck.items) {
+      if (!ok(it) || met(it.id)) continue;
+      const o = opensAt(it);
+      if (o <= tail) unseenAt[o]++;
+    }
+    let running = 0;
+    for (let h = 0; h <= horizon; h++) running += unseenAt[h];
+    while (horizon < tail && running < SUPPLY) { horizon++; running += unseenAt[horizon]; }
+  }
+  return deck.items.filter((it) => ok(it) && inReach(it, horizon, met, wordMet)).map((it) => it.id);
+};
 export const setAsideCount = (hasVoice, hasRecordings = true) =>
   deck.items.filter((it) => !askable(it, hasVoice, hasRecordings)).length;

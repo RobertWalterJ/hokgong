@@ -59,7 +59,10 @@ const isMet = (id) => !!State.card(id);
 // course has opened.
 // A word counts as met once any question about it has been asked.
 const wordMet = (i) => ['wl/', 'ws/', 'wr/'].some((p) => State.card(p + D().words[i]?.w));
-const inPlay = () => askableIds(canPlayWord(), haveRecordings(), course().current, isMet, wordMet);
+// "There needs to be a mode to say that I maybe am in public and in a noisy
+// space so don't do the speech questions" (Robert, 23 Sept).
+export const isQuiet = () => !!State.data.settings?.quiet;
+const inPlay = () => askableIds(canPlayWord(), haveRecordings(), course().current, isMet, wordMet, isQuiet());
 
 // ── a new version, and not losing your progress ──────────────────────────
 // Everything you have learnt lives in this phone's browser storage. That is
@@ -140,6 +143,8 @@ function settingsSheet() {
   const box = sheet(
     h('h2', {}, 'Settings'),
     row('Sound', 'Small clicks when you answer.', toggle('sound', s.sound !== false, (v) => setSoundOn(v))),
+    row('Quiet mode', 'For a bus, a waiting room, anywhere you cannot speak or listen. Sets aside every question that asks you to say something or to hear something; reading, gaps and grammar carry on.',
+      toggle('quiet', !!s.quiet, () => repaint())),
     row('Always show Jyutping', 'The romanisation under every Cantonese word.', toggle('jyutping', s.jyutping !== false)),
     row('Keep the interface in English', 'Turns off the slow switch to Cantonese labels.', toggle('englishOnly', !!s.englishOnly, (v) => setEnglishOnly(v))),
     row('Larger text', 'Also available in your phone’s own settings.', toggle('big', !!s.big, (v) => document.documentElement.classList.toggle('big', v))),

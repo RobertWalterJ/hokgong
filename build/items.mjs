@@ -38,6 +38,11 @@ const GRAMMAR = await load('content/grammar.mjs');
 const CONTEXT = await load('content/context.mjs');
 const SYLLABUS = await load('content/syllabus.mjs');
 const NOTES = await load('content/notes.mjs');
+// For the 167 words the course teaches, the sense is chosen by hand from the
+// ones the sources already give — see content/glosses.mjs for why, and
+// build/verify.mjs for the check that it is a re-ordering and not an invention.
+const CHOSEN_SENSE = await load('content/glosses.mjs');
+const { UNGLOSSABLE } = await import(pathToFileURL(join(ROOT, 'content', 'glosses.mjs')).href);
 
 const WORDS = 6000;        // the conversational vocabulary the app is built to reach
 const READING = 1200;      // how far read-the-characters items go: reading matters, but later
@@ -52,7 +57,19 @@ const seeded = (str) => { let h = 2166136261; for (const c of str) h = Math.imul
 // Recorded speech first, in the order people actually say them; then written
 // frequency. Only words whose gloss belongs to the pronunciation recorded —
 // the rest wait for a Cantonese speaker to check them.
-const usable = LEX.filter((e) => e.gloss.length && e.glossMatchesSaid && chars(e.w) <= 4);
+const unglossable = new Set(UNGLOSSABLE);
+for (const e of LEX) {
+  const want = CHOSEN_SENSE[e.w];
+  if (!want) continue;
+  const at = e.gloss.indexOf(want);
+  // Not there means the sources changed under the hand-written list. Leave it
+  // alone and let build/verify.mjs say so rather than quietly teaching it.
+  if (at > 0) e.gloss = [want, ...e.gloss.filter((g) => g !== want)];
+}
+// A word the course needs and no source can gloss is not taught at all. 湯 is
+// soup, and not one dictionary in this build says so for the reading people
+// use; the app will not invent it.
+const usable = LEX.filter((e) => e.gloss.length && e.glossMatchesSaid && chars(e.w) <= 4 && !unglossable.has(e.w));
 // The first conversation comes first. content/essentials.mjs lists what a
 // learner needs in week one — greetings, politeness, family, counting — which
 // a 125,000-word corpus of 1997 adult conversation puts at word 2,523. Those

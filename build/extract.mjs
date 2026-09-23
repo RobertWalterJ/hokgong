@@ -151,9 +151,20 @@ for (const [word, byReading] of Object.entries(wikt)) {
   }
   for (const [ch, e] of uni) {
     if (!e.jyuts || !e.def) continue;
-    // Unihan packs several senses into one line with semicolons and commas;
-    // the sense splitter downstream handles that.
-    addEntry(ch, e.jyuts, [e.def], 'Unihan');
+    // Unihan packs several senses into one line with semicolons, and several
+    // SYNONYMS into each of those with commas: 快 is "rapid, quick, speedy,
+    // fast; soon". Downstream only cuts on semicolons, so that stayed one
+    // 25-character lump — too long for the short-answer bonus, and matching
+    // nobody else's wording, so it drew no agreement either, and 快 was taught
+    // as "pleased". Cut on the commas here, where it is known that this is a
+    // synonym list rather than prose. Anything with a verb or a bracket in it
+    // is left alone, because there the comma is punctuation.
+    const parts = e.def.split(';').flatMap((chunk) => (
+      /[()]|\bto \w/.test(chunk) || chunk.split(',').some((x) => x.trim().split(/\s+/).length > 3)
+        ? [chunk]
+        : chunk.split(',')
+    )).map((x) => x.trim()).filter(Boolean);
+    addEntry(ch, e.jyuts, parts.length ? parts : [e.def], 'Unihan');
   }
 }
 
@@ -183,7 +194,17 @@ const rimeSays = (w) => ([...w].length === 1 ? rimeChars.get(w) : rimeWords.get(
 // "also pr." is CC-CEDICT noting an alternative pronunciation; once the pinyin
 // in brackets is stripped it reads "also pr. etc", which was being offered as
 // a second meaning of 拜拜.
-const uselessGloss = /^(variant of|old variant of|surname |abbr\. for|see |used in|erhua variant|another name for|an alternative form|alternative form|also pr\b|\(archaic\)|\(literary\))/i;
+// Senses no beginner's app should print, whoever printed them. 細佬 is a
+// younger brother and the dictionaries also record it as slang for a part of
+// the body; 老婆 is a wife, and "waifu" and "toad" are in there too. These are
+// honest lexicography and they were turning up as multiple-choice options in
+// an app for talking to your wife's family (gloss audit, 23 Sept).
+const coarseGloss = new RegExp(String.raw`\b(penis|vagina|breast|prick|dick|cock|arse|ass|shit|fuck|whore|slut|prostitute|prostitution|sexual|vulgar|obscene|derogatory|offensive|insult)\b|euphemism for|slang for|swear ?word`, 'i');
+// …and senses that are true but useless: a musical note in a notation system
+// nobody uses, a banknote of another country, a part-of-speech label.
+const obscureGloss = new RegExp(String.raw`\b(gongche|musical note|notation|NTD|banknote|kangxi|waifu|toad)\b|part of speech|classifier for votes|the other (woman|man)|note of (the )?currency`, 'i');
+const uselessGloss = /^(variant of|old variant of|surname |abbr\. for|see |used in|erhua variant|another name for|an alternative form|alternative form|also pr\b|\(archaic\)|\(literary\)|mandarin equivalent|cf\.|compare\b|short for)/i;
+
 
 // ── which sense is the right one ─────────────────────────────────────────
 // Matching the pronunciation is not enough. 都 is dou1 both as "all/also" (what
@@ -216,15 +237,25 @@ const balance = (s) => {
     else if (c === ')') { if (depth === 0) continue; depth--; }
     out.push(c);
   }
-  return (depth > 0 ? out.slice(0, cutAt).join('') : out.join('')).replace(/[\s;,]+$/, '').trim();
+  return (depth > 0 ? out.slice(0, cutAt).join('') : out.join('')).replace(/[\s;,.]+$/, '').trim();
 };
 const tidy = (s) => balance(s
   .replace(/\[[^\]]*\]/g, '')
+  .replace(/\s*\bM:\s*\S+/g, '')
+  .replace(/^['"‘’“”]+|['"‘’“”]+$/g, '')
   .replace(/\([^)]*[\u3400-\u9FFF][^)]*\)/g, '')
   .replace(/^\s*\([^)]{1,24}\)\s*/, '')
+  // A trailing register label is about the word, not part of its meaning:
+  // 冇 came out as "to not have (Cantonese)". Only these labels are stripped,
+  // so a qualifier that tells you something — "excuse me (to get attention)" —
+  // survives.
+  .replace(/\s*\((cantonese|hong ?kong|colloquial|literary|archaic|slang|formal|informal|vulgar|dialect(al)?|obsolete)\)\s*$/i, '')
   .replace(/^\s*\d+\s*[.)]\s*/, '')
   .replace(/\s+/g, ' ')
-  .replace(/^[;,\s]+|[;,\s]+$/g, '')
+  // …including the sentence-final full stop. A dictionary writes "sorry." and
+  // "don't."; on a button, and in "say this in Cantonese: sorry.", that reads
+  // as a typo (gloss audit, 23 Sept). Typography is not meaning.
+  .replace(/^[;,\s]+|[;,.\s]+$/g, '')
   .trim());
 // Senses are separated by a semicolon, by a numbered marker, or by both — but
 // only outside brackets. Splitting on every semicolon cut "(phrase; said when…)"
@@ -284,6 +315,11 @@ const senseScore = (sense, cls) => {
   if (/^(variant|see|short for|abbreviation)\b/i.test(sense.text)) s -= 5;
   if (/^\(?(cantonese|hong kong)\)?/i.test(sense.text)) s += 1;
   if (cls === 'verb' && /^to \w/.test(sense.text)) s += 2;
+  // …and the other way round. 杯 is a cup: the corpus hears it as a noun, but
+  // Wiktionary's Cantonese-sense entry offers only "to boycott" (from 杯葛) and
+  // "moon blocks", and the app taught the first of those. A verb-shaped gloss
+  // for a word nobody says as a verb is the wrong sense, whoever printed it.
+  if (cls && cls !== 'verb' && /^to \w/.test(sense.text)) s -= 2;
   if (sense.text.length <= 24) s += 0.5;               // a short answer is a better answer
   return s;
 };
@@ -366,8 +402,55 @@ const lexicon = [...counts.entries()]
     }
     // A cross-reference teaches nothing: a word whose every sense is 'variant
     // of X' or 'see Y' is left without a gloss, and so is not taught at all.
-    const ordered = pick ? [...pick.senses].sort((a, b) => senseScore(b, cls) - senseScore(a, cls)).map((s) => s.text)
-      .filter((g) => !/^used in transliteration/i.test(g) && !uselessGloss.test(g)) : [];
+    // Every dictionary that fits the recorded reading AS WELL as the winner
+    // gets a say, not just the winner. Taking only the top entry's senses threw
+    // away the ordinary meaning whenever a specialist entry won the tie-break:
+    // 杯 was taught as "to boycott" because Wiktionary's Cantonese-sense entry
+    // outranked CC-Canto, and CC-Canto's "cup" was never even considered.
+    // Cantonese-sense entries list what is DISTINCTIVELY Cantonese, which for a
+    // common word is precisely the sense nobody wants (Robert, 23 Sept:
+    // "quirks and inaccuracies").
+    //
+    // Pooling keeps the contract — every meaning is still one a published
+    // dictionary gives this word at this reading — and lets the best SENSE win
+    // rather than the best masthead.
+    // How many DIFFERENT dictionaries give a sense. This is the signal that
+    // separates a word's ordinary meaning from its slang, and nothing else in
+    // the ranking could: 水 is water, and CC-Canto happens to print its
+    // "money / who / whom" entry before its "water / river / liquid" one, so
+    // with both scoring identically the app taught 水 as "money" on file order
+    // alone. Four sources say water; two say money. 湯 was "Chinese surname",
+    // 四 was "labourer", 快 had lost "fast" — all the same shape of error.
+    //
+    // Counted across every entry for the word, including ones whose reading
+    // fits less well, because agreement about MEANING is evidence even when
+    // the reading is not the one recorded.
+    const plain = (t) => tidy(t).toLowerCase().replace(/[^a-z ]+/g, ' ').replace(/\s+/g, ' ').trim();
+    const agree = new Map();
+    for (const x of entries) {
+      const house = x.src.replace(/ \(.*$| readings$/, '');   // CC-Canto readings is CC-Canto
+      for (const sn of x.senses) {
+        const k = plain(sn.text);
+        if (!k) continue;
+        if (!agree.has(k)) agree.set(k, new Set());
+        agree.get(k).add(house);
+      }
+    }
+    const backing = (sn) => Math.min(3, ((agree.get(plain(sn.text)) || new Set()).size - 1));
+    const tier = pick ? ranked.filter((x) => x.conf === pick.conf) : [];
+    const pool = [];
+    const already = new Set();
+    for (const x of tier) for (const sn of x.senses) {
+      const key = tidy(sn.text).toLowerCase();
+      if (!key || already.has(key)) continue;
+      already.add(key);
+      pool.push({ sn, src: x.src, w: weigh(x) });
+    }
+    pool.sort((a, b) => (senseScore(b.sn, cls) + backing(b.sn)) - (senseScore(a.sn, cls) + backing(a.sn)) || b.w - a.w);
+    const kept = pool.filter(({ sn }) => !/^used in transliteration/i.test(sn.text) && !uselessGloss.test(sn.text) && !coarseGloss.test(sn.text) && !obscureGloss.test(sn.text));
+    const ordered = kept.map(({ sn }) => tidy(sn.text)).filter(Boolean);
+    // The source named is the one that printed the meaning actually taught.
+    const sawSrc = kept.length ? kept[0].src : pick ? pick.src : null;
     return {
       w, rank: i + 1, n: e.n,
       jyut: pick ? readingOf(pick, said) : said,
@@ -376,7 +459,7 @@ const lexicon = [...counts.entries()]
       rimeJyut: rime,
       pos,
       gloss: ordered.slice(0, 3),
-      glossSrc: pick ? pick.src : null,
+      glossSrc: sawSrc,
       glossConf: pick ? pick.conf : null,
       glossMatchesSaid: pick ? pick.conf !== 'other' : false,
       dictJyut: [...new Set(entries.flatMap((x) => x.jyuts))],
@@ -444,7 +527,7 @@ for (const line of readFileSync(join(RIME, 'essay-cantonese.txt'), 'utf8').split
   }
   if (!best) continue;
   const glosses = sensesOf(best.hit).sort((a, b) => senseScore(b, null) - senseScore(a, null)).map((x) => x.text)
-    .filter((g) => !uselessGloss.test(g) && !properNoun.test(g) && g.length <= 60)
+    .filter((g) => !uselessGloss.test(g) && !properNoun.test(g) && !coarseGloss.test(g) && !obscureGloss.test(g) && g.length <= 60)
     .slice(0, 3);
   if (!glosses.length) continue;
   essay.push({ w, freq, jyut: best.said, jyutAll: says, rimeJyut: says, pos: null, gloss: glosses, glossSrc: best.hit.src, glossConf: 'exact', glossMatchesSaid: true, dictJyut: [...new Set(entries.flatMap((x) => x.jyuts))] });
@@ -480,7 +563,7 @@ for (const group of SYLLABUS) {
     }
     if (!best) continue;
     const glosses = sensesOf(best.hit).sort((a, b) => senseScore(b, null) - senseScore(a, null))
-      .map((x) => x.text).filter((g) => !uselessGloss.test(g) && g.length <= 60).slice(0, 3);
+      .map((x) => x.text).filter((g) => !uselessGloss.test(g) && !coarseGloss.test(g) && !obscureGloss.test(g) && g.length <= 60).slice(0, 3);
     if (!glosses.length) continue;
     have.add(w);
     added.push({ w, freq: null, n: 0, jyut: best.said, said: best.said, jyutAll: [best.said], rimeJyut: says, pos: null,

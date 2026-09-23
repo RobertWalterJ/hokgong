@@ -27,17 +27,20 @@ export const DAY = 864e5;
 // removed on 18 Sept 2026: Robert found the same questions coming back inside
 // a session, and it made the pack feel small. A miss now simply comes back on
 // a later day — the spacing that actually builds memory.
-const NEW_PER_ROUND = 5;
-const MIN_NEW = 3;                   // new questions per round while some reviews are due
+const NEW_PER_ROUND = 9;
+const MIN_NEW = 6;                   // new questions per round while some reviews are due
 const ROUND = 25;              // about five minutes at ten seconds a question
 // Palimpsest's pack was 317 questions and these numbers suited it. This deck
 // is 13,826 questions towards a 6,000-word vocabulary, and a backlog threshold
 // of 14 throttled new words to three a day — sixteen years to the end of the
 // list. The thresholds now scale to what a language learner actually carries:
 // a few dozen reviews a day is ordinary, not a crisis.
-const NEW_PER_DAY = 18;              // new questions per day, across all rounds
-const EASING = 25;                   // due reviews above which a round eases to MIN_NEW
-const BACKLOG = 70;                  // …and above which it takes just one new question
+// A third of a day being new material is the ratio that feels like progress;
+// a fifth is the ratio that feels like a loop. At three sittings of 25 that
+// puts the day's allowance around thirty.
+const NEW_PER_DAY = 32;              // new questions per day, across all rounds
+const EASING = 70;                   // due reviews above which a round eases to MIN_NEW
+const BACKLOG = 160;                 // …and above which it takes just one new question
 // Robert plays in short bursts while waiting, several times a day. A question
 // answered in the last COOLDOWN hours is not asked again — not in another
 // round, not in practice, not after closing and reopening the app — so its
@@ -351,7 +354,13 @@ export class Round {
       for (const id of top) this.extra.add(id);
       reviews.push(...top);
     };
-    fillWith(metAll.filter((id) => !exclude.has(id) && !cooling(id)).sort((x, y) => State.recall(x, t) - State.recall(y, t)));
+    // Least recently asked first, NOT weakest recall. Weakest-recall was the
+    // obvious choice and it made the loop: a practice answer deliberately does
+    // not move the schedule, so the weakest questions were still the weakest
+    // tomorrow, and the fill handed back the same ones every single day. Going
+    // by when a question was last asked rotates through everything met, which
+    // is what spacing across material actually means.
+    fillWith(byAge(metAll.filter((id) => !exclude.has(id) && !cooling(id))));
     if (picked.length < size) add.push(...take(fresh.filter((id) => !picked.includes(id)), size - picked.length));
     fillWith(byAge(metAll.filter((id) => !exclude.has(id) && cooling(id))));
     // The last two steps re-ask something the learner has already seen today,

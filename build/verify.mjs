@@ -338,6 +338,23 @@ for (const [n, st] of DECK.stages.entries()) {
   }
 }
 
+// ── 8e. the hand-checked meanings are the sources' own ───────────────────
+// content/glosses.mjs picks which of a word's meanings the course teaches.
+// That is a judgement the dictionaries cannot make — 麵 really does mean
+// flour, and a course about ordering lunch means noodles. It is also the one
+// place in this build where a human overrides a source, so it is fenced: every
+// value must be a meaning the sources already give that word. A re-ordering,
+// never an invention.
+const CHOSEN = (await import(pathToFileURL(join(ROOT, 'content', 'glosses.mjs')).href)).default;
+const lexFor = new Map(LEX.map((e) => [e.w, e]));
+for (const [word, want] of Object.entries(CHOSEN)) {
+  const e = lexFor.get(word);
+  if (!e) { fail('the hand-checked list names a word not in the corpus', word); continue; }
+  check(e.gloss.includes(want), 'a hand-checked meaning is not one the sources give', `${word}: "${want}" — sources say ${JSON.stringify(e.gloss)}`);
+  const taught = DECK.words.find((w) => w.w === word);
+  if (taught) check(taught.g === want, 'a hand-checked meaning did not reach the deck', `${word}: deck says "${taught.g}"`);
+}
+
 // ── 9. the deck is big enough to be worth playing ────────────────────────
 check(DECK.words.length >= 4000, 'the word list is short of a conversational vocabulary', `${DECK.words.length} words`);
 check(DECK.items.filter((i) => i.k === 'sentence-listen').length >= 100, 'too little listening practice', '');
