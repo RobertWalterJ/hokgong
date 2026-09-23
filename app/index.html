@@ -290,6 +290,25 @@ details.more > :not(summary) { animation: rise .2s var(--ease); }
 .dot { flex: 1 1 0; min-width: 2px; max-width: 18px; height: 2px; border-radius: 2px; background: var(--line); transition: background .2s var(--ease); }
 .dot.done { background: var(--accent); }
 .q { text-align: center; animation: rise .22s var(--ease); display: flex; flex-direction: column; justify-content: center; min-height: 56vh; }
+/* Meeting a word: the one screen that asks nothing. It should read as calm and
+   unhurried — no marks, no colour of judgement, nothing to get wrong. The pale
+   yellow wash is the app's "here is something" colour, used nowhere that an
+   answer is expected, so the difference is visible before it is read. */
+.meet { background: var(--chip); border-radius: 18px; padding: var(--s5) var(--s4); justify-content: flex-start; }
+/* The word itself. NOT .start — that is the big red button on the home screen,
+   and reusing it painted 你好 as a button you could press. The same collision
+   happened once before with .big; a class named for how something LOOKS will
+   always get borrowed by something that is not it. */
+.meet .han.word { font-size: 2.6rem; line-height: 1.25; margin: 0 0 var(--s2); }
+.meet .eyebrow { color: var(--muted); }
+.meet .big-j { color: var(--accent); font-family: var(--ui); font-size: 1.35rem; letter-spacing: .01em; margin: 0 0 var(--s2); }
+.meet .gloss.big { font-size: 1.3rem; margin-bottom: var(--s2); }
+.meet .cue { margin: 0 auto var(--s4); max-width: 26rem; }
+.meet-eg { margin-top: var(--s4); padding-top: var(--s4); border-top: 1px solid var(--line); }
+.meet-eg .note { margin-bottom: var(--s2); }
+.meet .gpoint { margin-top: var(--s4); text-align: left; }
+.newwords { margin: var(--s2) 0 var(--s4); color: var(--muted); }
+.newwords .han { color: var(--ink); }
 .play {
   display: inline-flex; align-items: center; gap: var(--s2); margin: var(--s2) auto var(--s5);
   border: 1px solid var(--line); border-radius: 999px; padding: var(--s3) var(--s5);

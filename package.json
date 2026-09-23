@@ -1,13 +1,13 @@
 {
   "name": "hokgong",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "description": "Hok Gong — a Cantonese app built on recorded speech.",
   "private": true,
   "type": "module",
   "scripts": {
     "corpus": "node build/extract.mjs && node build/items.mjs",
     "verify": "node build/verify.mjs",
-    "check": "node build/verify.mjs && node build/test-verify.mjs && node build/audit-colour.mjs && node audits/run-dyslexia.mjs && node audits/run-glosses.mjs --strict && node audits/run-variety.mjs && node build/test-layout.mjs && node audits/run-repetition.mjs && node build/test-schedule.mjs && node build/test-keen.mjs",
+    "check": "node build/verify.mjs && node build/test-verify.mjs && node build/audit-colour.mjs && node audits/run-dyslexia.mjs && node audits/run-glosses.mjs --strict && node audits/run-variety.mjs && node audits/run-teaching.mjs && node build/test-layout.mjs && node audits/run-repetition.mjs && node build/test-schedule.mjs && node build/test-keen.mjs",
     "build": "node build/single.mjs && node build/make-deploy.mjs"
   },
   "devDependencies": {

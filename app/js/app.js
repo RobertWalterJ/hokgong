@@ -12,7 +12,7 @@ import { h, iconBtn, sayBtn, sheet, closeSheet, disclosure, flash, show, route, 
 import { initSpeech, say, unlock, available as speechAvailable, cantoneseAvailable, onSpeaking } from './speech.js';
 import { playRecording, playWord, stopAudio, onAudio, canPlayWord, haveRecordings, probeRecordings } from './audio.js';
 import { State, Round, cardState, isHolding, dayKey, newLeftToday, nextDueSentence, untilText, now, shuffle, DAY } from './schedule.js';
-import { loadDeck, indexDeck, D, wordOf, exampleOf, allIds, askableIds, setAsideCount, stageState, SKILL, SELF_RATED } from './deck.js';
+import { loadDeck, indexDeck, D, wordOf, exampleOf, examplesOf, allIds, askableIds, setAsideCount, stageState, SKILL, SELF_RATED } from './deck.js';
 import { setProgress, setEnglishOnly, t } from './lang.js';
 import { press as tick, right as correct, wrong, setSound as setSoundOn } from './sound.js';
 import { attempt as toneAttempt, rank as toneRank, toneName, toneChao } from './pitch.js';
@@ -465,6 +465,10 @@ function roundScreen(round, { practice }) {
   // Where the course stood when the round began, so passing a gate during it
   // can be said out loud at the end.
   const stageBefore = course().current;
+  // What was met for the first time in this round, so the end of it can say so.
+  // "Nine new words" is the thing a learner actually wants to hear, and the
+  // summary was only ever reporting a score.
+  const metToday = new Set();
 
   const count = h('span', { class: 'n' });
   const paint = () => {
@@ -488,6 +492,9 @@ function roundScreen(round, { practice }) {
     return h('section', { class: 'card summary' },
       h('div', { class: 'eyebrow' }, practice ? 'Recall test finished' : 'Round finished'),
       h('p', { class: 'score' }, `${right} right, out of ${done}`),
+      metToday.size ? h('p', { class: 'newwords' },
+        `${metToday.size} new word${metToday.size === 1 ? '' : 's'}: `,
+        h('span', { class: 'han' }, [...metToday].join('　'))) : null,
       h('p', { class: 'note' }, practice ? `A recall test goes through everything you have met, weakest memory first, ${sitting().size} at a time — it does not change when a word comes back, it only tells you where you stand.` : byline(tally)),
       practice ? recallScope() : null,
       passed ? h('div', { class: 'passed' },
@@ -520,9 +527,22 @@ function roundScreen(round, { practice }) {
       flash(ok ? 'right' : 'wrong');
       paint();
     };
-    box.replaceChildren(h('div', { class: 'qcount' }, count, dots), question(it, { onAnswer, onNext: ask, practice }));
-    paint();
-    window.scrollTo(0, 0);
+    const showQuestion = () => {
+      box.replaceChildren(h('div', { class: 'qcount' }, count, dots), question(it, { onAnswer, onNext: ask, practice }));
+      paint();
+      window.scrollTo(0, 0);
+    };
+    // Taught before tested. A recall test never introduces anything — it is
+    // there to tell you where you stand, and meeting a word inside it would
+    // make the score a lie.
+    if (!practice && needsIntroduction(it)) {
+      metToday.add(D().words[it.i].w);
+      box.replaceChildren(h('div', { class: 'qcount' }, count, dots), meetCard(it, showQuestion));
+      paint();
+      window.scrollTo(0, 0);
+      return;
+    }
+    showQuestion();
   };
   ask();
   return [header(practice ? 'Recall test' : t('learn').text), box];
@@ -878,6 +898,47 @@ function grammarMean(it, ctx) {
     ], { ...ctx, ok, answer: it.eng }));
   }));
   return card;
+}
+
+// Jyutping as a person reads it. The corpus stores do1ze6; a learner who can
+// only read the romanisation needs do1 ze6.
+const readable = (j) => String(j || '').replace(/([a-z]+[1-6])(?=[a-z])/g, '$1 ');
+
+// Has this WORD been met before, in any of the ways the app asks about it?
+// Per word, not per question: 妹 is introduced once, not again when its
+// reading question comes round a week later.
+const wordSeen = (i) => {
+  const w = D().words[i];
+  return !!w && ['wl/', 'ws/', 'wr/', 'cz/'].some((pre) => State.card(pre + w.w));
+};
+const needsIntroduction = (it) => it.i != null && !State.card(it.id) && !wordSeen(it.i);
+
+// Meeting a word. This is the only screen in the app that asks nothing.
+function meetCard(it, onDone) {
+  const d = D();
+  const w = d.words[it.i];
+  const ex = (examplesOf(it.i) || [])[0];
+  const cue = d.cues?.[it.i];
+  const notes = d.notesForWord?.get(it.i) || [];
+  return h('section', { class: 'card q meet' },
+    h('div', { class: 'eyebrow' }, 'A new word'),
+    h('p', { class: 'han word' }, w.w),
+    h('p', { class: 'jyut big-j' }, readable(w.j)),
+    h('p', { class: 'gloss big' }, w.g),
+    // A cue is the difference between two words a dictionary glosses the same
+    // way — "for something someone did" against "for a gift". If the word has
+    // one, meeting it is exactly when it is wanted.
+    cue ? h('p', { class: 'cue' }, cue) : null,
+    canPlayWord() ? playButton({ word: w.w, label: 'Hear it' }) : null,
+    ex ? h('div', { class: 'sentence meet-eg' },
+      h('p', { class: 'note' }, 'You might hear it like this'),
+      h('p', { class: 'han big-s' }, ex.t),
+      h('p', { class: 'jyut' }, ex.j),
+      h('p', { class: 'gloss' }, ex.e)) : null,
+    notes.length ? h('div', { class: 'gpoint' },
+      h('h3', {}, notes[0].title),
+      h('p', {}, notes[0].plain, sayBtn(notes[0].plain))) : null,
+    h('button', { class: 'wide primary', type: 'button', onclick: onDone }, 'Got it — ask me'));
 }
 
 // The gap. Robert asked for this one by name: "what is the correct word in

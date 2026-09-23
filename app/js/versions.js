@@ -6,6 +6,15 @@
 
 export default [
   {
+    v: '1.9.0', date: '2026-09-23',
+    what: [
+      'The app teaches before it tests. Every word used to be met for the first time as a question — 妹 arrived as "what does this mean?" with four options, you guessed, and then you were told. Now a word is shown first: the characters, the reading spaced out to read aloud, what it means, a sentence it lives in, and the note if it has one. Then it asks.',
+      'The card appears once per WORD, not once per question, so meeting 妹 and reading 妹 a week later does not introduce it twice. Nothing on it is scored and nothing on it is timed — it is the one screen in the app that asks nothing.',
+      'A recall test never introduces anything. Meeting a word inside it would make the score a lie.',
+      'The end of a round now says what was new: "9 new words: 妹 阿嫲 屋企人 …". The summary used to report only a score, which is the one thing that does not tell you whether you got anywhere.',
+    ],
+  },
+  {
     v: '1.8.0', date: '2026-09-23',
     what: [
       'The same questions no longer come back over and over. Over a fortnight the app used to ask 1,015 questions of which only 202 were different — the median one five times, one of them thirteen. The cause was mine: the stage gate opened about forty-five questions and v1.5.0 made every round fill to twenty-five, so three sittings a day drew seventy-five from a pool of forty-five. The course now decides the ORDER new words arrive in, not how many exist, and there is always a supply of unseen material within reach. Same fortnight now: 339 different questions, the median asked three times, no day without something new.',
