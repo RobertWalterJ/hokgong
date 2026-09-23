@@ -128,6 +128,44 @@ const addEntry = (head, jyuts, glosses, src) => {
   if (!dict.has(head)) dict.set(head, []);
   dict.get(head).push({ jyuts, glosses, src });
 };
+// What words are actually USED to mean, counted from 229 graded Cantonese
+// readers (Hambaanglaang, CC BY 4.0 — see build/usage.mjs). Not a dictionary
+// and never used as a gloss: it decides between the senses the dictionaries
+// give. Optional, so a fresh clone without it still builds.
+let USAGE = {};
+try { USAGE = JSON.parse(readFileSync(join(ROOT, 'corpus', 'usage.json'), 'utf8')); } catch { /* not built yet */ }
+
+// Matching a dictionary's wording to a reader's wording needs a little care:
+// the dictionary says "to be", the readers say "is" and "am". This is the
+// smallest normalisation that gets the common cases right — citation "to",
+// articles, plurals, participles, and the handful of irregular verbs that
+// carry most of the weight in a beginner's vocabulary.
+const IRREGULAR = new Map(Object.entries({
+  is: 'be', am: 'be', are: 'be', was: 'be', were: 'be', been: 'be', being: 'be',
+  has: 'have', had: 'have', having: 'have', does: 'do', did: 'do', done: 'do',
+  goes: 'go', went: 'go', gone: 'go', said: 'say', says: 'say',
+  got: 'get', gets: 'get', made: 'make', makes: 'make', came: 'come', comes: 'come',
+  ate: 'eat', eats: 'eat', eaten: 'eat', drank: 'drink', drinks: 'drink',
+  saw: 'see', sees: 'see', seen: 'see', knew: 'know', knows: 'know', known: 'know',
+  thought: 'think', thinks: 'think', wanted: 'want', wants: 'want',
+}));
+const stem = (word) => {
+  const w = word.toLowerCase();
+  if (IRREGULAR.has(w)) return IRREGULAR.get(w);
+  if (w.length > 4 && w.endsWith('ing')) return w.slice(0, -3);
+  if (w.length > 4 && w.endsWith('ed')) return w.slice(0, -2);
+  if (w.length > 3 && w.endsWith('s') && !w.endsWith('ss')) return w.slice(0, -1);
+  return w;
+};
+// The content words of a gloss, so "to go out" and "out" can be compared.
+const STOP = new Set(['to', 'a', 'an', 'the', 'of', 'for', 'be', 'or', 'and', 'in', 'on', 'at', 'it', 'sth', 'sb', 'one', 'that', 'this']);
+const heads = (text) => {
+  const bare = String(text).toLowerCase().replace(/\([^)]*\)/g, ' ').replace(/[^a-z' ]+/g, ' ');
+  const parts = bare.split(/\s+/).filter(Boolean).map(stem);
+  const content = parts.filter((x) => !STOP.has(x));
+  return new Set(content.length ? content : parts);
+};
+
 const wikt = JSON.parse(readFileSync(join(ROOT, 'corpus', 'wiktionary.json'), 'utf8'));
 for (const [word, byReading] of Object.entries(wikt)) {
   for (const [jyut, slot] of Object.entries(byReading)) {
@@ -399,6 +437,7 @@ const lexicon = [...counts.entries()]
     if (process.env.DEBUG_WORD === w) {
       console.log(`\n${w}: recorded as ${said}; rime says ${rime.join('/') || 'nothing'}; corpus tag ${pos} (${cls})`);
       for (const x of ranked) console.log(`   ${String(weigh(x).toFixed(1)).padStart(5)}  ${x.conf.padEnd(9)} ${x.src.padEnd(30)} [${x.jyuts.join(',') || 'no reading'}]  ${x.senses.map((s) => s.text).slice(0, 3).join(' / ')}`);
+      if (USAGE[w]) console.log(`   used as: ${USAGE[w].s.slice(0, 5).map(([e, n]) => `${e} (${n})`).join(', ')}`);
     }
     // A cross-reference teaches nothing: a word whose every sense is 'variant
     // of X' or 'see Y' is left without a gloss, and so is not taught at all.
@@ -441,6 +480,24 @@ const lexicon = [...counts.entries()]
       }
     }
     const backing = (sn) => Math.min(3, ((agree.get(plain(sn.text)) || new Set()).size - 1));
+    // How well a sense matches what the word is actually USED to mean. This is
+    // the signal that decides 係: the readers use it as "is" 930 times and
+    // never once as "to bind", so "to be" is rewarded and "to bind" is vetoed.
+    // Only for words seen often enough for absence to mean something — a word
+    // used three times tells you nothing by what it omits.
+    const use = USAGE[w];
+    const useHeads = use ? use.s.map(([text, n]) => ({ h: heads(text), n })) : [];
+    const useTotal = useHeads.reduce((a, x) => a + x.n, 0) || 1;
+    const usage = (sn) => {
+      if (!use || !useHeads.length) return 0;
+      const mine = heads(sn.text);
+      let best = 0;
+      for (const { h, n } of useHeads) {
+        for (const word of mine) if (h.has(word)) { best = Math.max(best, n / useTotal); break; }
+      }
+      if (best > 0) return 1.5 + 3 * best;            // used, and weighted by how often
+      return use.n >= 20 ? -3 : 0;                    // never used, on decent evidence
+    };
     // A sense a dictionary has explicitly marked Cantonese outranks one it has
     // not, for a word people were recorded saying.
     const cantoMarked = (src) => /Cantonese sense|CC-Canto/.test(src) ? 1 : 0;
@@ -453,7 +510,8 @@ const lexicon = [...counts.entries()]
       already.add(key);
       pool.push({ sn, src: x.src, w: weigh(x) });
     }
-    pool.sort((a, b) => (senseScore(b.sn, cls) + backing(b.sn) + cantoMarked(b.src)) - (senseScore(a.sn, cls) + backing(a.sn) + cantoMarked(a.src)) || b.w - a.w);
+    const total = (x) => senseScore(x.sn, cls) + backing(x.sn) + cantoMarked(x.src) + usage(x.sn);
+    pool.sort((a, b) => total(b) - total(a) || b.w - a.w);
     const kept = pool.filter(({ sn }) => !/^used in transliteration/i.test(sn.text) && !uselessGloss.test(sn.text) && !coarseGloss.test(sn.text) && !obscureGloss.test(sn.text));
     const ordered = kept.map(({ sn }) => tidy(sn.text)).filter(Boolean);
     // The source named is the one that printed the meaning actually taught.

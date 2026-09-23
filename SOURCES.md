@@ -41,6 +41,29 @@ English translation, and **1,784 with recorded audio** by a human speaker
 (user `cantonesespoken`). Sentences are CC BY 2.0 FR; the audio is CC BY 4.0.
 Each sentence keeps its id, so it can be credited and linked.
 
+## Which meaning gets taught
+
+**Hambaanglaang 冚唪唥**, https://hambaanglaang.hk — 229 graded Cantonese
+readers, levels 1 to 7, written for people learning to read Cantonese. The
+machine-readable build by chinvocab (https://chinvocab.com/hbl/data/) carries
+229 books, 6,727 translated sentences and **116,835 word-level glosses**: every
+Cantonese word in every sentence with the English it means *in that sentence*.
+CC BY 4.0.
+
+`build/usage.mjs` counts those into a sense-frequency table for 7,500 words
+(`corpus/usage.json`). **It is never used as a gloss** — these are contextual
+translations from children's books, so 咗 arrives as "-en" and 咩 as
+"(particle)". It is used to rank and to veto the senses the *dictionaries*
+give, which is why every meaning the app teaches is still one a published
+dictionary gives that word at that reading.
+
+It is the signal that was missing. Dictionaries record what a word CAN mean;
+nothing here recorded which of those a learner needs, and that gap produced
+every gloss failure this project has had — 水 taught as "money", 四 as
+"labourer", 杯 as "to boycott", and 係, the copula the whole of stage one rests
+on, taught as "to bind" (which is the literary Mandarin 係 xì). The readers use
+係 as "is" 930 times and as "to bind" never.
+
 ## The word list past the corpus
 
 **rime-cantonese**, CanCLID. CC BY 4.0. https://github.com/rime/rime-cantonese

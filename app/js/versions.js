@@ -6,6 +6,15 @@
 
 export default [
   {
+    v: '1.11.0', date: '2026-09-23',
+    what: [
+      'A new source, and it is the one that was missing. Hambaanglaang 冚唪唥 is a series of 229 graded Cantonese readers written for people learning to read Cantonese, and its 116,835 word-by-word glosses say what each word means IN A SENTENCE. Counted up, that is what a word is actually used to mean: 係 is used as "is" 930 times and as "to bind" never; 水 is water 135 times out of 135; 湯 is soup.',
+      'Dictionaries record what a word CAN mean. Nothing here recorded which of those a learner needs, and that gap caused every meaning this app has got wrong. The usage table now ranks and vetoes the dictionaries — it is never shown to you as a meaning, because these are translations from children’s books and function words arrive as "-en" and "(particle)". Every meaning taught is still one a published dictionary gives.',
+      'The effect across the whole six thousand words, not just the course: 係 to be, 四 four, 麵 noodles, 出 to go out, 街 street, 單 bill, 得 can, 點 how. The automatic ranking now agrees with 142 of the 166 hand-checked course meanings, where before it disagreed with more than half.',
+      'Credited in Look things up → Where the words come from, and in SOURCES.md. CC BY 4.0.',
+    ],
+  },
+  {
     v: '1.10.0', date: '2026-09-23',
     what: [
       'The course no longer goes backwards. A stage was judged live from your answers, so missing three stage-one words in a review un-passed stage one: the rail, the title and the word of the day all fell back to where they were weeks ago. A fortnight simulation showed it oscillating 3, 1, 3, 1 on consecutive days. What has been opened now stays open; the count towards the current stage still moves both ways, because that is honest.',

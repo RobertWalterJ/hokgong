@@ -40,7 +40,7 @@ export default {
   唔: 'not',
   有: 'to have',
   冇: 'to not have',
-  得: 'Ok',
+  得: 'can',                 // usage: the readers use it as "can", not "Ok"
 
   // ── me and you ──────────────────────────────────────────────────────────
   我: 'I',
@@ -88,7 +88,7 @@ export default {
   九: 'nine',
   十: 'ten',
   幾多: 'how much',
-  幾: 'how much',          // NOT "what (time)"
+  幾: 'a few',               // 幾多 is "how much"; 幾 alone is "a few", "quite"
   個: 'individual',
   啲: 'some',
   隻: 'one of pair',
@@ -96,7 +96,7 @@ export default {
   條: 'strip',
   本: 'origin',
   杯: 'cup',
-  歲: 'age',
+  歲: 'classifier for years (of age)',
 
   // ── asking things ───────────────────────────────────────────────────────
   乜嘢: 'what',
@@ -105,7 +105,7 @@ export default {
   幾時: 'when',
   點: 'point',
   點解: 'why',
-  點樣: "what's up?",      // "what's with it?" is the source's odd first
+  點樣: 'how?',
   有冇: 'is there?',
   係唔係: 'is it?',
   可以: 'to be able to',
@@ -148,7 +148,7 @@ export default {
   晚: 'evening',
   夜: 'night',
   遲: 'late',
-  快: 'quick',
+  快: 'fast',
   先: 'first',
   之後: 'after',
   得閒: 'to be free',
@@ -159,7 +159,7 @@ export default {
   嚟: 'to come',
   返: 'to return (to)',
   行: 'to walk',
-  搭: 'to connect',
+  搭: 'to take (boat, train)',   // "to connect" is the Mandarin sense
   車: 'vehicle',
   火車: 'train',
   路: 'road',
