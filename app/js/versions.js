@@ -6,6 +6,15 @@
 
 export default [
   {
+    v: '1.12.0', date: '2026-09-24',
+    what: [
+      'A sitting has a shape now. It used to be twenty-five questions in a shuffled heap — reviews and new words thrown together, nothing saying which was which. It now opens on three things you already know, teaches the new words in the middle with a review between every second one, and closes with the reviews.',
+      'And the part that matters most: a word you meet in a sitting comes back once more in the SAME sitting, about fifteen questions later, as a DIFFERENT question — met by ear, come back to by eye. One encounter a day was the flat part of the spacing curve; the first retrieval belongs close to the teaching and the next one further away.',
+      'The effect on repetition, measured over a fortnight at the pace the app actually ships: 357 different questions where a week ago it was 202, and the most any single question came back fell from thirteen times to six.',
+      'A determined evening now passes two stages rather than four. That is the honest cost: a slot spent coming back to a word you just met is a slot not spent racing to the next one.',
+    ],
+  },
+  {
     v: '1.11.0', date: '2026-09-23',
     what: [
       'A new source, and it is the one that was missing. Hambaanglaang 冚唪唥 is a series of 229 graded Cantonese readers written for people learning to read Cantonese, and its 116,835 word-by-word glosses say what each word means IN A SENTENCE. Counted up, that is what a word is actually used to mean: 係 is used as "is" 930 times and as "to bind" never; 水 is water 135 times out of 135; 湯 is soup.',

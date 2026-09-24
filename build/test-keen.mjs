@@ -28,6 +28,14 @@ Math.random = () => ((mseed = (mseed * 16807) % 2147483647) / 2147483647);
 const S = await import('../app/js/schedule.js');
 
 const deck = JSON.parse(readFileSync(join(ROOT, 'app', 'data', 'deck.json'), 'utf8'));
+// The app's own reach rule, not a copy of it. This file reimplemented
+// `inReach` and so never saw the horizon that widens past the current stage —
+// it reported 47 questions in reach where the app offers 150+, which is the
+// same class of mistake as the repetition audit measuring a pace the app does
+// not ship. A test that reimplements the thing it is testing tests nothing.
+globalThis.window = { HOKGONG_DECK: deck };
+const D = await import('../app/js/deck.js');
+await D.loadDeck(); D.indexDeck();
 const byId = new Map(deck.items.map((it) => [it.id, it]));
 const groupOf = (id) => {
   const it = byId.get(id);
@@ -59,12 +67,7 @@ const recount = () => {
 };
 const metCard = (id) => !!S.State.card(id);
 const wordMet = (i) => ['wl/', 'ws/', 'wr/'].some((p) => S.State.card(p + deck.words[i]?.w));
-const inPlay = (current) => deck.items.filter((it) => {
-  if (metCard(it.id)) return true;
-  if (it.stage != null) return it.stage <= current;
-  if (it.needs) return it.needs.every((i) => wordMet(i));
-  return current >= deck.stages.length;
-}).map((it) => it.id);
+const inPlay = (current) => D.askableIds(true, true, current, metCard, wordMet);
 
 let seed = 5;
 const rand = () => ((seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648);

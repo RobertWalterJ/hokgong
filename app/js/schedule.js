@@ -319,8 +319,29 @@ export class Round {
     // What is owed is never displaced by new material: when the learner has
     // asked for a full round, the reviews still go in first and the new words
     // fill whatever is left.
-    const reviews = take(due, beyondDaily ? size : size - nNew);
+    // How many of the new words get a second look inside this sitting. Capped
+    // at a quarter of the round so the reviews are not starved to pay for it.
+    const nAgain = practice ? 0 : Math.min(nNew, Math.floor(size / 4));
+    const reviews = take(due, beyondDaily ? size : Math.max(0, size - nNew - nAgain));
     const add = take(fresh, Math.min(nNew, size - picked.length));
+    // A second question about each word just taught, to be asked later in this
+    // same round. It is a DIFFERENT question — met by ear, come back to by
+    // eye — so it is consolidation rather than the in-round repetition that
+    // made the pack feel small (Robert, 18 Sept). Reserved here, before the
+    // fill spends the round's budget on anything else.
+    const again = [];
+    if (!practice && groupOf) {
+      for (const id of add) {
+        if (again.length >= nAgain || picked.length >= size) break;
+        const g = groupOf(id);
+        if (!g) continue;
+        const sib = pool.find((x) => x !== id && groupOf(x) === g && !picked.includes(x) && !State.card(x));
+        if (!sib) continue;
+        picked.push(sib);
+        groups.set(g, (groups.get(g) || 0) + 1);
+        again.push(sib);
+      }
+    }
     // A round that runs out is a round that ends after two questions. Robert
     // wants fifteen minutes a day in three sittings, and between the stage
     // gate, the daily allowance of new words and the four-hour cool-down,
@@ -375,12 +396,36 @@ export class Round {
       }
     }
     this.early = [...this.extra].filter((id) => cooling(id) || exclude.has(id)).length;
-    this.queue = this.#spread(shuffle([...reviews, ...add]), groupOf);
-    // …except the very first question of a player's first round: the pack's
-    // opening anchor, not a random one.
+    this.queue = this.#arc(reviews, add, again, groupOf);
+    // …except the very first round a player ever plays, which opens on the
+    // pack's first word rather than on a review there cannot be one of.
     if (!Object.keys(State.data.cards).length && add.length) {
       this.queue = [add[0], ...this.queue.filter((x) => x !== add[0])];
     }
+  }
+  // warm-up, teaching, consolidation, review.
+  //
+  // Reviews open the sitting because starting on something you know is the
+  // difference between a lesson and an examination; new material sits in the
+  // middle where attention is; the second look at each new word lands in the
+  // back half, far enough from the first to be a retrieval rather than an
+  // echo; and the remaining reviews fill in around it.
+  #arc(reviews, add, again, groupOf) {
+    if (!add.length && !again.length) return this.#spread(shuffle(reviews), groupOf);
+    const rest = reviews.slice();
+    // Three to warm up, but never at the cost of having reviews left to space
+    // the new material out with.
+    const warm = rest.splice(0, Math.min(3, Math.max(0, rest.length - add.length)));
+    // The new words, with a review between every second one so the teaching
+    // is not one long wall of things you have never seen.
+    const body = [];
+    add.forEach((id, i) => {
+      body.push(id);
+      if (i % 2 === 1 && rest.length) body.push(rest.shift());
+    });
+    // Everything left, with the second looks among it.
+    const tail = this.#spread(shuffle([...rest, ...again]), groupOf);
+    return [...warm, ...body, ...tail];
   }
   // Reorders so no two neighbours serve the same big question, where that's
   // possible, keeping the order otherwise.
