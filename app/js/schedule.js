@@ -232,7 +232,10 @@ export class Round {
   // Lifting only the daily one gave a five-question round, which is what
   // Robert met on 20 Sept: "I can't get it to serve me up 25 questions back to
   // back if I try my hardest."
-  constructor(ids, { practice = false, exclude = new Set(), pace = null, groupOf = null, parasOf = null, beyondDaily = false, perGroup = PER_GROUP, size = ROUND } = {}) {
+  // `stageOf(id)`: which stage of the course a question belongs to, so new
+  // material can lead with the stage being worked on rather than with whatever
+  // the widened horizon happens to offer.
+  constructor(ids, { practice = false, exclude = new Set(), pace = null, groupOf = null, parasOf = null, stageOf = null, beyondDaily = false, perGroup = PER_GROUP, size = ROUND } = {}) {
     this.size = size;
     this.extra = new Set();
     this.beyondDaily = beyondDaily;
@@ -301,7 +304,10 @@ export class Round {
       return;
     }
     const due = State.dueIds(pool);
+    // Unseen questions, the stage being worked on first. A stable sort, so
+    // within a stage the pack's own teaching order is kept.
     const fresh = pool.filter((id) => !State.card(id));
+    if (stageOf) fresh.sort((a, b) => (stageOf(a) ?? 99) - (stageOf(b) ?? 99));
     // At most NEW_PER_DAY new a day: five "another round"s used to mean
     // twenty-five new questions and a wall of reviews tomorrow.
     const newToday = State.data.days[dayKey()]?.newN || 0;

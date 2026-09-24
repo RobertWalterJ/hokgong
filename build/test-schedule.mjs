@@ -43,7 +43,7 @@ const groupOf = (id) => {
   if (it.syll) return 't' + it.syll;
   return 's' + it.id;
 };
-const SKILL = { 'word-listen': 'listening', 'sentence-listen': 'listening', 'word-say': 'speaking', 'tone-say': 'tones', 'tone-pair': 'tones', 'word-read': 'reading', 'word-cloze': 'grammar', 'grammar-mean': 'grammar', 'grammar-pick': 'grammar', 'grammar-build': 'grammar' };
+const SKILL = { 'word-listen': 'listening', 'sentence-listen': 'listening', 'word-say': 'speaking', 'word-pick': 'speaking', 'tone-say': 'tones', 'tone-pair': 'tones', 'word-read': 'reading', 'word-cloze': 'grammar', 'grammar-mean': 'grammar', 'grammar-pick': 'grammar', 'grammar-build': 'grammar' };
 
 let seed = 42;
 const rand = () => ((seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648);
@@ -65,7 +65,7 @@ for (let day = 0; day < DAYS; day++) {
   let newToday = 0;
   for (let s = 0; s < sittings; s++) {
     t += 90 * 60e3;                                   // an hour and a half apart
-    const round = new S.Round(ids, { exclude: asked, groupOf });
+    const round = new S.Round(ids, { exclude: asked, groupOf, stageOf: (id) => byId.get(id)?.stage });
     if (round.empty) { emptyRounds++; continue; }
     roundsPlayed++;
     if (round.queue.length > round.size) fails.push(`day ${day}: a round of ${round.queue.length}, longer than the sitting`);

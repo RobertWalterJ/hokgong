@@ -29,6 +29,7 @@ export const SKILL = {
   'word-listen': 'listening',
   'sentence-listen': 'listening',
   'word-say': 'speaking',
+  'word-pick': 'speaking',   // recalling the form from the meaning is production
   'tone-say': 'tones',
   'tone-pair': 'tones',
   'word-read': 'reading',
@@ -119,10 +120,12 @@ const NEEDS_RECORDING = new Set(['sentence-listen']);
 // in a waiting room, beside someone sleeping, all of these are impossible —
 // and being asked them anyway is what makes an app something you can only use
 // at home.
-export const OUT_LOUD = new Set(['word-say', 'tone-say', 'word-listen', 'sentence-listen', 'tone-pair']);
-const askable = (it, hasVoice, hasRecordings, quiet = false) =>
+// The questions that ask the LEARNER to make a sound. Not the ones that make a
+// sound at him — headphones handle those, and a bus does not.
+export const SPEAKING_ALOUD = new Set(['word-say', 'tone-say']);
+const askable = (it, hasVoice, hasRecordings, noSpeaking = false) =>
   (hasVoice || !NEEDS_VOICE.has(it.k)) && (hasRecordings || !NEEDS_RECORDING.has(it.k))
-  && !(quiet && OUT_LOUD.has(it.k));
+  && !(noSpeaking && SPEAKING_ALOUD.has(it.k));
 // A question is in reach if its stage is open, or if it has been met already —
 // a card you have seen never disappears because of where you are in the
 // course. Items belonging to no stage are the tail after the course.
@@ -149,8 +152,8 @@ const inReach = (it, current, met, wordMet) => {
 // of unseen material. The course still decides what comes next — the order is
 // untouched — it just no longer decides that nothing comes next.
 const SUPPLY = 150;
-export const askableIds = (hasVoice, hasRecordings = true, current = Infinity, met = () => false, wordMet = () => false, quiet = false) => {
-  const ok = (it) => askable(it, hasVoice, hasRecordings, quiet);
+export const askableIds = (hasVoice, hasRecordings = true, current = Infinity, met = () => false, wordMet = () => false, noSpeaking = false) => {
+  const ok = (it) => askable(it, hasVoice, hasRecordings, noSpeaking);
   // The earliest stage at which each item comes within reach, in one pass.
   const tail = deck.stages.length;
   const opensAt = (it) => {

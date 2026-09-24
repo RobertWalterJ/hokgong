@@ -90,7 +90,7 @@ for (let r = 0; r < 8; r++) {
   // What home would do: a normal round while something is owed, otherwise the
   // "Keep going" button, which lifts the day's allowance.
   const owed = due || Math.min(room, fresh);
-  const round = new S.Round(ids, { beyondDaily: !owed && fresh > 0, practice: !owed && fresh === 0, groupOf, size: SITTING });
+  const round = new S.Round(ids, { beyondDaily: !owed && fresh > 0, practice: !owed && fresh === 0, groupOf, stageOf: (id) => byId.get(id)?.stage, size: SITTING });
   const n = round.queue.length;
   lengths.push(n);
   if (n < SITTING) fails.push(`round ${r + 1}: only ${n} questions, with ${ids.length} in reach at stage ${stage + 1}`);

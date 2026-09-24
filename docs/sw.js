@@ -8,7 +8,7 @@
 // a new deploy arrives on the next open with signal; cache first for the
 // recordings, which never change and are the slow part on a phone.
 
-const VERSION = "hokgong-v1-7ef423e-202609241102";   // stamped per deploy by make-deploy.mjs
+const VERSION = "hokgong-v1-3fe786e-202609241214";   // stamped per deploy by make-deploy.mjs
 const PREFIX = 'hokgong-';
 // The recordings live in their own cache and survive a deploy: they are 16 MB
 // and they never change, so clearing them with the page would mean a phone

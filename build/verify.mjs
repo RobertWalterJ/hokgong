@@ -83,7 +83,7 @@ for (const it of DECK.items) {
   // Which of these a question's buttons actually say. The gap questions are
   // the odd ones out: they carry a word index like a vocabulary question, but
   // what is on the buttons is Chinese words, not English meanings.
-  const pair = it.k === 'note-pick' || it.k === 'word-cloze';
+  const pair = it.k === 'note-pick' || it.k === 'word-cloze' || it.k === 'word-pick';
   const answer = it.k === 'sentence-listen' || it.k === 'grammar-mean' ? it.eng
     : it.k === 'grammar-pick' || it.k === 'word-cloze' ? it.answer
       : pair ? DECK.words[it.i]?.w
@@ -95,6 +95,13 @@ for (const it of DECK.items) {
   // options. A Chinese button is balanced by CHARACTERS instead, which the
   // build already does when it picks the distractors.
   if (pair) {
+    // word-pick carries no readings of its own: its options are deck words and
+    // the app looks them up. So what must be true is that they ARE deck words.
+    if (it.k === 'word-pick') {
+      for (const o of it.options) {
+        check(DECK.words.some((x) => x.w === o), 'a word-pick option is not a word the deck teaches', `${it.id}: ${o}`);
+      }
+    }
     if (it.k === 'word-cloze') {
       const cs = (x) => [...String(x).replace(/[^㐀-䶿一-鿿]/g, '')].length;
       const lens = [answer, ...it.options].map(cs);
@@ -310,6 +317,7 @@ const hanOnly = /^[㐀-䶿一-鿿豈-﫿]+$/;
 for (const it of DECK.items) {
   for (const o of it.options || []) {
     if (typeof o !== 'string' || !hanOnly.test(o)) continue;
+    if (it.k === 'word-pick') continue;              // looked up from the word list
     check(!!it.reads?.[o], 'a Chinese answer button has no reading beside it', `${it.id}: ${o}`);
   }
   for (const [n, p] of (it.pieces || []).entries()) {
@@ -367,6 +375,40 @@ for (const [word, want] of Object.entries(CHOSEN)) {
   check(e.gloss.includes(want), 'a hand-checked meaning is not one the sources give', `${word}: "${want}" — sources say ${JSON.stringify(e.gloss)}`);
   const taught = DECK.words.find((w) => w.w === word);
   if (taught) check(taught.g === want, 'a hand-checked meaning did not reach the deck', `${word}: deck says "${taught.g}"`);
+}
+
+// ── 8f. a question with two right answers is not a question ──────────────
+// "Say this in Cantonese: dad" had two right answers among the words the
+// course teaches, 爸爸 and 老豆, and marked the natural one wrong (Robert, 24
+// Sept). content/families.mjs names the groups a learner would answer with
+// each other; every member must carry a cue that picks it out.
+const FAMILIES = (await import(pathToFileURL(join(ROOT, 'content', 'families.mjs')).href)).default;
+const wordAt = new Map(DECK.words.map((w, i) => [w.w, i]));
+const glosses = new Map(DECK.words.map((w, i) => [i, (w.g || '').toLowerCase().trim()]));
+for (const fam of FAMILIES) {
+  const members = Object.keys(fam.words);
+  check(members.length > 1, 'a family with fewer than two words', members.join(' '));
+  check(!!fam.why, 'a family with nothing said about why it is one', members.join(' '));
+  for (const [word, cue] of Object.entries(fam.words)) {
+    const i = wordAt.get(word);
+    if (i == null) { fail('a family names a word the deck does not teach', word); continue; }
+    check(!!cue && cue.length > 8, 'a family member with no real cue', `${word}: "${cue}"`);
+    check(DECK.cues?.[i] === cue, 'a family cue did not reach the deck', `${word}`);
+    // The cue must not simply BE another member's meaning. That was the old
+    // automatic cue — 爸爸 cued "dad", which is 老豆 — and a wrong cue is read
+    // as information.
+    for (const other of members) {
+      if (other === word) continue;
+      const g = glosses.get(wordAt.get(other));
+      check(!g || cue.toLowerCase().trim() !== g, 'a cue is another word in the family', `${word}: "${cue}" is ${other}`);
+    }
+  }
+}
+// And no word anywhere may be cued with its own meaning, which says nothing.
+for (const [i, cue] of Object.entries(DECK.cues || {})) {
+  const w = DECK.words[i];
+  if (!w) continue;
+  check(String(cue).toLowerCase().trim() !== (w.g || '').toLowerCase().trim(), 'a word is cued with its own meaning', `${w.w}: "${cue}"`);
 }
 
 // ── 9. the deck is big enough to be worth playing ────────────────────────

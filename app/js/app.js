@@ -12,7 +12,7 @@ import { h, iconBtn, sayBtn, sheet, closeSheet, disclosure, flash, show, route, 
 import { initSpeech, say, unlock, available as speechAvailable, cantoneseAvailable, onSpeaking } from './speech.js';
 import { playRecording, playWord, stopAudio, onAudio, canPlayWord, haveRecordings, probeRecordings } from './audio.js';
 import { State, Round, cardState, isHolding, dayKey, newLeftToday, nextDueSentence, untilText, now, shuffle, DAY } from './schedule.js';
-import { loadDeck, indexDeck, D, wordOf, exampleOf, examplesOf, allIds, askableIds, setAsideCount, stageState, SKILL, SELF_RATED } from './deck.js';
+import { loadDeck, indexDeck, D, wordOf, exampleOf, examplesOf, allIds, askableIds, setAsideCount, stageState, SKILL, SELF_RATED, SPEAKING_ALOUD } from './deck.js';
 import { setProgress, setEnglishOnly, t } from './lang.js';
 import { press as tick, right as correct, wrong, setSound as setSoundOn } from './sound.js';
 import { attempt as toneAttempt, rank as toneRank, toneName, toneChao } from './pitch.js';
@@ -62,10 +62,11 @@ const isMet = (id) => !!State.card(id);
 // course has opened.
 // A word counts as met once any question about it has been asked.
 const wordMet = (i) => ['wl/', 'ws/', 'wr/'].some((p) => State.card(p + D().words[i]?.w));
-// "There needs to be a mode to say that I maybe am in public and in a noisy
-// space so don't do the speech questions" (Robert, 23 Sept).
-export const isQuiet = () => !!State.data.settings?.quiet;
-const inPlay = () => askableIds(canPlayWord(), haveRecordings(), course().current, isMet, wordMet, isQuiet());
+// "It becomes difficult to speak and be recorded in public… it's primarily the
+// noise issue" (Robert, 24 Sept). Listening carries on; only the questions
+// that ask him to say something out loud are set aside.
+export const noSpeaking = () => !!State.data.settings?.quiet;
+const inPlay = () => askableIds(canPlayWord(), haveRecordings(), course().current, isMet, wordMet, noSpeaking());
 
 // ── a new version, and not losing your progress ──────────────────────────
 // Everything you have learnt lives in this phone's browser storage. That is
@@ -146,7 +147,7 @@ function settingsSheet() {
   const box = sheet(
     h('h2', {}, 'Settings'),
     row('Sound', 'Small clicks when you answer.', toggle('sound', s.sound !== false, (v) => setSoundOn(v))),
-    row('Quiet mode', 'For a bus, a waiting room, anywhere you cannot speak or listen. Sets aside every question that asks you to say something or to hear something; reading, gaps and grammar carry on.',
+    row('Not out loud', 'For a bus or a waiting room. Sets aside the questions that ask you to SAY something — listening carries on, so keep your headphones in. Also on the home screen.',
       toggle('quiet', !!s.quiet, () => repaint())),
     row('Always show Jyutping', 'The romanisation under every Cantonese word.', toggle('jyutping', s.jyutping !== false)),
     row('Keep the interface in English', 'Turns off the slow switch to Cantonese labels.', toggle('englishOnly', !!s.englishOnly, (v) => setEnglishOnly(v))),
@@ -326,6 +327,11 @@ function homeScreen() {
         !owed && met ? countdownLine(State.nextDue(ids)) : null,
         met >= 12 && !(startBtn && !owed && !fresh)
           ? h('button', { class: 'link', type: 'button', onclick: () => startRound({ practice: true }) }, 'Recall test') : null,
+        // On the home screen, not buried in Settings: it is a decision made on
+        // the way out of the door, about the room you are in, not a preference
+        // you set once. It says what it costs, because setting aside the
+        // speaking questions does mean the speaking strand stops moving.
+        outLoudSwitch(),
         run > 1 ? h('p', { class: 'note centre' }, `${run} days in a row.`) : null),
       canPlayWord() && haveRecordings() ? null : noVoiceCard(),
       h('nav', { class: 'rows' },
@@ -350,6 +356,23 @@ function recallScope() {
   return h('p', { class: 'note' }, shaky
     ? `${shaky.toLocaleString()} of your ${met.length.toLocaleString()} questions are the ones it would reach for next. Run it again to carry on through them.`
     : `All ${met.length.toLocaleString()} questions you have met are holding at the moment.`);
+}
+
+// Somewhere to say "not here". Robert, 24 Sept: "I have headphones and it's
+// just fine to keep listening but it becomes difficult to speak and be
+// recorded in public… best to just have a mode or a button/tab from the home
+// screen to mute these question types."
+function outLoudSwitch() {
+  const on = noSpeaking();
+  const n = D().items.filter((it) => SPEAKING_ALOUD.has(it.k) && it.stage != null).length;
+  return h('button', {
+    class: 'outloud' + (on ? ' on' : ''), type: 'button',
+    'aria-pressed': on ? 'true' : 'false',
+    onclick: () => { State.data.settings.quiet = !on; State.save(); repaint(); },
+  },
+  h('span', { class: 'sw' }, h('span', { class: 'knob' })),
+  h('span', {}, on ? 'Not speaking out loud' : 'Ask me to speak'),
+  h('span', { class: 'note' }, on ? 'Listening carries on — keep your headphones in' : 'Turn off on a bus or anywhere noisy'));
 }
 
 // How long until the next review comes round. Robert asked for this: when
@@ -453,7 +476,7 @@ let session = { asked: new Set() };
 
 function startRound(opts) {
   unlock();
-  const r = new Round(inPlay(), { ...opts, exclude: session.asked, pace: pace(), groupOf: D().groupOf, size: sitting().size });
+  const r = new Round(inPlay(), { ...opts, exclude: session.asked, pace: pace(), groupOf: D().groupOf, stageOf: (id) => D().byId.get(id)?.stage, size: sitting().size });
   if (r.empty) { show('round', () => emptyRound()); return; }
   show('round', () => roundScreen(r, { practice: !!opts.practice }), { arg: null });
 }
@@ -494,7 +517,7 @@ function roundScreen(round, { practice }) {
     const after = course();
     const passed = after.current > stageBefore ? after.stages[stageBefore] : null;
     const card = D().context[Math.floor(Math.random() * D().context.length)];
-    const left = new Round(inPlay(), { practice, exclude: session.asked, pace: pace(), groupOf: D().groupOf, size: sitting().size });
+    const left = new Round(inPlay(), { practice, exclude: session.asked, pace: pace(), groupOf: D().groupOf, stageOf: (id) => D().byId.get(id)?.stage, size: sitting().size });
     // A summary has to look like a summary. This screen used to open with a
     // bare "3 of 5" and then a card about dim sum, which read as another
     // question (Robert, on his phone).
@@ -573,6 +596,7 @@ function question(it, ctx) {
     case 'tone-pair': return tonePair(it, ctx);
     case 'tone-say': return toneSay(it, ctx);
     case 'grammar-mean': return grammarMean(it, ctx);
+    case 'word-pick': return wordPick(it, ctx);
     case 'word-cloze': return wordCloze(it, ctx);
     case 'grammar-pick': return grammarPick(it, ctx);
     case 'grammar-build': return grammarBuild(it, ctx);
@@ -718,7 +742,7 @@ function sayWord(it, ctx) {
       h('button', { class: 'choice', type: 'button', onclick: () => { ctx.onAnswer(false, { selfRated: true }); out.append(afterCard([], ctx)); } }, t('iDont').text)));
 
   const reveal = (extra) => {
-    out.append(wordCard(it.i, { example: true, reveal: true }));
+    out.append(wordCard(it.i, { example: true, reveal: true }), familyNote(it.i));
     if (extra) out.append(extra);
   };
 
@@ -944,6 +968,56 @@ function meetCard(it, onDone) {
       h('h3', {}, notes[0].title),
       h('p', {}, notes[0].plain, sayBtn(notes[0].plain))) : null,
     h('button', { class: 'wide primary', type: 'button', onclick: onDone }, 'Got it — ask me'));
+}
+
+// "There are obviously other ways, and so if you ask for dad, it probably
+// wouldn't be the first thing that people think of" (Robert, 24 Sept). When a
+// word belongs to a family, the reveal names the others — otherwise a learner
+// who answered 爸爸 and was told the answer was 老豆 has learnt something
+// false, which is that 爸爸 was wrong.
+function familyNote(i) {
+  const d = D();
+  const fam = (d.families || []).find((f) => f.words.includes(i));
+  if (!fam) return null;
+  const others = fam.words.filter((x) => x !== i);
+  if (!others.length) return null;
+  return h('div', { class: 'family' },
+    h('p', { class: 'note' }, others.length === 1 ? 'There is another way to say this:' : 'There are other ways to say this:'),
+    h('div', { class: 'famrow' }, ...others.map((x) => {
+      const o = d.words[x];
+      return h('span', { class: 'wchip' },
+        h('span', { class: 'han' }, o.w),
+        h('span', { class: 'jyut' }, readable(o.j)),
+        h('span', { class: 'gloss' }, d.cues?.[x] || o.g));
+    })),
+    h('p', { class: 'note' }, fam.why));
+}
+
+// Meaning in, word out. The app's only auto-marked production question: every
+// other vocabulary question gives the Cantonese and asks for the English,
+// which is recognition. This gives the English and asks which of four
+// Cantonese words it is — a real recall of the form, marked by the app rather
+// than by the learner, and answerable with the microphone off.
+function wordPick(it, ctx) {
+  const w = wordOf(it);
+  const cue = D().cues?.[it.i];
+  const card = h('section', { class: 'card q' },
+    prompt('Which one means this?'),
+    h('p', { class: 'gloss big' }, w.g),
+    // Two words can answer to one English meaning; the cue says which.
+    cue ? h('p', { class: 'cue' }, cue) : null);
+  // The readings are looked up rather than carried in the item.
+  const d = D();
+  const reads = Object.fromEntries([w.w, ...it.options].map((x) => {
+    const at = d.wordIndex.get(x);
+    return [x, at == null ? '' : readable(d.words[at].j)];
+  }));
+  card.append(choices(it.options, w.w, (ok) => {
+    ctx.onAnswer(ok);
+    card.append(afterCard([wordCard(it.i, { example: true, reveal: true }), familyNote(it.i)],
+      { ...ctx, ok, answer: `${w.w} (${reads[w.w]})` }));
+  }, { reads }));
+  return card;
 }
 
 // The gap. Robert asked for this one by name: "what is the correct word in

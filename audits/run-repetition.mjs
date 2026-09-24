@@ -89,7 +89,7 @@ for (let day = 0; day < DAYS; day++) {
     const due = S.State.dueIds(ids).length;
     const unseen = ids.filter((id) => !S.State.card(id)).length;
     const owed = due || Math.min(S.newLeftToday(PACE), unseen);
-    const round = new S.Round(ids, { exclude: today, pace: PACE, beyondDaily: !owed && unseen > 0, practice: !owed && unseen === 0, groupOf, size: SITTING });
+    const round = new S.Round(ids, { exclude: today, pace: PACE, beyondDaily: !owed && unseen > 0, practice: !owed && unseen === 0, groupOf, stageOf: (id) => byId.get(id)?.stage, size: SITTING });
     let id;
     while ((id = round.next())) {
       asks++;

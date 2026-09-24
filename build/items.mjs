@@ -38,6 +38,8 @@ const GRAMMAR = await load('content/grammar.mjs');
 const CONTEXT = await load('content/context.mjs');
 const SYLLABUS = await load('content/syllabus.mjs');
 const NOTES = await load('content/notes.mjs');
+// Words a learner would answer with each other, and what tells them apart.
+const FAMILIES = await load('content/families.mjs');
 // For the 167 words the course teaches, the sense is chosen by hand from the
 // ones the sources already give — see content/glosses.mjs for why, and
 // build/verify.mjs for the check that it is a re-ordering and not an invention.
@@ -303,6 +305,24 @@ for (const [i, e] of chosen.entries()) {
   });
 }
 
+// ── meaning in, word out ─────────────────────────────────────────────────
+// The reverse of every other vocabulary question: the English is given and the
+// Cantonese has to be picked out. Built for every word that has three
+// same-length neighbours to stand against it.
+for (const [i, e] of chosen.entries()) {
+  const rnd = seeded('wp' + e.w);
+  const options = wordOthers(i, '', 3, rnd);
+  if (options.length < 3) continue;
+  items.push({
+    id: `wp/${e.w}`, k: 'word-pick', i, options,
+    // No `reads` here on purpose: every option is a word the deck already
+    // carries, so the app looks the readings up. Writing them into each of six
+    // thousand items added a megabyte to a file a phone downloads over mobile
+    // data. build/verify.mjs checks each option really is a deck word.
+    level: Math.min(9, Math.ceil((i + 1) / 700)) + 1,
+  });
+}
+
 // ── listening: real recorded sentences ───────────────────────────────────
 // Short ones first, and only those made of words in the first 1,000 — so
 // listening starts in week one rather than after months.
@@ -523,7 +543,11 @@ for (const [, group] of byMeaning) {
   if (group.length < 2) continue;
   for (const i of group) {
     const e = chosen[i];
-    const cue = cueFromNotes.get(e.w) || e.gloss[1] || null;
+    // NOT the word's own second dictionary sense. That was the old fallback
+    // and it produced cues that were worse than none: 爸爸 was cued "dad",
+    // which is 老豆's meaning; 阿哥, an elder brother, was cued "dad"; 細佬, a
+    // younger brother, was cued "I". A wrong cue is read as information.
+    const cue = cueFromNotes.get(e.w) || null;
     if (cue) { cues[i] = cue; cued++; } else stillAmbiguous++;
   }
 }
@@ -533,6 +557,21 @@ for (const [, group] of byMeaning) {
 for (const [w, cue] of cueFromNotes) {
   const i = index.get(w);
   if (i != null && !cues[i]) { cues[i] = cue; cued++; }
+}
+// And the families: words that answer to the same English in a learner's head
+// even when their glosses do not collide as strings. "Say this in Cantonese:
+// dad" had two right answers, 爸爸 and 老豆, and marked the natural one wrong
+// (Robert, 24 Sept). Every word in a family carries the thing that picks it
+// out — including its register, because 老豆 is affectionate and nothing said
+// so.
+const familyOf = new Map();
+for (const fam of FAMILIES) {
+  for (const [w, cue] of Object.entries(fam.words)) {
+    const i = index.get(w);
+    if (i == null) continue;
+    familyOf.set(w, Object.keys(fam.words));
+    if (!cues[i] || cues[i] !== cue) { if (!cues[i]) cued++; cues[i] = cue; }
+  }
 }
 
 // ── the stages, resolved to what is actually in the deck ─────────────────
@@ -646,6 +685,7 @@ const deck = {
   stages,
   notes,
   cues,
+  families: FAMILIES.map((f) => ({ why: f.why, words: Object.keys(f.words).map((w) => index.get(w)).filter((i) => i != null) })).filter((f) => f.words.length > 1),
   words: chosen.map((e) => ({ w: e.w, j: e.jyut, g: e.gloss[0], alt: e.gloss.slice(1, 3), r: e.rank, t: e.tier, c: e.glossConf, s: e.glossSrc })),
   examples,
   grammar,

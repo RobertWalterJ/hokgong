@@ -53,7 +53,7 @@ const shapes = [];
 // review pile, which is where an arc is harder to hold.
 for (let n = 0; n < 6; n++) {
   const ids = D.askableIds(true, true, stage, metCard, wordMet);
-  const round = new S.Round(ids, { pace: PACE, groupOf, size: SIZE });
+  const round = new S.Round(ids, { pace: PACE, groupOf, stageOf: (id) => byId.get(id)?.stage, size: SIZE });
   const q = round.queue.slice();
   const fresh = new Set(q.filter((id) => !S.State.card(id)));
   // Where in the round each kind of question falls.

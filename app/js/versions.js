@@ -6,6 +6,16 @@
 
 export default [
   {
+    v: '1.13.0', date: '2026-09-24',
+    what: [
+      'A new question, and the one the app most needed: the English is given and you pick which of four Cantonese words it is. Every vocabulary question until now ran the other way — hear it, pick the meaning — which is recognition, the easy half. This is recall of the word itself, marked by the app rather than by you, and it works with the microphone off. 5,994 of them.',
+      '"Not out loud" is on the home screen now, and it does what you actually asked: it sets aside only the questions that ask YOU to make a sound. Listening carries on — keep your headphones in. The first version also cut the listening questions, which was my inference and not your ask; it left 2,595 questions where this leaves 9,038.',
+      'Words you would reasonably answer with each other now say which one is wanted. "Say this in Cantonese: dad" had two right answers among the words this app teaches and marked 爸爸 wrong. 爸爸 is now cued "the ordinary word, safe with anyone" and 老豆 "informal and affectionate, for your own dad" — and whichever you are asked, the answer names the other one and says how they differ.',
+      'The old cues were worse than none. They were taken from a word’s own second dictionary sense, so 爸爸 was cued "dad", 阿哥 — an elder brother — was cued "dad", and 細佬, a younger brother, was cued "I". Sixteen families are now written out by hand, and the build fails if a cue is another word’s meaning or simply repeats its own.',
+      'New words now arrive in the order the course teaches them. The horizon that keeps unseen material in reach was also deciding what came first, so the fourteen words of the stage you are on competed with everything else.',
+    ],
+  },
+  {
     v: '1.12.0', date: '2026-09-24',
     what: [
       'A sitting has a shape now. It used to be twenty-five questions in a shuffled heap — reviews and new words thrown together, nothing saying which was which. It now opens on three things you already know, teaches the new words in the middle with a review between every second one, and closes with the reviews.',
