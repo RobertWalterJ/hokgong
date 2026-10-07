@@ -499,6 +499,21 @@ if (existsSync(join(ROOT, 'corpus', 'hbl.json'))) {
   }
 }
 
+// ── 8i. the pieces rebuild the sentence ──────────────────────────────────
+// app/js/buildup.js takes these pieces and grows a sentence from its end. It
+// trusts that they rebuild the sentence, because a module that re-derives what
+// it was given cannot be tested on the thing it was given. So the trust is
+// placed here instead.
+for (const it of DECK.items.filter((x) => Array.isArray(x.parts) && x.parts.length)) {
+  const built = it.parts.map((p2) => p2[0]).join('');
+  const want = (it.text || '').replace(/[^\u3400-\u9FFF]/g, '');
+  check(built.replace(/[^\u3400-\u9FFF]/g, '') === want, 'the pieces do not rebuild the sentence', `${it.id}: "${built}" vs "${want}"`);
+  for (const [w, j] of it.parts) {
+    check(!!w, 'an empty piece', it.id);
+    check(!!j && !/\?/.test(j), 'a piece with no reading, or a reading with a gap in it', `${it.id}: ${w} → "${j}"`);
+  }
+}
+
 // ── 9. the deck is big enough to be worth playing ────────────────────────
 check(DECK.words.length >= 4000, 'the word list is short of a conversational vocabulary', `${DECK.words.length} words`);
 check(DECK.items.filter((i) => i.k === 'sentence-listen').length >= 100, 'too little listening practice', '');

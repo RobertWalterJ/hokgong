@@ -448,6 +448,12 @@ for (const g of GRAMMAR) {
   }
 }
 
+// Pieces, each with its reading, for building a sentence up from its end
+// (app/js/buildup.js). Punctuation is dropped: it is not said.
+const segRead = (text) => seg(text.replace(/[。，、？！「」：；…—·]/g, ''))
+  .filter((w) => /[\u3400-\u9FFF]/.test(w))
+  .map((w) => [w, spaced(readings.get(w) || '') || romanise(w)]);
+
 // ── listening, from the graded readers ───────────────────────────────────
 // Tatoeba's recordings are two readers and a general corpus. These are 229
 // books written for people learning to read Cantonese, graded 1 to 7, read
@@ -473,6 +479,11 @@ try {
       id: `hl/${s2.id}`, k: 'sentence-listen', sid: s2.id, src: 'hbl',
       text: s2.text, jyut: romanise(s2.text), eng: s2.eng, by: 'Hambaanglaang',
       lvl: s2.lvl, options, level: Math.min(9, 2 + (s2.lvl || 1)),
+      // …only when every piece has a reading. A build-up step showing "?" is
+      // useless to someone who navigates by the romanisation, and four
+      // characters in this corpus have no reading in any source. Better no
+      // build-up than one with a hole in it.
+      parts: (() => { const ps = segRead(s2.text); return ps.every(([, j]) => j && !j.includes('?')) ? ps : undefined; })(),
     });
     // NOT audioNeeded: that is the Tatoeba fetch list, and these clips come
     // from their own source, live in their own folder and are tracked by their

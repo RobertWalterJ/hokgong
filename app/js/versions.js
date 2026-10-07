@@ -6,6 +6,15 @@
 
 export default [
   {
+    v: '1.17.0', date: '2026-10-07',
+    what: [
+      'Say it with me — a long sentence built up from its END, a piece at a time. 要剪喇 → 好長要剪喇 → 佢嘅頭髮好長要剪喇 → the whole thing. It appears after you have answered a listening question, so there is nothing to get wrong: the only thing asked is that you say each line out loud.',
+      'Backwards, because the hard part of a long phrase is holding its shape, and the shape lives at the end. Build forwards and you practise the beginning over and over while the ending is new every time. Build backwards and every attempt finishes on something you have already said twice.',
+      'The steps are cut where a phrase can actually begin. 嘅 and the aspect markers attach to the word in front of them, so a step never starts on one — the first attempt produced 嘅頭髮好長要剪喇, which is not something anyone would say.',
+      'Fixed: the questions that ask you to judge yourself could be answered twice. A second tap logged a second answer and moved when the word would come back. Found by accident, while testing something else.',
+    ],
+  },
+  {
     v: '1.16.0', date: '2026-10-07',
     what: [
       'Listening questions read by a person, from books written for people learning Cantonese. The graded readers the app already used for their word meanings turn out to have every one of their sentences read aloud — 287 new listening questions, graded 1 to 7, nearly doubling what there was.',

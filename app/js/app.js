@@ -19,6 +19,7 @@ import { attempt as toneAttempt, rank as toneRank, toneName, toneChao } from './
 import { asrSupported, listenFor, matches } from './asr.js';
 import { browseScreens, evidenceLine, wordCard, contextCard } from './browse.js';
 import { Placement, PER_STAGE, NEED } from './placement.js';
+import { buildUp, worthBuilding } from './buildup.js';
 
 export const VERSION = window.HOKGONG_BUILD || { v: 'dev', date: '', commit: '' };
 
@@ -74,6 +75,34 @@ const inPlay = () => askableIds(canPlayWord(), haveRecordings(), course().curren
 // What the level check said you already know, and so is not taught: kept for
 // the spot checks that test that claim.
 const spotPool = () => assumedKnown(State.data.floor || 0, isMet);
+
+// ── saying a long sentence, from the end ─────────────────────────────────
+// Pimsleur's oldest trick; app/js/buildup.js says why it runs backwards. It
+// sits AFTER the answer, on the reveal, because it is practice and not a
+// question: nothing to get wrong, nothing scored, and the only thing asked is
+// that you say each line out loud.
+//
+// Each step can be heard. The fragments are the phone's own voice and are
+// labelled as such; the whole sentence at the end is the person who read the
+// book, which is the recording that actually exists.
+function buildUpCard(it) {
+  if (!it || !Array.isArray(it.parts) || !worthBuilding(it.parts)) return null;
+  const steps = buildUp(it.parts);
+  if (steps.length < 2) return null;
+  const box = h('div', { class: 'buildup' },
+    h('div', { class: 'eyebrow' }, 'Say it with me'),
+    h('p', { class: 'note' }, 'From the end, a piece at a time. The end of a sentence is the hardest part to hold, so it is the part you say most.'));
+  steps.forEach((st, k) => {
+    const last = k === steps.length - 1;
+    box.append(h('div', { class: 'bustep' + (last ? ' whole' : '') },
+      h('div', {},
+        h('p', { class: 'han' }, st.text),
+        h('p', { class: 'jyut' }, st.jyut)),
+      last && it.sid ? playButton({ sentenceId: it.sid, label: 'The reader' })
+        : canPlayWord() ? h('button', { class: 'play small', type: 'button', onclick: () => playWord(st.text) }, 'Hear it') : null));
+  });
+  return box;
+}
 
 // ── the grammar ladder ───────────────────────────────────────────────────
 // Ten patterns in the order they stand on each other, with where the learner
@@ -990,11 +1019,26 @@ function sayWord(it, ctx) {
     cue ? h('p', { class: 'cue' }, cue) : null);
   const out = h('div', {});
 
-  const selfRate = (lead) => h('div', {},
-    lead ? h('p', { class: 'note' }, lead) : null,
-    h('div', { class: 'choices two' },
-      h('button', { class: 'choice', type: 'button', onclick: () => { ctx.onAnswer(true, { selfRated: true }); out.append(afterCard([], ctx)); } }, t('iKnow').text),
-      h('button', { class: 'choice', type: 'button', onclick: () => { ctx.onAnswer(false, { selfRated: true }); out.append(afterCard([], ctx)); } }, t('iDont').text)));
+  // Answered once. Nothing locked these, so a second tap logged a second
+  // answer, moved the schedule again and appended another way on to the page —
+  // a test driver pressing buttons in a loop left a hundred and sixty "Next"
+  // buttons stacked on one screen, which is also what a fat thumb on a bus
+  // does. The multiple-choice questions have had this guard from the start;
+  // this one was written later and never got it.
+  const selfRate = (lead) => {
+    const wrap = h('div', { class: 'choices two' });
+    const rate = (ok) => {
+      if (wrap.classList.contains('locked')) return;
+      wrap.classList.add('locked');
+      for (const b of wrap.children) b.disabled = true;
+      ctx.onAnswer(ok, { selfRated: true });
+      out.append(afterCard([], ctx));
+    };
+    wrap.append(
+      h('button', { class: 'choice', type: 'button', onclick: () => rate(true) }, t('iKnow').text),
+      h('button', { class: 'choice', type: 'button', onclick: () => rate(false) }, t('iDont').text));
+    return h('div', {}, lead ? h('p', { class: 'note' }, lead) : null, wrap);
+  };
 
   const reveal = (extra) => {
     out.append(wordCard(it.i, { example: true, reveal: true }), familyNote(it.i));
@@ -1075,6 +1119,7 @@ function listenSentence(it, ctx) {
     ctx.onAnswer(ok);
     card.append(afterCard([
       sentenceBlock(it.text, it.jyut, it.eng),
+      buildUpCard(it),
       evidenceLine({ sentence: it.sid, by: it.by }),
     ], { ...ctx, ok, answer: it.eng }));
   }));

@@ -342,6 +342,17 @@ details.more > :not(summary) { animation: rise .2s var(--ease); }
 .lvl.getting-there { background: var(--tint); color: var(--accent); }
 .row.shut { opacity: .62; }
 .how { font-family: var(--ui); background: var(--chip); padding: var(--s3) var(--s4); border-radius: 12px; }
+/* Saying a sentence from its end. Each line a little longer than the one
+   above it, so the growth is visible down the left edge rather than described. */
+.buildup { margin-top: var(--s4); padding-top: var(--s4); border-top: 1px solid var(--line); text-align: left; }
+.bustep { display: flex; align-items: center; gap: var(--s3); padding: var(--s3) 0; border-bottom: 1px solid var(--line); }
+.bustep > div { flex: 1; min-width: 0; }
+.bustep p { margin: 0; }
+.bustep .han { font-size: 1.15rem; line-height: 1.4; }
+.bustep .jyut { font-size: .85rem; }
+.bustep.whole { border-bottom: 0; }
+.bustep.whole .han { font-weight: 600; }
+.play.small { margin: 0; flex: none; padding: var(--s2) var(--s3); font-size: .85rem; }
 .newwords { margin: var(--s2) 0 var(--s4); color: var(--muted); }
 .newwords .han { color: var(--ink); }
 .play {
