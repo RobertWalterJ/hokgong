@@ -17,7 +17,7 @@ import { setProgress, setEnglishOnly, t } from './lang.js';
 import { press as tick, right as correct, wrong, setSound as setSoundOn } from './sound.js';
 import { attempt as toneAttempt, rank as toneRank, toneName, toneChao } from './pitch.js';
 import { asrSupported, listenFor, matches } from './asr.js';
-import { browseScreens, evidenceLine, wordCard, contextCard } from './browse.js';
+import { browseScreens, evidenceLine, wordCard, contextCard, contourGlyph } from './browse.js';
 import { Placement, PER_STAGE, NEED } from './placement.js';
 import { buildUp, worthBuilding } from './buildup.js';
 
@@ -75,6 +75,87 @@ const inPlay = () => askableIds(canPlayWord(), haveRecordings(), course().curren
 // What the level check said you already know, and so is not taught: kept for
 // the spot checks that test that claim.
 const spotPool = () => assumedKnown(State.data.floor || 0, isMet);
+
+// ── hearing a tone apart from its word ───────────────────────────────────
+// The other two tone questions work on a minimal pair — 詩 against 史, one
+// syllable at two pitches. That teaches the contrast and keeps the tone welded
+// to the syllable. This one plays a word and asks only what its tone was, with
+// many different words carrying each tone, so the shape comes loose from the
+// word it arrived on.
+//
+// The wrong answers are the tones that share a SHAPE with the right one: two
+// level tones at different heights, two rises from different starting points.
+// Offering the top of the range against the bottom of it would be no question.
+function toneOption(n) {
+  return h('span', { class: 'toneopt' },
+    h('span', { class: 'tnum' }, String(n)),
+    h('span', { class: 'glyph', html: contourGlyph(n) }),
+    h('span', { class: 'tname' }, toneName(n)),
+    h('span', { class: 'chao' }, toneChao(n)));
+}
+
+function toneHear(it, ctx) {
+  const w = wordOf(it);
+  const card = h('section', { class: 'card q' },
+    prompt('Which tone was that?'),
+    // No no-voice fallback: this question IS the sound. deck.js keeps it out
+    // of reach entirely on a phone with no Cantonese voice, because the only
+    // thing it could fall back to — the romanisation — ends in the tone number.
+    playButton({ word: w.w, label: 'Play again', autoplay: true }),
+    h('p', { class: 'note' }, 'Just the pitch — the word itself comes after.'));
+
+  const wrap = h('div', { class: 'choices tones' });
+  const all = shuffle([it.tone, ...it.options]);
+  for (const n of all) {
+    const b = h('button', { class: 'choice tonechoice', type: 'button', onclick: () => {
+      if (wrap.classList.contains('locked')) return;
+      wrap.classList.add('locked');
+      const ok = n === it.tone;
+      b.classList.add(ok ? 'right' : 'wrong');
+      b.append(h('span', { class: 'mark' }, ok ? '✓' : '✗'));
+      if (!ok) for (const other of wrap.children) if (+other.dataset.t === it.tone) { other.classList.add('right'); other.append(h('span', { class: 'mark' }, '✓')); }
+      ctx.onAnswer(ok);
+      card.append(afterCard([
+        wordCard(it.i, { example: true, reveal: true }),
+        h('p', { class: 'note' }, `${w.w} is ${readable(w.j)} — tone ${it.tone}, ${toneName(it.tone)} (${toneChao(it.tone)}).`),
+      ], { ...ctx, ok, answer: `tone ${it.tone}, ${toneName(it.tone)}` }));
+    } }, toneOption(n));
+    b.dataset.t = String(n);
+    wrap.append(b);
+  }
+  card.append(wrap);
+  return card;
+}
+
+// The lesson. Shown once before the first tone question of all, the way a word
+// is shown before it is asked about — tones are the hardest thing in the
+// language and being tested on them cold is the wrong way round.
+function toneLesson(onDone) {
+  const d = D();
+  const L = d.toneLesson || {};
+  const rows = (d.tones || []).map((t) => {
+    const w = t.i != null ? d.words[t.i] : null;
+    return h('div', { class: 'trow big' },
+      h('span', { class: 'tnum' }, String(t.n)),
+      h('span', { class: 'chao' }, t.chao),
+      h('span', { class: 'glyph', html: contourGlyph(t.n) }),
+      h('div', { class: 'tinfo' },
+        h('div', { class: 'tname' }, t.name),
+        h('div', { class: 'note' }, t.is),
+        h('div', { class: 'note' }, t.like)),
+      w ? h('button', { class: 'wchip', type: 'button', onclick: () => canPlayWord() && playWord(w.w) },
+        h('span', { class: 'han' }, w.w), h('span', { class: 'jyut' }, readable(w.j))) : null);
+  });
+  return h('section', { class: 'card q meet tonelesson' },
+    h('div', { class: 'eyebrow' }, 'Before the tones'),
+    h('h2', {}, L.title || 'The six tones'),
+    L.what ? h('p', {}, L.what, sayBtn(L.what)) : null,
+    L.how ? h('p', {}, L.how, sayBtn(L.how)) : null,
+    h('div', { class: 'tonelist' }, ...rows),
+    L.watch ? h('p', { class: 'watch' }, L.watch) : null,
+    L.honest ? h('p', { class: 'note' }, L.honest) : null,
+    h('button', { class: 'wide primary', type: 'button', onclick: onDone }, 'Got it — ask me'));
+}
 
 // ── saying a long sentence, from the end ─────────────────────────────────
 // Pimsleur's oldest trick; app/js/buildup.js says why it runs backwards. It
@@ -851,6 +932,16 @@ function roundScreen(round, { practice }) {
     // Taught before tested. A recall test never introduces anything — it is
     // there to tell you where you stand, and meeting a word inside it would
     // make the score a lie.
+    // Tones get their lesson once, before the first question about them. It is
+    // the hardest thing in the language and the one place the app was testing
+    // cold.
+    const TONE_KINDS = ['tone-hear', 'tone-pair', 'tone-say'];
+    if (!practice && TONE_KINDS.includes(it.k) && !State.data.tonesTaught) {
+      State.data.tonesTaught = true; State.save();
+      box.replaceChildren(h('div', { class: 'qcount' }, count, dots), toneLesson(showQuestion));
+      paint(); window.scrollTo(0, 0);
+      return;
+    }
     if (!practice && needsIntroduction(it)) {
       metToday.add(D().words[it.i].w);
       box.replaceChildren(h('div', { class: 'qcount' }, count, dots), meetCard(it, showQuestion));
@@ -877,6 +968,7 @@ function question(it, ctx) {
     case 'word-read': return readWord(it, ctx);
     case 'word-say': return sayWord(it, ctx);
     case 'sentence-listen': return listenSentence(it, ctx);
+    case 'tone-hear': return toneHear(it, ctx);
     case 'tone-pair': return tonePair(it, ctx);
     case 'tone-say': return toneSay(it, ctx);
     case 'grammar-mean': return grammarMean(it, ctx);
@@ -1407,6 +1499,68 @@ function grammarBuild(it, ctx) {
   }
   card.append(line, tray);
   return card;
+}
+
+// ── the sweep ────────────────────────────────────────────────────────────
+// Every question kind and every teaching card, rendered into one page and
+// read back for the things that look like a render gone wrong.
+function sweep() {
+  const d = D();
+  const out = [];
+  const report = [];
+  const ctx = { onAnswer: () => {}, onNext: () => {}, practice: false };
+
+  const kinds = [...new Set(d.items.map((it) => it.k))];
+  const pick = (k, extra = () => true) => d.items.find((it) => it.k === k && extra(it));
+  const cases = [];
+  for (const k of kinds) {
+    const it = pick(k);
+    if (it) cases.push([k, () => question(it, ctx)]);
+  }
+  // The cards, which are where the gaps have actually been.
+  const anyWord = d.items.find((it) => it.i != null);
+  const graded = d.items.find((it) => it.src === 'hbl' && Array.isArray(it.parts) && it.parts.length >= 6);
+  const famWord = (d.families || [])[0]?.words?.[0];
+  cases.push(['card: meeting a word', () => meetCard(anyWord, () => {})]);
+  if (graded) cases.push(['card: saying it with me', () => buildUpCard(graded)]);
+  if (famWord != null) cases.push(['card: the other ways to say it', () => familyNote(famWord)]);
+  cases.push(['card: a grammar lesson', () => lessonCard(d.ladder[0].id)]);
+  cases.push(['card: the ladder', () => ladderScreen()]);
+
+  for (const [name, make] of cases) {
+    let node = null, err = null;
+    try { node = make(); } catch (e) { err = String(e && (e.stack || e.message) || e); }
+    const box = h('section', { class: 'card flat' }, h('div', { class: 'eyebrow' }, name));
+    if (err) { report.push(`THREW  ${name}: ${err.split('\n')[0]}`); box.append(h('p', { class: 'watch' }, err)); }
+    else if (!node) { report.push(`EMPTY  ${name}: rendered nothing`); }
+    else {
+      for (const n of [].concat(node).filter(Boolean)) box.append(n);
+      const text = box.innerText || box.textContent || '';
+      if (/\bnull\b|\bundefined\b|\bNaN\b/.test(text)) report.push(`TEXT   ${name}: the page contains "${(text.match(/\b(null|undefined|NaN)\b/) || [])[0]}"`);
+      if (!text.trim()) report.push(`BLANK  ${name}: no text at all`);
+      // Some cards are purely something to read — the other ways to say a
+      // word, the ladder — and having nothing to press is what they are for.
+      const readOnly = /^card: (the ladder|the other ways)/.test(name);
+      if (!box.querySelector('button') && !readOnly) report.push(`NOBTN  ${name}: nothing to press`);
+    }
+    out.push(box);
+  }
+
+  const summary = h('section', { class: 'card' },
+    h('h2', {}, report.length ? `${report.length} to look at` : 'Nothing looks wrong'),
+    ...report.map((r) => h('p', { class: 'watch' }, r)),
+    h('p', { class: 'note' }, `${cases.length} things rendered: ${kinds.length} question kinds and ${cases.length - kinds.length} cards.`));
+  show('sweep', () => [header('Sweep'), h('main', {}, summary, ...out)]);
+  // Also to the console, so it can be read without scrolling a phone.
+  if (report.length) console.warn(report.join('\n')); else console.log('sweep: nothing looks wrong');
+  return { rendered: cases.length, problems: report };
+}
+route('sweep', () => [header('Sweep'), h('main', {}, h('p', {}, 'Run HG.sweep() again.'))]);
+
+// Only with ?debug, so there is nothing to find by accident.
+if (new URLSearchParams(location.search).has('debug')) {
+  window.HG = { sweep, deck: () => D(), state: () => State.data, ladder: () => ladderState() };
+  console.log('debug: HG.sweep(), HG.deck(), HG.state(), HG.ladder()');
 }
 
 // ── boot ─────────────────────────────────────────────────────────────────

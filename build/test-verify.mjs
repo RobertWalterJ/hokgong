@@ -33,6 +33,12 @@ const cases = [
   // A book re-edited upstream, so a clip now belongs to different words. This
   // is the failure the sources research warned about: ranks and sentence
   // numbers shift, filenames do not.
+  // A tone question that asks about a tone the word does not have — the one
+  // way this question kind can be quietly wrong.
+  ['a tone question naming the wrong tone', (d) => {
+    const it = d.items.find((x) => x.k === 'tone-hear');
+    if (it) it.tone = it.tone === 1 ? 2 : 1;
+  }, 'names a tone the word does not have'],
   ['a graded-reader question that no longer matches its recording', (d) => {
     const it = d.items.find((x) => x.src === 'hbl');
     if (it) it.text = it.text + '呀';

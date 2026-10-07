@@ -31,6 +31,7 @@ export const SKILL = {
   'word-say': 'speaking',
   'word-pick': 'speaking',   // recalling the form from the meaning is production
   'tone-say': 'tones',
+  'tone-hear': 'tones',
   'tone-pair': 'tones',
   'word-read': 'reading',
   'word-cloze': 'grammar',
@@ -112,7 +113,10 @@ export function stageState({ canAnswerWord, grammarMet, floor = 0 }) {
   return { stages, current, done: current >= stages.length };
 }
 
-const NEEDS_VOICE = new Set(['tone-pair', 'word-listen']);
+// tone-hear belongs here above all: its whole question is a pitch, and the
+// romanisation it would otherwise fall back to ENDS IN THE TONE NUMBER. A
+// no-voice fallback would print the answer above the question.
+const NEEDS_VOICE = new Set(['tone-pair', 'word-listen', 'tone-hear']);
 // And these need a recording: a sentence nobody can hear is not a listening
 // question, it is a blank.
 const NEEDS_RECORDING = new Set(['sentence-listen']);

@@ -6,6 +6,15 @@
 
 export default [
   {
+    v: '1.18.0', date: '2026-10-07',
+    what: [
+      'A tone question: a word is played and the only question is what its tone was. The other two tone questions work on a minimal pair — the same syllable at two pitches — which teaches the contrast but keeps the tone welded to one word. This asks the same tone on sixty different words, so the shape comes loose from the word it arrived on. 341 of them, across all six tones.',
+      'The wrong answers are the tones that share a SHAPE with the right one: two level tones at different heights, two rises from different starting points. Offering the top of your voice against the bottom of it would be no question at all.',
+      'And a lesson before the first tone question of all: what the six are, what each one does, which three are level and which two rise, with a word you can hear for each. Tones are the hardest thing in the language and the app was testing them cold.',
+      'Every option carries its number, its shape and its Chao value, so the question teaches while it asks.',
+    ],
+  },
+  {
     v: '1.17.0', date: '2026-10-07',
     what: [
       'Say it with me — a long sentence built up from its END, a piece at a time. 要剪喇 → 好長要剪喇 → 佢嘅頭髮好長要剪喇 → the whole thing. It appears after you have answered a listening question, so there is nothing to get wrong: the only thing asked is that you say each line out loud.',

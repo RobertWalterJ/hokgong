@@ -353,6 +353,19 @@ details.more > :not(summary) { animation: rise .2s var(--ease); }
 .bustep.whole { border-bottom: 0; }
 .bustep.whole .han { font-weight: 600; }
 .play.small { margin: 0; flex: none; padding: var(--s2) var(--s3); font-size: .85rem; }
+/* Choosing a tone. Each option carries its number, its shape and its name,
+   so the question teaches while it asks. */
+.choices.tones { gap: var(--s2); }
+.tonechoice { padding: var(--s3) var(--s7) var(--s3) var(--s4); }
+.toneopt { display: flex; align-items: center; gap: var(--s3); text-align: left; }
+.toneopt .tnum { font-weight: 700; font-size: 1.2rem; color: var(--accent); min-width: 1.2rem; }
+.toneopt .glyph { width: 34px; flex: none; color: var(--muted); }
+.toneopt .tname { flex: 1; min-width: 0; }
+.toneopt .chao { font-family: var(--ui); font-size: .8rem; color: var(--muted); }
+.tonelesson { text-align: left; }
+.tonelesson .tonelist { margin: var(--s4) 0; }
+.tonelesson .trow.big { align-items: flex-start; }
+.tinfo { flex: 1; min-width: 0; }
 .newwords { margin: var(--s2) 0 var(--s4); color: var(--muted); }
 .newwords .han { color: var(--ink); }
 .play {

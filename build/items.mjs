@@ -38,6 +38,7 @@ const GRAMMAR = await load('content/grammar.mjs');
 const CONTEXT = await load('content/context.mjs');
 const SYLLABUS = await load('content/syllabus.mjs');
 const NOTES = await load('content/notes.mjs');
+const { TONES: TONE_TABLE, CONFUSABLE, LESSON: TONE_LESSON } = await import(pathToFileURL(join(ROOT, 'content', 'tones.mjs')).href);
 // Words a learner would answer with each other, and what tells them apart.
 const FAMILIES = await load('content/families.mjs');
 // What each grammar pattern is made of and what it stands on — the ladder.
@@ -384,6 +385,35 @@ for (const [syll, group] of toneSets) {
   items.push({ id: `tsay/${syll}`, k: 'tone-say', syll, choices: group.slice(0, 4).map((e) => ({ i: e.i, tone: +e.jyut.slice(-1) })), level: 4 });
 }
 
+// ── which tone was that? ─────────────────────────────────────────────────
+// Spread across the six tones and across many different words, because the
+// point is to stop hearing the tone as part of the word. Sixty of each, taken
+// from the first 1,500 so they are words being learnt anyway.
+const PER_TONE = 60;
+{
+  const byTone = new Map([1, 2, 3, 4, 5, 6].map((t) => [t, []]));
+  for (const [i, e] of chosen.slice(0, 1500).entries()) {
+    if (!/^[a-z]+[1-6]$/.test(e.jyut)) continue;       // one syllable only: a
+    const t = +e.jyut.slice(-1);                        // two-syllable word has
+    if (chars(e.w) !== 1) continue;                     // two tones in it
+    const list = byTone.get(t);
+    if (list && list.length < PER_TONE) list.push({ ...e, i });
+  }
+  let n = 0;
+  for (const [tone, list] of byTone) {
+    for (const e of list) {
+      const wrong = (CONFUSABLE[tone] || []).filter((t) => t !== tone).slice(0, 2);
+      if (wrong.length < 2) continue;
+      items.push({
+        id: `th/${e.w}`, k: 'tone-hear', i: e.i, tone, options: wrong,
+        level: 3,
+      });
+      n++;
+    }
+  }
+  console.log(`  which tone was that: ${n} across ${[...byTone].map(([t, l]) => `T${t} ${l.length}`).join(', ')}`);
+}
+
 // ── grammar ──────────────────────────────────────────────────────────────
 // Each point gets real examples: shortest, recorded where possible. Three item
 // kinds — understand it, choose the right form, build the sentence.
@@ -531,6 +561,7 @@ const context = CONTEXT.map((c0) => {
 //   - recorded sentences are spread right through.
 const place = (it) => {
   switch (it.k) {
+    case 'tone-hear': return it.i * 3 + 2;
     case 'word-listen': return it.i * 3;
     case 'word-say': return it.i * 3 + 1;
     case 'word-read': return it.i * 3 + 400;             // later, but still in rank order
@@ -757,6 +788,13 @@ const deck = {
   // how it is made. The explanations are mine; every example a lesson shows is
   // one build/verify.mjs has already checked against Tatoeba.
   ladder: LESSONS.map((l, n) => ({ ...l, n })),
+  // The six tones, and for each the easiest single-character word the app
+  // teaches at that tone — so the lesson's examples are words he will meet.
+  toneLesson: TONE_LESSON,
+  tones: TONE_TABLE.map((t) => {
+    const w = chosen.findIndex((e) => chars(e.w) === 1 && /^[a-z]+[1-6]$/.test(e.jyut) && +e.jyut.slice(-1) === t.n);
+    return { ...t, i: w >= 0 ? w : null };
+  }),
   context,
   items,
   audio: [...audioNeeded],

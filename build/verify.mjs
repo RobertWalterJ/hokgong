@@ -86,7 +86,7 @@ for (const it of DECK.items) {
   // Which of these a question's buttons actually say. The gap questions are
   // the odd ones out: they carry a word index like a vocabulary question, but
   // what is on the buttons is Chinese words, not English meanings.
-  const pair = it.k === 'note-pick' || it.k === 'word-cloze' || it.k === 'word-pick';
+  const pair = it.k === 'note-pick' || it.k === 'word-cloze' || it.k === 'word-pick' || it.k === 'tone-hear';
   const answer = it.k === 'sentence-listen' || it.k === 'grammar-mean' ? it.eng
     : it.k === 'grammar-pick' || it.k === 'word-cloze' ? it.answer
       : pair ? DECK.words[it.i]?.w
@@ -100,6 +100,18 @@ for (const it of DECK.items) {
   if (pair) {
     // word-pick carries no readings of its own: its options are deck words and
     // the app looks them up. So what must be true is that they ARE deck words.
+    // A tone question's buttons are tones, not words: checked on their own
+    // terms below, and skipped by everything that assumes an English answer.
+    if (it.k === 'tone-hear') {
+      check(it.options.length === 2, 'a tone question with the wrong number of wrong answers', `${it.id}: ${it.options.length}`);
+      check(!it.options.includes(it.tone), 'a tone question offers its own answer as a wrong one', it.id);
+      check([it.tone, ...it.options].every((t) => Number.isInteger(t) && t >= 1 && t <= 6), 'a tone question offers something that is not a tone', `${it.id}: ${JSON.stringify(it.options)}`);
+      check(new Set(it.options).size === it.options.length, 'a tone question offers the same wrong answer twice', it.id);
+      // The tone asked about must be the tone the word actually has.
+      const w = DECK.words[it.i];
+      check(!!w && +String(w.j).slice(-1) === it.tone, 'a tone question names a tone the word does not have', `${it.id}: ${w && w.j} is not tone ${it.tone}`);
+      continue;
+    }
     if (it.k === 'word-pick') {
       for (const o of it.options) {
         check(DECK.words.some((x) => x.w === o), 'a word-pick option is not a word the deck teaches', `${it.id}: ${o}`);
