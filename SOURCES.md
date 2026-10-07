@@ -50,6 +50,18 @@ machine-readable build by chinvocab (https://chinvocab.com/hbl/data/) carries
 Cantonese word in every sentence with the English it means *in that sentence*.
 CC BY 4.0.
 
+The same books also supply **listening material**. Every one of their 6,727
+sentences is read aloud, one recording per sentence, and `build/hbl-sentences.mjs`
+turns the catalogue into 6,179 usable graded sentences (the rest are set aside
+by `content/unsuitable.mjs` like any other). `build/fetch-hbl-audio.mjs` takes a
+capped subset — every sentence within reach of the ten-stage course first, then
+by reading level, then shortest first — and records the sentence text alongside
+each clip, because a book re-edited upstream would otherwise leave a file called
+`07.mp3` holding a recording of different words.
+
+These are better beginner listening than Tatoeba's: graded 1 to 7, written for
+people learning to read Cantonese, with translations the publisher has checked.
+
 `build/usage.mjs` counts those into a sense-frequency table for 7,500 words
 (`corpus/usage.json`). **It is never used as a gloss** — these are contextual
 translations from children's books, so 咗 arrives as "-en" and 咩 as

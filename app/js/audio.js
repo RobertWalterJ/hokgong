@@ -40,7 +40,17 @@ export function playRecording(id, { onend = null } = {}) {
       a.addEventListener('error', () => { listener?.(false); then(); });
       a.play().catch(then);
     };
-    const remote = () => tryUrl(`${REMOTE}${id}.mp3`, () => { listener?.(false); onend?.(); resolve(null); });
+      // A graded reader's recording. Its id carries where it came from —
+    // hbl:<book>:<sentence> — so it can never be confused with a Tatoeba one,
+    // and it lives in its own folder. There is no remote fallback: these are
+    // bundled or they are not offered.
+    if (String(id).startsWith('hbl:')) {
+      const file = String(id).replace(/:/g, '-') + '.mp3';
+      tryUrl(`${BASE}hbl/${file}`, () => { listener?.(false); onend?.(); resolve(null); });
+      resolve('bundled');
+      return;
+    }
+  const remote = () => tryUrl(`${REMOTE}${id}.mp3`, () => { listener?.(false); onend?.(); resolve(null); });
     if (BUNDLED.size && !BUNDLED.has(id)) { remote(); resolve('remote'); return; }
     tryUrl(`${BASE}${id}.mp3`, remote);
     resolve('bundled');

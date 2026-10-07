@@ -11,7 +11,7 @@
 // six thousand words repeating the word, reading and gloss inside every item
 // tripled the file for nothing.
 
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -447,6 +447,46 @@ for (const g of GRAMMAR) {
     }
   }
 }
+
+// ── listening, from the graded readers ───────────────────────────────────
+// Tatoeba's recordings are two readers and a general corpus. These are 229
+// books written for people learning to read Cantonese, graded 1 to 7, read
+// aloud, with a translation the publisher has checked. For a beginner they are
+// simply better listening material, and they come with a reading level the app
+// can order them by.
+//
+// Only sentences whose recording is actually bundled become questions. The
+// catalogue holds 6,179; the app carries a capped subset (build/fetch-hbl-
+// audio.mjs), and a question whose audio is missing is not a listening
+// question, it is a blank.
+let hblItems = 0;
+try {
+  const HBL = JSON.parse(readFileSync(join(ROOT, 'corpus', 'hbl.json'), 'utf8'));
+  const CLIPS = JSON.parse(readFileSync(join(ROOT, 'corpus', 'hbl-audio.json'), 'utf8'));
+  const pool = HBL.filter((x) => CLIPS[x.id] && x.eng && chars(x.text) >= 2);
+  const engPoolHbl = pool.map((x) => x.eng);
+  for (const s2 of pool) {
+    const rnd = seeded('hbl' + s2.id);
+    const options = pickEng(s2.eng, engPoolHbl, 3, rnd);
+    if (options.length < 3) continue;
+    items.push({
+      id: `hl/${s2.id}`, k: 'sentence-listen', sid: s2.id, src: 'hbl',
+      text: s2.text, jyut: romanise(s2.text), eng: s2.eng, by: 'Hambaanglaang',
+      lvl: s2.lvl, options, level: Math.min(9, 2 + (s2.lvl || 1)),
+    });
+    // NOT audioNeeded: that is the Tatoeba fetch list, and these clips come
+    // from their own source, live in their own folder and are tracked by their
+    // own manifest (corpus/hbl-audio.json).
+    hblItems++;
+  }
+} catch (err) {
+  // The catalogue is optional — a fresh clone builds without it — but a
+  // catalogue that is PRESENT and fails is a bug, not an absence, and a silent
+  // catch is how a build comes out looking fine with a whole source missing.
+  if (existsSync(join(ROOT, 'corpus', 'hbl.json'))) throw err;
+  console.log('  listening from graded readers: none (no catalogue)');
+}
+console.log(`  listening from graded readers: ${hblItems}`);
 
 // ── where the words come from ────────────────────────────────────────────
 // Short cards on Cantonese in Canada and on the food the words name. They are

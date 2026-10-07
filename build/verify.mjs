@@ -48,7 +48,10 @@ for (const w of DECK.words) {
 }
 
 // ── 2. every sentence is Tatoeba's, word for word ────────────────────────
-const sentenceItems = DECK.items.filter((it) => it.text && it.sid);
+// Tatoeba's sentences. The graded readers have their own catalogue and their
+// own section below; checking them against Tatoeba's ids would only ever say
+// they are not Tatoeba's, which is true and not a fault.
+const sentenceItems = DECK.items.filter((it) => it.text && it.sid && it.src !== 'hbl');
 for (const it of sentenceItems) {
   const s = sentById.get(it.sid);
   if (!s) { fail('sentence not in the corpus', it.id); continue; }
@@ -271,7 +274,10 @@ check(missing === 0, 'recordings named in the deck but not downloaded', `${missi
 // An HTML error page saved as .mp3 is silent and looks fine in a file listing;
 // 307 of them got into the repo once. Every file is checked for an mp3 header.
 let notAudio = 0;
-for (const f of have.size ? readdirSync(audioDir) : []) {
+// Only the files. The graded readers' recordings live in a folder of their own
+// beside these and are checked in their own section; reading a directory as if
+// it were an mp3 throws.
+for (const f of (have.size ? readdirSync(audioDir) : []).filter((x) => x.endsWith('.mp3'))) {
   const b = readFileSync(join(audioDir, f));
   const ok = (b[0] === 0x49 && b[1] === 0x44 && b[2] === 0x33) || (b[0] === 0xff && (b[1] & 0xe0) === 0xe0);
   if (!ok) notAudio++;
@@ -460,6 +466,37 @@ check(LADDER.some((l) => !(l.builds || []).length), 'every rung stands on anothe
     for (const l of LADDER) if (!open.has(l.id) && (l.builds || []).every((b) => open.has(b))) { open.add(l.id); moved = true; }
   }
   for (const l of LADDER) check(open.has(l.id), 'a rung can never be opened', l.id);
+}
+
+// ── 8h. the graded readers' recordings are of what they claim ────────────
+// These clips are filed by book and sentence number, and that number is the
+// only thing tying a recording to its words. If a book is re-edited upstream
+// so that its seventh sentence changes, the file called 07 becomes a recording
+// of something else and no filename anywhere would say so. So the manifest
+// records the text as it was when the clip was taken, and it is compared.
+if (existsSync(join(ROOT, 'corpus', 'hbl.json'))) {
+  const HBL = read('corpus/hbl.json');
+  const CLIPS = existsSync(join(ROOT, 'corpus', 'hbl-audio.json')) ? read('corpus/hbl-audio.json') : {};
+  const hblById = new Map(HBL.map((x) => [x.id, x]));
+  const dir = join(ROOT, 'app', 'audio', 'hbl');
+  for (const [id, clip] of Object.entries(CLIPS)) {
+    const src = hblById.get(id);
+    if (!src) { fail('a recording is kept for a sentence no longer in the catalogue', id); continue; }
+    check(src.text === clip.text, 'a recording and its sentence have drifted apart', `${id}: "${clip.text}" vs "${src.text}"`);
+    const f = join(dir, clip.file);
+    check(existsSync(f), 'a recording in the manifest is not on disk', `${id}: ${clip.file}`);
+    if (!existsSync(f)) continue;
+    const b = readFileSync(f);
+    const ok = (b[0] === 0x49 && b[1] === 0x44 && b[2] === 0x33) || (b[0] === 0xff && (b[1] & 0xe0) === 0xe0);
+    check(ok, 'a file in the graded-reader audio is not an mp3', clip.file);
+  }
+  // And every listening question built from these must have its recording.
+  for (const it of DECK.items.filter((x) => x.src === 'hbl')) {
+    check(!!CLIPS[it.sid], 'a graded-reader listening question has no recording', it.id);
+    const src = hblById.get(it.sid);
+    check(!!src && src.text === it.text, 'a graded-reader question does not match the catalogue', it.id);
+    check(!!src && src.eng === it.eng, 'a graded-reader translation does not match the catalogue', it.id);
+  }
 }
 
 // ── 9. the deck is big enough to be worth playing ────────────────────────

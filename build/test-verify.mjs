@@ -30,6 +30,13 @@ const cases = [
   // A grammar point you are gated on, rationed back to one question: the shape
   // of the fault that let an evening of work pass no stage at all.
   // A rung hung off one above it: the ladder with its bottom rung removed.
+  // A book re-edited upstream, so a clip now belongs to different words. This
+  // is the failure the sources research warned about: ranks and sentence
+  // numbers shift, filenames do not.
+  ['a graded-reader question that no longer matches its recording', (d) => {
+    const it = d.items.find((x) => x.src === 'hbl');
+    if (it) it.text = it.text + '呀';
+  }, 'does not match the catalogue'],
   ['a grammar rung that stands on a rung above it', (d) => {
     const l = d.ladder.find((x) => !x.builds.length);
     if (l) l.builds = [d.ladder[d.ladder.length - 1].id];

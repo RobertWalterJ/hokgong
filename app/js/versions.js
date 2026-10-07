@@ -6,6 +6,14 @@
 
 export default [
   {
+    v: '1.16.0', date: '2026-10-07',
+    what: [
+      'Listening questions read by a person, from books written for people learning Cantonese. The graded readers the app already used for their word meanings turn out to have every one of their sentences read aloud — 287 new listening questions, graded 1 to 7, nearly doubling what there was.',
+      'They are better beginner material than what came before: short, written to a reading level, with translations the publisher has checked. The old ones came from a general corpus of whatever people had contributed.',
+      'Every sentence within reach of the ten stages now has its recording, and the app keeps a note of the exact words each clip was taken for — so a book edited after the fact can never leave a recording attached to the wrong sentence. The build fails if one drifts.',
+    ],
+  },
+  {
     v: '1.15.0', date: '2026-10-07',
     what: [
       'Grammar is a ladder now, not a list. Ten patterns in the order they stand on each other: 係 holds up 唔, which holds up 食唔食 and 有冇; 咗 holds up 緊, which holds up 返 and 埋. Each rung says what it stands on and why it sits where it does.',

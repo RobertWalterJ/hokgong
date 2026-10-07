@@ -67,5 +67,12 @@ const missing = list.filter((u) => !existsSync(join(OUT, u)));
 if (missing.length) throw new Error('the service worker precaches files that do not exist: ' + missing.join(', '));
 
 const mb = (p) => (statSync(p).size / 1024 / 1024);
-const audioMb = readdirSync(join(OUT, 'audio')).reduce((n, f) => n + mb(join(OUT, 'audio', f)), 0);
-console.log(`wrote docs/ — build ${build}, ${mb(join(OUT, 'index.html')).toFixed(1)} MB page + ${ids.length} recordings (${audioMb.toFixed(0)} MB)`);
+// Recursively, because the graded readers' recordings live in a folder of
+// their own and the old count silently reported only the Tatoeba ones — so the
+// deploy line said 18 MB while 29 MB was being shipped.
+const walk = (dir) => readdirSync(dir, { withFileTypes: true }).reduce((n, e) =>
+  n + (e.isDirectory() ? walk(join(dir, e.name)) : mb(join(dir, e.name))), 0);
+const audioMb = walk(join(OUT, 'audio'));
+const hblDir = join(OUT, 'audio', 'hbl');
+const hblN = existsSync(hblDir) ? readdirSync(hblDir).filter((f) => f.endsWith('.mp3')).length : 0;
+console.log(`wrote docs/ — build ${build}, ${mb(join(OUT, 'index.html')).toFixed(1)} MB page + ${ids.length} Tatoeba + ${hblN} graded recordings (${audioMb.toFixed(0)} MB)`);
