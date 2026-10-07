@@ -57,15 +57,24 @@ const skillsSeen = new Set();
 let worstBacklog = 0, roundsPlayed = 0, emptyRounds = 0, longestDryDay = 0, dryRun = 0, shortRounds = 0, topped = 0;
 const newByDay = [];
 
+// THE SETTINGS THE APP ACTUALLY SHIPS, not the module's bare constants.
+// Passing no pace and no size meant this file measured 32 new a day and
+// 25-question rounds while the app shipped something else, twice. A simulation
+// of a regime nobody is in proves nothing. These must track app.js: SITTINGS
+// .usual and PACES.steady.
+const SITTING = 25;
+const PACE = { newPerRound: 9, newPerDay: 40 };
+
 for (let day = 0; day < DAYS; day++) {
-  // He plays in bursts: two or three short sittings on most days, five on
-  // some, one on others.
-  const sittings = day % 7 === 3 ? 5 : day % 3 === 0 ? 1 : 3;
+  // Short rounds, so he plays MORE of them: four on most days, seven on some,
+  // two on others. The old shape — one to five long sittings — was the wrong
+  // regime to test once the default round became eighteen questions.
+  const sittings = day % 7 === 3 ? 7 : day % 3 === 0 ? 2 : 4;
   const asked = new Set();
   let newToday = 0;
   for (let s = 0; s < sittings; s++) {
-    t += 90 * 60e3;                                   // an hour and a half apart
-    const round = new S.Round(ids, { exclude: asked, groupOf, stageOf: (id) => byId.get(id)?.stage });
+    t += 70 * 60e3;                                   // a bit over an hour apart
+    const round = new S.Round(ids, { exclude: asked, pace: PACE, size: SITTING, groupOf, stageOf: (id) => byId.get(id)?.stage });
     if (round.empty) { emptyRounds++; continue; }
     roundsPlayed++;
     if (round.queue.length > round.size) fails.push(`day ${day}: a round of ${round.queue.length}, longer than the sitting`);
@@ -113,6 +122,13 @@ if (emptyRounds > DAYS) fails.push(`${emptyRounds} sittings had nothing to ask`)
 if (shortRounds > roundsPlayed * 0.25) fails.push(`${shortRounds} of ${roundsPlayed} rounds came up short of the sitting length`);
 if (skillsSeen.size < 5) fails.push(`only ${skillsSeen.size} of the five skills were ever started: ${[...skillsSeen].join(', ')}`);
 if (known < 100) fails.push(`only ${known} questions reached "known" in ${DAYS} days`);
+// The pace is a ceiling. Three separate paths hand out questions the learner
+// has never seen — the round's own allowance, the second look at each new
+// word, and the fill that stops a sitting coming up short — and for a while
+// only the first of them counted against the day's number. A little slack is
+// allowed for the day a round is already in flight when the cap is reached.
+const overruns = newByDay.filter((n) => n > PACE.newPerDay + 2);
+if (overruns.length) fails.push(`${overruns.length} days went past the pace of ${PACE.newPerDay} new a day — worst was ${Math.max(...overruns)}`);
 
 console.log(`test-schedule: ${DAYS} days, ${roundsPlayed} rounds, ${met.toLocaleString()} questions met, ${canAnswer.toLocaleString()} answerable, ${known.toLocaleString()} known`);
 console.log(`  new per day: ${(totalNew / DAYS).toFixed(1)} average, ${Math.max(...newByDay)} at most, ${Math.min(...newByDay)} at least`);

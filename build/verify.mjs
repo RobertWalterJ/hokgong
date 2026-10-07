@@ -342,7 +342,14 @@ for (const [n, st] of DECK.stages.entries()) {
   const need = Math.max(1, Math.ceil(st.words.length * st.gate));
   check(have >= need, 'a stage asks for more words than it opens questions for', `stage ${n + 1}: ${have} of ${need}`);
   for (const gid of st.grammar) {
-    check(open.some((it) => it.gid === gid), 'a stage asks for a grammar point with no question in reach', `stage ${n + 1}: ${gid}`);
+    // Not merely one question: a stage is passed only when its grammar points
+    // are answered right, a miss is not due again until tomorrow, and a point
+    // with a single question is therefore a stage that one wrong answer shuts
+    // for the day. An evening of solid work reached fourteen of fourteen
+    // stage-one WORDS and never passed the stage, because one of its two
+    // patterns had exactly one question and it had been got wrong.
+    const n3 = open.filter((it) => it.gid === gid).length;
+    check(n3 >= 3, 'a gated grammar point has too few questions in reach', `stage ${n + 1}: ${gid} has ${n3}, wants 3`);
   }
 }
 

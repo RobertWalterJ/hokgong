@@ -12,12 +12,13 @@ import { h, iconBtn, sayBtn, sheet, closeSheet, disclosure, flash, show, route, 
 import { initSpeech, say, unlock, available as speechAvailable, cantoneseAvailable, onSpeaking } from './speech.js';
 import { playRecording, playWord, stopAudio, onAudio, canPlayWord, haveRecordings, probeRecordings } from './audio.js';
 import { State, Round, cardState, isHolding, dayKey, newLeftToday, nextDueSentence, untilText, now, shuffle, DAY } from './schedule.js';
-import { loadDeck, indexDeck, D, wordOf, exampleOf, examplesOf, allIds, askableIds, setAsideCount, stageState, SKILL, SELF_RATED, SPEAKING_ALOUD } from './deck.js';
+import { loadDeck, indexDeck, D, wordOf, exampleOf, examplesOf, allIds, askableIds, assumedKnown, setAsideCount, stageState, SKILL, SELF_RATED, SPEAKING_ALOUD } from './deck.js';
 import { setProgress, setEnglishOnly, t } from './lang.js';
 import { press as tick, right as correct, wrong, setSound as setSoundOn } from './sound.js';
 import { attempt as toneAttempt, rank as toneRank, toneName, toneChao } from './pitch.js';
 import { asrSupported, listenFor, matches } from './asr.js';
 import { browseScreens, evidenceLine, wordCard, contextCard } from './browse.js';
+import { Placement, PER_STAGE, NEED } from './placement.js';
 
 export const VERSION = window.HOKGONG_BUILD || { v: 'dev', date: '', commit: '' };
 
@@ -52,7 +53,10 @@ export function course() {
     if (it.i != null) wordRight.add(it.i);
     if (it.gid != null) grammarRight.add(it.gid);
   }
-  const st = stageState({ canAnswerWord: (i) => wordRight.has(i), grammarMet: (g) => grammarRight.has(g), floor: State.data.maxStage || 0 });
+  // The level check's floor and the high-water mark are the same idea: a stage
+  // you have cleared stays cleared. So the floor simply joins the mark rather
+  // than becoming a second progression beside it.
+  const st = stageState({ canAnswerWord: (i) => wordRight.has(i), grammarMet: (g) => grammarRight.has(g), floor: Math.max(State.data.maxStage || 0, State.data.floor || 0) });
   // The high-water mark, kept in the saved state so it survives a reload.
   if (st.current > (State.data.maxStage || 0)) { State.data.maxStage = st.current; State.save(); }
   return st;
@@ -66,7 +70,139 @@ const wordMet = (i) => ['wl/', 'ws/', 'wr/'].some((p) => State.card(p + D().word
 // noise issue" (Robert, 24 Sept). Listening carries on; only the questions
 // that ask him to say something out loud are set aside.
 export const noSpeaking = () => !!State.data.settings?.quiet;
-const inPlay = () => askableIds(canPlayWord(), haveRecordings(), course().current, isMet, wordMet, noSpeaking());
+const inPlay = () => askableIds(canPlayWord(), haveRecordings(), course().current, isMet, wordMet, noSpeaking(), State.data.floor || 0);
+// What the level check said you already know, and so is not taught: kept for
+// the spot checks that test that claim.
+const spotPool = () => assumedKnown(State.data.floor || 0, isMet);
+
+// ── the level check ──────────────────────────────────────────────────────
+// Offered once, from the home screen, and never nagged about. It asks words
+// from each stage in turn and stops at the first one that is not already
+// yours. For a beginner that is four questions and an honest answer.
+function levelCheck() {
+  const p = new Placement();
+  let asked = null;
+  const box = h('div', {});
+
+  const finish = () => {
+    const r = p.result();
+    State.data.floor = Math.max(State.data.floor || 0, r.floor);
+    State.data.levelChecked = new Date().toISOString().slice(0, 10);
+    State.save();
+    const d = D();
+    const st = d.stages[r.floor];
+    box.replaceChildren(h('section', { class: 'card summary' },
+      h('div', { class: 'eyebrow' }, 'Level check finished'),
+      h('p', { class: 'score' }, r.floor === 0 ? 'We will start at the beginning' : `Starting you at stage ${r.floor + 1}`),
+      h('p', { class: 'note' }, r.floor === 0
+        ? 'Nothing skipped — which is the right answer for most people, and nothing to apologise for.'
+        : `The ${r.floor} stage${r.floor === 1 ? '' : 's'} before that will not be taught again from scratch. Their words still come round now and then, and if one catches you out that stage comes back.`),
+      st ? h('p', { class: 'note' }, `Next: ${st.title} — ${st.can}`) : null,
+      h('p', { class: 'note' }, `${r.asked} question${r.asked === 1 ? '' : 's'}. This is an estimate, and it leans towards starting you too low rather than too high.`),
+      h('button', { class: 'wide primary', type: 'button', onclick: () => show('home', homeScreen) }, 'Start learning')));
+    window.scrollTo(0, 0);
+  };
+
+  const ask = () => {
+    if (p.finished) { finish(); return; }
+    asked = p.pick();
+    if (!asked) { finish(); return; }
+    const w = asked.word;
+    const answer = (right) => {
+      p.record(asked.i, right);
+      // A wrong answer teaches. A check should not be a run of being told you
+      // are wrong with nothing to show for it.
+      if (!right) {
+        box.replaceChildren(h('div', { class: 'qcount' }, h('span', { class: 'n' }, `Question ${p.total}`)),
+          h('section', { class: 'card q meet' },
+            h('div', { class: 'eyebrow' }, 'This one is new, then'),
+            h('p', { class: 'han word' }, w.w),
+            h('p', { class: 'jyut big-j' }, readable(w.j)),
+            h('p', { class: 'gloss big' }, w.g),
+            h('button', { class: 'wide primary', type: 'button', onclick: ask }, 'Carry on')));
+        window.scrollTo(0, 0);
+        return;
+      }
+      ask();
+    };
+    const card = h('section', { class: 'card q' },
+      prompt('What does this mean?'),
+      h('p', { class: 'han word' }, w.w),
+      h('p', { class: 'jyut big-j' }, readable(w.j)),
+      asked.cue ? h('p', { class: 'cue' }, asked.cue) : null);
+    card.append(choices(asked.options, w.g, (ok) => answer(ok)));
+    card.append(h('button', { class: 'link', type: 'button', onclick: () => answer(false) }, 'I don’t know'));
+    box.replaceChildren(h('div', { class: 'qcount' }, h('span', { class: 'n' }, `Question ${p.total + 1}`)), card);
+    window.scrollTo(0, 0);
+  };
+
+  box.replaceChildren(h('section', { class: 'card' },
+    h('h2', {}, 'Find your level'),
+    h('p', {}, 'A few words from each stage of the course, in order, stopping at the first stage that is not already yours. Most people answer four questions and start at the beginning.'),
+    h('p', { class: 'note' }, 'Every word is shown with its romanisation, never characters alone. "I don’t know" is a real answer and costs you nothing — a guess is worse, because it would place you above where you are.'),
+    h('p', { class: 'note' }, 'It leans towards starting you too low. Anything it skips still comes round now and then, and if one catches you out, that part of the course comes back.'),
+    h('button', { class: 'wide primary', type: 'button', onclick: ask }, 'Start the check'),
+    h('button', { class: 'ghost wide', type: 'button', onclick: () => show('home', homeScreen) }, 'Not now')));
+  return [header('Find your level'), box];
+}
+route('level', levelCheck);
+
+// Offered on the home screen until it has been done.
+const levelCard = () => (State.data.levelChecked || (State.data.maxStage || 0) > 0 ? null
+  : h('button', { class: 'row', type: 'button', onclick: () => show('level', levelCheck) },
+    h('div', {}, h('div', { class: 'rlabel' }, 'Find your level'),
+      h('div', { class: 'note' }, 'Four questions, if you are starting from scratch')),
+    h('span', { class: 'chev', html: ICON.chev })));
+
+// ── installing it ────────────────────────────────────────────────────────
+// A web app you keep is one with an icon on the home screen. Chrome offers
+// that through a menu item that is easy to miss and, on this shared origin,
+// has sometimes refused outright; an in-page button that holds the event and
+// prompts itself is what worked. Where there is no event — an iPhone, or a
+// Chrome that has already decided — the same button shows the steps instead.
+let installEvent = null;
+const standalone = () => (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); installEvent = e; if (currentScreen() === 'home') repaint(); });
+window.addEventListener('appinstalled', () => { installEvent = null; State.data.installed = true; State.save(); repaint(); });
+
+async function installApp() {
+  if (!installEvent) { installSheet(); return; }
+  installEvent.prompt();
+  try {
+    const r = await installEvent.userChoice;
+    if (r.outcome === 'accepted') { State.data.installed = true; State.save(); }
+  } catch { /* the prompt closes either way */ }
+  installEvent = null;
+  repaint();
+}
+
+function installSheet() {
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const step = (n, text) => h('div', { class: 'step' }, h('span', { class: 'stepn' }, String(n)), h('span', {}, text));
+  sheet(
+    h('h2', {}, 'Putting it on your home screen'),
+    h('p', { class: 'note' }, 'Hok Gong is a web app. Once it is installed it has its own icon, opens without the browser bars, works without signal, and keeps everything you have learnt on this phone.'),
+    ...(ios ? [
+      step(1, 'Open this page in Safari.'),
+      step(2, 'Tap the Share button — the square with an arrow coming out of it.'),
+      step(3, 'Choose "Add to Home Screen", then "Add".'),
+    ] : [
+      step(1, 'Open this page in Chrome.'),
+      step(2, 'Tap the ⋮ menu, top right.'),
+      step(3, 'Choose "Install app", or "Add to Home screen", and confirm.'),
+    ]),
+    h('div', { class: 'gpoint' }, h('p', { class: 'watch' },
+      'If the menu says it is already installed but there is no icon: every app on this address shares one list in Chrome, and it can get its wires crossed. Back your progress up in Settings first, then remove any old Hok Gong icon and try again.')),
+    h('button', { class: 'wide primary', type: 'button', onclick: closeSheet }, 'Got it'));
+}
+
+// Shown on the home screen until it is installed, and never after.
+const installCard = () => (standalone() || State.data.installed ? null
+  : h('section', { class: 'card flat install' },
+    h('div', { class: 'rlabel' }, 'Keep it on your phone'),
+    h('p', { class: 'note' }, 'An icon on your home screen, no browser bars, and it works with no signal.'),
+    installEvent ? h('button', { class: 'wide primary', type: 'button', onclick: installApp }, 'Install now') : null,
+    h('button', { class: 'link', type: 'button', onclick: installSheet }, installEvent ? 'How it works' : 'How to install it')));
 
 // ── a new version, and not losing your progress ──────────────────────────
 // Everything you have learnt lives in this phone's browser storage. That is
@@ -334,7 +470,9 @@ function homeScreen() {
         outLoudSwitch(),
         run > 1 ? h('p', { class: 'note centre' }, `${run} days in a row.`) : null),
       canPlayWord() && haveRecordings() ? null : noVoiceCard(),
+      installCard(),
       h('nav', { class: 'rows' },
+        levelCard(),
         link('The course', c.done ? 'All ten stages behind you' : 'The ten stages, and what each one is for', 'course', browseScreens.course),
         link('Progress', 'What you can answer, and how it has moved', 'progress', browseScreens.progress),
         link('Look things up', 'Words, tones, grammar, sources', 'lookup', browseScreens.lookup)),
@@ -451,9 +589,15 @@ function noVoiceCard() {
 // ── pace ─────────────────────────────────────────────────────────────────
 // Vocabulary apps that push new words regardless of the review backlog bury
 // the learner. The pace is set by how much is waiting.
+// A round should be short enough that starting one is never a decision.
+// Twenty-five was chosen when the complaint was that a sitting ended after two
+// questions; the answer to that was the fill rule, not the length. Eighteen is
+// about three and a half minutes, which is the difference between "I have time
+// for this" and "I will do it later".
 export const SITTINGS = {
   short: { label: 'Short', note: 'About 12 questions — two minutes.', size: 12 },
-  five: { label: 'Five minutes', note: 'About 25 questions. Three of these is the fifteen minutes a day.', size: 25 },
+  brief: { label: 'Briefer', note: 'About 18 questions — three or four minutes.', size: 18 },
+  five: { label: 'Five minutes', note: 'About 25 questions. The default.', size: 25 },
   long: { label: 'Longer', note: 'About 40 questions — seven or eight minutes.', size: 40 },
 };
 const sitting = () => SITTINGS[State.data.settings.sitting] || SITTINGS.five;
@@ -464,10 +608,14 @@ const sitting = () => SITTINGS[State.data.settings.sitting] || SITTINGS.five;
 // wins. The measurement that said the loop was fixed was run without a pace
 // and so measured a regime nobody was in — 32% of a day new, where the real
 // default gave 26%. These now carry the retuned numbers.
+// A ceiling, not a quota. Forty a day is what the app will hand out if you ask
+// it to all day; one round a day simply gives you fifteen or twenty, and
+// nothing anywhere nags you towards the number. The pace says how fast new
+// work ARRIVES when you are there, never how much you owe.
 export const PACES = {
-  gentle: { label: 'Gentle', note: 'About 12 new questions a day.', newPerRound: 4, newPerDay: 12 },
-  steady: { label: 'Steady', note: 'About 30 a day — the default, and about a third of a sitting.', newPerRound: 9, newPerDay: 30 },
-  keen: { label: 'Keen', note: 'Up to 60 a day. Expect a lot more reviewing tomorrow.', newPerRound: 14, newPerDay: 60 },
+  gentle: { label: 'Gentle', note: 'Up to 12 new questions a day.', newPerRound: 4, newPerDay: 12 },
+  steady: { label: 'Steady', note: 'Up to 40 a day if you play that much — one round gives about fifteen. The default.', newPerRound: 9, newPerDay: 40 },
+  keen: { label: 'Keen', note: 'Up to 70 a day. Expect a lot more reviewing tomorrow.', newPerRound: 14, newPerDay: 70 },
 };
 const pace = () => PACES[S().pace] || PACES.steady;
 
@@ -476,7 +624,7 @@ let session = { asked: new Set() };
 
 function startRound(opts) {
   unlock();
-  const r = new Round(inPlay(), { ...opts, exclude: session.asked, pace: pace(), groupOf: D().groupOf, stageOf: (id) => D().byId.get(id)?.stage, size: sitting().size });
+  const r = new Round(inPlay(), { ...opts, exclude: session.asked, pace: pace(), groupOf: D().groupOf, stageOf: (id) => D().byId.get(id)?.stage, spot: spotPool(), size: sitting().size });
   if (r.empty) { show('round', () => emptyRound()); return; }
   show('round', () => roundScreen(r, { practice: !!opts.practice }), { arg: null });
 }
@@ -517,7 +665,7 @@ function roundScreen(round, { practice }) {
     const after = course();
     const passed = after.current > stageBefore ? after.stages[stageBefore] : null;
     const card = D().context[Math.floor(Math.random() * D().context.length)];
-    const left = new Round(inPlay(), { practice, exclude: session.asked, pace: pace(), groupOf: D().groupOf, stageOf: (id) => D().byId.get(id)?.stage, size: sitting().size });
+    const left = new Round(inPlay(), { practice, exclude: session.asked, pace: pace(), groupOf: D().groupOf, stageOf: (id) => D().byId.get(id)?.stage, spot: spotPool(), size: sitting().size });
     // A summary has to look like a summary. This screen used to open with a
     // bare "3 of 5" and then a card about dim sum, which read as another
     // question (Robert, on his phone).
@@ -553,6 +701,13 @@ function roundScreen(round, { practice }) {
       const s = SKILL[it.k] || 'other';
       tally[s] = tally[s] || { n: 0, ok: 0 };
       tally[s].n++; if (ok) tally[s].ok++;
+      // A spot check is an audit of the level check, not a question about a
+      // word. Missing one means the floor was wrong: that stage starts being
+      // taught again, from here down.
+      if (round.spot === id && !ok) {
+        const at = it.stage ?? 0;
+        if ((State.data.floor || 0) > at) { State.data.floor = at; State.save(); }
+      }
       State.answer(id, ok, { practice: practice || round.extra.has(id) });
       if (selfRated) { const c = State.card(id); if (c) { c.self = (c.self || 0) + 1; State.save(); } }
       (ok ? correct : wrong)();

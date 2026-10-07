@@ -75,7 +75,10 @@ let t = new Date(2026, 8, 20, 16, 30).getTime();
 S.__setClock(() => t);
 S.State.load();
 
+// The settings the app ships, not the module's constants. Keep in step with
+// SITTINGS.usual and PACES.steady in app/js/app.js.
 const SITTING = 25;
+const PACE = { newPerRound: 9, newPerDay: 40 };
 const fails = [];
 const lengths = [];
 let stage = 0;
@@ -86,11 +89,16 @@ for (let r = 0; r < 8; r++) {
   const ids = inPlay(stage);
   const due = S.State.dueIds(ids).length;
   const fresh = ids.filter((id) => !S.State.card(id)).length;
-  const room = S.newLeftToday();
+  const room = S.newLeftToday(PACE);
   // What home would do: a normal round while something is owed, otherwise the
   // "Keep going" button, which lifts the day's allowance.
   const owed = due || Math.min(room, fresh);
-  const round = new S.Round(ids, { beyondDaily: !owed && fresh > 0, practice: !owed && fresh === 0, groupOf, stageOf: (id) => byId.get(id)?.stage, size: SITTING });
+  // …and after the first round of an evening, a determined learner is pressing
+  // that button. It is what it is for, and it is the honest way past the day's
+  // pace. Modelling him as a man who never presses it was testing a learner
+  // who does not exist, and it made the new daily cap look like a bug.
+  const keepGoing = r > 0;
+  const round = new S.Round(ids, { pace: PACE, beyondDaily: keepGoing || (!owed && fresh > 0), practice: !keepGoing && !owed && fresh === 0, groupOf, stageOf: (id) => byId.get(id)?.stage, size: SITTING });
   const n = round.queue.length;
   lengths.push(n);
   if (n < SITTING) fails.push(`round ${r + 1}: only ${n} questions, with ${ids.length} in reach at stage ${stage + 1}`);

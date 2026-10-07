@@ -235,7 +235,10 @@ export class Round {
   // `stageOf(id)`: which stage of the course a question belongs to, so new
   // material can lead with the stage being worked on rather than with whatever
   // the widened horizon happens to offer.
-  constructor(ids, { practice = false, exclude = new Set(), pace = null, groupOf = null, parasOf = null, stageOf = null, beyondDaily = false, perGroup = PER_GROUP, size = ROUND } = {}) {
+  // `spot`: questions from stages the level check said are already known. One
+  // may be slipped into a round, roughly one round in three, to test that
+  // claim. They are not new material and not reviews; they are an audit.
+  constructor(ids, { practice = false, exclude = new Set(), pace = null, groupOf = null, parasOf = null, stageOf = null, spot = null, beyondDaily = false, perGroup = PER_GROUP, size = ROUND } = {}) {
     this.size = size;
     this.extra = new Set();
     this.beyondDaily = beyondDaily;
@@ -311,7 +314,16 @@ export class Round {
     // At most NEW_PER_DAY new a day: five "another round"s used to mean
     // twenty-five new questions and a wall of reviews tomorrow.
     const newToday = State.data.days[dayKey()]?.newN || 0;
-    const perRound = pace?.newPerRound ?? NEW_PER_ROUND;
+    // New material is at most a third of a sitting, whatever the pace says.
+    //
+    // The pace's nine-a-round was written for a twenty-five question sitting.
+    // Against eighteen it is half the round, and with the four consolidation
+    // slots on top it left FIVE for reviews — so stage-one words were met and
+    // then never confirmed, and eight rounds of solid work passed no stage at
+    // all. The round size moved and the throttle did not move with it, which
+    // is the same shape as every pacing fault in this file: the rules multiply,
+    // and one of them was written against a number that has since changed.
+    const perRound = Math.min(pace?.newPerRound ?? NEW_PER_ROUND, Math.max(2, Math.round(size / 3)));
     const newRoom = beyondDaily ? Infinity : Math.max(0, (pace?.newPerDay ?? NEW_PER_DAY) - newToday);
     // New questions scale with the reviews waiting: five when little is due,
     // three when some is, and one — never none — under a backlog. (Forcing
@@ -335,10 +347,19 @@ export class Round {
     // eye — so it is consolidation rather than the in-round repetition that
     // made the pack feel small (Robert, 18 Sept). Reserved here, before the
     // fill spends the round's budget on anything else.
+    // Whatever is left of the day's allowance once the new material already
+    // chosen is counted. Both the second looks below and the fill further down
+    // take questions the learner has NEVER SEEN, and neither was counting
+    // against the allowance — so a day's new work could quietly run to half as
+    // much again as the pace promised. Jasette hit exactly this and needed the
+    // same switch; the lesson is that pacing rules multiply, so every path
+    // that can hand out new material has to ask the same question.
+    const roomLeft = () => (beyondDaily ? Infinity
+      : Math.max(0, (pace?.newPerDay ?? NEW_PER_DAY) - newToday - add.length - again.length));
     const again = [];
     if (!practice && groupOf) {
       for (const id of add) {
-        if (again.length >= nAgain || picked.length >= size) break;
+        if (again.length >= nAgain || picked.length >= size || roomLeft() <= 0) break;
         const g = groupOf(id);
         if (!g) continue;
         const sib = pool.find((x) => x !== id && groupOf(x) === g && !picked.includes(x) && !State.card(x));
@@ -388,8 +409,20 @@ export class Round {
     // by when a question was last asked rotates through everything met, which
     // is what spacing across material actually means.
     fillWith(byAge(metAll.filter((id) => !exclude.has(id) && !cooling(id))));
-    if (picked.length < size) add.push(...take(fresh.filter((id) => !picked.includes(id)), size - picked.length));
+    // …but only as much of it as the day still has room for. Without the cap
+    // this step alone could double a day's new material: it exists so a sitting
+    // is never cut short, and a sitting that has run out of new work should be
+    // filled with practice, which the tiers either side of this do.
+    if (picked.length < size) add.push(...take(fresh.filter((id) => !picked.includes(id)), Math.min(size - picked.length, roomLeft())));
     fillWith(byAge(metAll.filter((id) => !exclude.has(id) && cooling(id))));
+    // A round CAN now come up short, and that is the right answer rather than
+    // a regression. Two promises collide here: "up to forty new a day" and
+    // "a sitting is never cut short". They only collide when the day's new
+    // allowance is spent and there is nothing met left to practise — and the
+    // app already has the honest way through that, which is the button on the
+    // home screen. Going past the day's pace should be a thing the learner
+    // chooses, not a thing that happens to him. `beyondDaily` lifts the cap
+    // entirely, and everything below fills the round for anyone who asked.
     // The last two steps re-ask something the learner has already seen today,
     // so they are only for a learner who asked to keep going. An ordinary
     // round is allowed to come up short; home offers to carry on.
@@ -402,7 +435,15 @@ export class Round {
       }
     }
     this.early = [...this.extra].filter((id) => cooling(id) || exclude.has(id)).length;
+    // A spot check rides at the back of the round, where a wrong answer is not
+    // the first thing that happens to you.
+    this.spot = null;
+    if (!practice && spot && spot.length && Math.random() < 1 / 3) {
+      const free = spot.filter((id) => !picked.includes(id) && !exclude.has(id));
+      if (free.length) { this.spot = free[Math.floor(Math.random() * free.length)]; picked.push(this.spot); }
+    }
     this.queue = this.#arc(reviews, add, again, groupOf);
+    if (this.spot) this.queue.push(this.spot);
     // …except the very first round a player ever plays, which opens on the
     // pack's first word rather than on a review there cannot be one of.
     if (!Object.keys(State.data.cards).length && add.length) {

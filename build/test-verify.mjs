@@ -27,6 +27,13 @@ const cases = [
   ['a grammar example without its pattern', (d) => { const g = d.grammar[0]; g.examples[0] = { ...g.examples[0], text: '你好', eng: 'Hello' }; }, 'does not match the source'],
   ['a history quote with a word changed', (d) => { const c = d.context.find((x) => x.kind === 'quote'); c.quote = c.quote.replace('Canada', 'Canadia'); }, 'not in the source word for word'],
   ['a word card meaning that drifted', (d) => { const c = d.context.find((x) => x.kind === 'words'); c.found[0] = { ...c.found[0], gloss: 'a kind of hat' }; }, 'does not match the dictionary'],
+  // A grammar point you are gated on, rationed back to one question: the shape
+  // of the fault that let an evening of work pass no stage at all.
+  ['a gated grammar point with only one question in reach', (d) => {
+    const gid = d.stages.find((st) => st.grammar.length)?.grammar[0];
+    const mine = d.items.filter((it) => it.gid === gid && it.stage != null);
+    for (const it of mine.slice(1)) it.stage = null;
+  }, 'too few questions in reach'],
   ['a pieces list that does not rebuild the sentence', (d) => { const it = d.items.find((x) => x.k === 'grammar-build'); it.pieces = [...it.pieces, '嗎']; }, 'do not rebuild'],
   ['sense numbering left in a meaning', (d) => { d.words[7].g = 'one thing 2. another'; }, 'sense numbering left'],
 ];

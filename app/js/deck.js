@@ -152,8 +152,16 @@ const inReach = (it, current, met, wordMet) => {
 // of unseen material. The course still decides what comes next — the order is
 // untouched — it just no longer decides that nothing comes next.
 const SUPPLY = 150;
-export const askableIds = (hasVoice, hasRecordings = true, current = Infinity, met = () => false, wordMet = () => false, noSpeaking = false) => {
-  const ok = (it) => askable(it, hasVoice, hasRecordings, noSpeaking);
+// Everything the level check decided you already know: never taught as new
+// material, but kept here so it can be spot-checked rather than trusted.
+export const assumedKnown = (floor, met = () => false) =>
+  (!floor ? [] : deck.items.filter((it) => it.stage != null && it.stage < floor && !met(it.id)).map((it) => it.id));
+
+export const askableIds = (hasVoice, hasRecordings = true, current = Infinity, met = () => false, wordMet = () => false, noSpeaking = false, floor = 0) => {
+  const ok = (it) => askable(it, hasVoice, hasRecordings, noSpeaking)
+    // A stage the level check cleared is not taught again from scratch. It is
+    // still reachable through a spot check, which is a different door.
+    && !(floor && it.stage != null && it.stage < floor && !met(it.id));
   // The earliest stage at which each item comes within reach, in one pass.
   const tail = deck.stages.length;
   const opensAt = (it) => {

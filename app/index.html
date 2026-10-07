@@ -6,6 +6,10 @@
 <meta name="theme-color" content="#FFF9F6" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#181419" media="(prefers-color-scheme: dark)">
 <title>Hok Gong — learning to talk</title>
+<!-- Chrome's page translator rewrites the Chinese on every card into English,
+     which turns a Cantonese app into an English one and silently breaks every
+     question. -->
+<meta name="google" content="notranslate">
 <meta name="description" content="A Cantonese app built on recorded speech: spaced retrieval, tones you can hear and say, and progress you can check.">
 <link rel="stylesheet" href="fonts/fonts.css">
 <style>
@@ -325,6 +329,11 @@ details.more > :not(summary) { animation: rise .2s var(--ease); }
 /* The other ways to say the same thing, on the reveal. */
 .family { margin-top: var(--s4); padding-top: var(--s4); border-top: 1px solid var(--line); text-align: left; }
 .famrow { display: flex; flex-wrap: wrap; gap: var(--s2); margin: var(--s2) 0 var(--s3); }
+/* Install steps, and the card that offers them. */
+.step { display: flex; gap: var(--s3); align-items: flex-start; margin: var(--s3) 0; }
+.stepn { flex: none; min-width: 28px; height: 28px; border-radius: 999px; background: var(--chip); color: var(--accent); display: inline-grid; place-items: center; font-weight: 600; font-size: .9rem; }
+.install { text-align: center; }
+.install .rlabel { margin-bottom: var(--s1); }
 .newwords { margin: var(--s2) 0 var(--s4); color: var(--muted); }
 .newwords .han { color: var(--ink); }
 .play {

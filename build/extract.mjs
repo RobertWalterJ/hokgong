@@ -237,7 +237,10 @@ const rimeSays = (w) => ([...w].length === 1 ? rimeChars.get(w) : rimeWords.get(
 // the body; 老婆 is a wife, and "waifu" and "toad" are in there too. These are
 // honest lexicography and they were turning up as multiple-choice options in
 // an app for talking to your wife's family (gloss audit, 23 Sept).
-const coarseGloss = new RegExp(String.raw`\b(penis|vagina|breast|prick|dick|cock|arse|ass|shit|fuck|whore|slut|prostitute|prostitution|sexual|vulgar|obscene|derogatory|offensive|insult)\b|euphemism for|slang for|swear ?word`, 'i');
+// 八婆 was being taught as "bitch" at position 5,800: the list below is only
+// as good as its last omission, so it is checked against the deck whenever the
+// word list is rebuilt rather than trusted.
+const coarseGloss = new RegExp(String.raw`\b(penis|vagina|breast|prick|dick|cock|arse|ass|shit|fuck|whore|slut|bitch|bastard|cunt|wanker|tosser|prostitute|prostitution|sexual|vulgar|obscene|derogatory|offensive|insult|insulting|pejorative|contemptuous)\b|euphemism for|slang for|swear ?word|term of abuse`, 'i');
 // …and senses that are true but useless: a musical note in a notation system
 // nobody uses, a banknote of another country, a part-of-speech label.
 const obscureGloss = new RegExp(String.raw`\b(gongche|musical note|notation|NTD|banknote|kangxi|waifu|toad)\b|part of speech|classifier for votes|the other (woman|man)|note of (the )?currency`, 'i');

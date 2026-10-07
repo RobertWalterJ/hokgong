@@ -662,20 +662,31 @@ for (const it of items) {
 // two grammar points, both of their questions were out of reach, and eight
 // rounds of solid work passed no stage at all (caught by build/test-keen.mjs).
 //
-// So each grammar point keeps one question open at its own stage: the one
-// whose sentence the learner can read most of. A taught example is not a
-// listening test — it arrives with its reading line and its translation, and
-// being shown a sentence slightly beyond you is how you get past it.
+// So each grammar point keeps questions open at its own stage: the ones whose
+// sentences the learner can read most of. A taught example is not a listening
+// test — it arrives with its reading line and its translation, and being shown
+// a sentence slightly beyond you is how you get past it.
+//
+// THREE of them, not one. Opening a single question meant a grammar point you
+// are gated on could be shut by one wrong answer: a miss is due tomorrow, so
+// an evening of solid work could reach fourteen of fourteen stage-one WORDS
+// and still never pass the stage, because one of its two patterns had exactly
+// one question and it had been got wrong. Three to six exist for every point;
+// there was no reason to ration them.
+const GRAMMAR_AT_STAGE = 3;
 for (const [gid, gs] of stageOfGrammar) {
   const mine = items.filter((it) => it.gid === gid && it.text);
-  if (!mine.length || mine.some((it) => it.stage != null && it.stage <= gs)) continue;
+  if (!mine.length) continue;
+  const open = mine.filter((it) => it.stage != null && it.stage <= gs).length;
+  if (open >= GRAMMAR_AT_STAGE) continue;
   const readable = (t) => {
     const cs = [...t.replace(/[^㐀-鿿]/g, '')];
     const set = charsByStage[gs] || new Set();
     return cs.length ? cs.filter((c) => set.has(c)).length / cs.length : 0;
   };
-  const best = mine.slice().sort((a, b) => readable(b.text) - readable(a.text) || chars(a.text) - chars(b.text))[0];
-  best.stage = gs;
+  const ranked = mine.filter((it) => !(it.stage != null && it.stage <= gs))
+    .sort((a, b) => readable(b.text) - readable(a.text) || chars(a.text) - chars(b.text));
+  for (const best of ranked.slice(0, GRAMMAR_AT_STAGE - open)) best.stage = gs;
 }
 
 mkdirSync(join(ROOT, 'app', 'data'), { recursive: true });

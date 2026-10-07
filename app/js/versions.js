@@ -6,6 +6,19 @@
 
 export default [
   {
+    v: '1.14.0', date: '2026-10-07',
+    what: [
+      'A level check, offered once from the home screen. It asks words from each stage of the course in turn and stops at the first stage that is not already yours. If you are starting from scratch that is four questions and an honest "we will start at the beginning". Every word is shown with its romanisation, and "I don’t know" is a real answer that costs you nothing.',
+      'It leans towards starting you too low. Whatever it skips is not taught again from scratch but still comes round now and then as a spot check — and if one catches you out, that part of the course comes straight back. The floor is a claim the app audits, not a fact it acts on for ever.',
+      'Up to 40 new questions a day, from 30 — a ceiling, not a quota. One round a day still simply gives you about sixteen, and nothing nags you towards the number.',
+      'Three different paths were handing out new questions and only one of them counted against the day’s pace, so a day could quietly run to 44 against a stated 40. All three now count.',
+      'New material is at most a third of a sitting, whatever the pace says. Nine-a-round was written for a 25-question round and did not move when the round could.',
+      'A grammar point you are gated on now has three questions rather than one. With one, a single wrong answer shut the stage for the day — an evening of solid work could reach fourteen of fourteen stage-one words and still never pass the stage.',
+      'The app can now be installed from inside itself, with steps for Android and iPhone, and it has a proper identity of its own so it can no longer be mistaken for another app on the same address.',
+      'Round length stays at 25. Its sister app settled on 18 and that is offered, but at 18 the course measurably advanced more slowly: the review slots are what confirm a word.',
+    ],
+  },
+  {
     v: '1.13.0', date: '2026-09-24',
     what: [
       'A new question, and the one the app most needed: the English is given and you pick which of four Cantonese words it is. Every vocabulary question until now ran the other way — hear it, pick the meaning — which is recognition, the easy half. This is recall of the word itself, marked by the app rather than by you, and it works with the microphone off. 5,994 of them.',
