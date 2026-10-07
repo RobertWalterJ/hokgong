@@ -11,7 +11,8 @@
 // six thousand words repeating the word, reading and gloss inside every item
 // tripled the file for nothing.
 
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { join, dirname } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -43,6 +44,9 @@ const { TONES: TONE_TABLE, CONFUSABLE, LESSON: TONE_LESSON } = await import(path
 const FAMILIES = await load('content/families.mjs');
 // What each grammar pattern is made of and what it stands on — the ladder.
 const LESSONS = await load('content/grammar-lessons.mjs');
+// The readings: tones, history, borrowed words, the sound of the language.
+const READINGS = await load('content/lessons.mjs');
+const { SOURCES: READING_SOURCES } = await import(pathToFileURL(join(ROOT, 'content', 'lessons.mjs')).href);
 // For the 167 words the course teaches, the sense is chosen by hand from the
 // ones the sources already give — see content/glosses.mjs for why, and
 // build/verify.mjs for the check that it is a re-ordering and not an invention.
@@ -795,7 +799,29 @@ const deck = {
     const w = chosen.findIndex((e) => chars(e.w) === 1 && /^[a-z]+[1-6]$/.test(e.jyut) && +e.jyut.slice(-1) === t.n);
     return { ...t, i: w >= 0 ? w : null };
   }),
+  // A fingerprint of every file in content/, so a deck built before one of
+  // them was edited can be told from one built after. Editing a content file
+  // and forgetting to rebuild ships the old text while the source shows the
+  // new, and nothing about the app looks wrong when that happens.
+  contentHash: Object.fromEntries(readdirSync(join(ROOT, 'content')).filter((f) => f.endsWith('.mjs')).sort()
+    .map((f) => [f, createHash('sha256').update(readFileSync(join(ROOT, 'content', f))).digest('hex').slice(0, 12)])),
   context,
+  // The readings, in the order they open. Every `shows` row carries the
+  // deck's own reading rather than one typed into the lesson.
+  readings: READINGS.map((r) => ({
+    ...r,
+    shows: (r.shows || []).map(([w, jyut, means]) => {
+      const e = LEX.find((x) => x.w === w);
+      if (!e) throw new Error(`reading "${r.id}" shows ${w}, which the deck does not teach`);
+      // The reading written in the lesson is checked against the deck's, with
+      // spacing ignored — lessons space multi-syllable words for legibility.
+      if (e.jyut.replace(/\s+/g, '') !== jyut.replace(/\s+/g, '')) {
+        throw new Error(`reading "${r.id}" gives ${w} as ${jyut}, the deck says ${e.jyut}`);
+      }
+      return { w, jyut, means };
+    }),
+  })),
+  readingSources: READING_SOURCES,
   items,
   audio: [...audioNeeded],
 };
@@ -806,6 +832,7 @@ console.log(`deck: ${items.length.toLocaleString()} items from ${chosen.length.t
 for (const [k, n] of Object.entries(byKind)) console.log(`  ${k.padEnd(16)} ${n.toLocaleString()}`);
 console.log(`  tier 1 (recorded speech) ${chosen.filter((e) => e.tier === 1).length.toLocaleString()}, tier 2 (written frequency) ${chosen.filter((e) => e.tier === 2).length.toLocaleString()}`);
 console.log(`  words with an example sentence: ${Object.keys(examples).length.toLocaleString()}`);
+console.log(`readings: ${READINGS.length}, opening between ${READINGS[0].at} and ${READINGS[READINGS.length - 1].at} words known`);
 console.log(`grammar points: ${grammar.length}; context cards: ${context.length}; recordings to fetch: ${audioNeeded.size}`);
 console.log(`words sharing a meaning with another: ${cued + stillAmbiguous} — ${cued} now carry a cue, ${stillAmbiguous} still ambiguous`);
 console.log(`notes on confusable words: ${notes.length}`);

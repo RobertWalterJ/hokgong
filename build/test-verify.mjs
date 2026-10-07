@@ -54,6 +54,24 @@ const cases = [
   }, 'too few questions in reach'],
   ['a pieces list that does not rebuild the sentence', (d) => { const it = d.items.find((x) => x.k === 'grammar-build'); it.pieces = [...it.pieces, '嗎']; }, 'do not rebuild'],
   ['sense numbering left in a meaning', (d) => { d.words[7].g = 'one thing 2. another'; }, 'sense numbering left'],
+  // The readings.
+  ['a reading quote with a word changed', (d) => {
+    const r = d.readings.find((x) => x.quote);
+    r.quote.text = r.quote.text.replace(/ the /, ' every ');
+  }, 'not in its paper word for word'],
+  ['a reading quoting a paper nobody licensed for reuse', (d) => {
+    const r = d.readings.find((x) => x.quote);
+    d.readingSources[r.quote.source] = { ...d.readingSources[r.quote.source], licence: 'free to read; no reuse licence stated' };
+  }, 'no reuse licence'],
+  ['a reading with a Chinese character loose in its prose', (d) => {
+    d.readings[0].read[0] += ' For example 多謝.';
+  }, 'prints a Chinese character in its prose'],
+  ['a reading giving an example the wrong reading', (d) => {
+    const r = d.readings.find((x) => (x.shows || []).length);
+    r.shows[0] = { ...r.shows[0], jyut: 'zyu1' };
+  }, 'wrong reading'],
+  ['a reading that cites nothing', (d) => { d.readings[0].cite = []; }, 'cites nothing'],
+  ['a deck built before a content file was edited', (d) => { d.contentHash['tones.mjs'] = 'deadbeef0000'; }, 'older than its content'],
 ];
 
 copyFileSync(DECK, BAK);

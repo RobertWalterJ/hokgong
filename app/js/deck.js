@@ -8,7 +8,9 @@ export const D = () => deck;
 
 export async function loadDeck() {
   if (window.HOKGONG_DECK) { deck = window.HOKGONG_DECK; return deck; }
-  const r = await fetch('data/deck.json');
+  // The deployed build names the file by a hash of its contents, so an
+  // unchanged word list keeps its name and the phone keeps its copy.
+  const r = await fetch(window.HOKGONG_DECK_URL || 'data/deck.json');
   if (!r.ok) throw new Error('The word list did not load.');
   deck = await r.json();
   return deck;

@@ -12,6 +12,7 @@
 // fail is worse than no check: it reassures.
 
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { join, dirname } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -200,6 +201,70 @@ for (const c of DECK.context) {
       check(!e || (e.jyut === f.jyut && e.gloss.includes(f.gloss)), 'card word does not match the dictionary', `${c.id}: ${f.w}`);
     }
   }
+}
+
+// ── 6a. the deck is not behind its sources ───────────────────────────────
+// A content file edited without rebuilding the deck ships the old text while
+// the source file shows the new one, and nothing about the app looks wrong.
+for (const f of readdirSync(join(ROOT, 'content')).filter((x) => x.endsWith('.mjs')).sort()) {
+  const now = createHash('sha256').update(readFileSync(join(ROOT, 'content', f))).digest('hex').slice(0, 12);
+  check((DECK.contentHash || {})[f] === now, 'the deck is older than its content — run node build/items.mjs', f);
+}
+
+// ── 6b. the readings ─────────────────────────────────────────────────────
+// Eleven short pieces on the tones, the history and the borrowed words. They
+// are the only place in the app that makes a claim about the world rather than
+// about a word, so they are checked hardest.
+//
+// Quotes are compared with their paper's extracted text with ALL whitespace
+// removed, because the text came out of a PDF and a PDF puts spaces inside
+// words ("syl lables", "B auer"). Removing whitespace still catches a changed
+// word, which is what this is for.
+const LICENCE_OK = /^(CC BY|CC0|public domain)/i;
+const flat = (x) => x.replace(/[\s\u00ad]+/g, '').replace(/[’‘]/g, "'").replace(/[“”]/g, '"').replace(/[–—]/g, '-');
+const paperText = {};
+const loadPaper = (name) => {
+  if (paperText[name]) return paperText[name];
+  const f = join(ROOT, 'sources', 'cantonese', name + '.txt');
+  if (!existsSync(f)) { fail('reading source file missing', name); return (paperText[name] = ''); }
+  return (paperText[name] = flat(readFileSync(f, 'utf8')));
+};
+const readings = DECK.readings || [];
+check(readings.length > 0, 'the deck carries no readings', 'readings');
+let lastAt = -1;
+for (const r of readings) {
+  check(typeof r.at === 'number' && r.at > lastAt, 'readings do not open in order', `${r.id} opens at ${r.at}`);
+  lastAt = r.at;
+  check((r.read || []).length >= 2, 'a reading with almost nothing in it', r.id);
+  check((r.cite || []).length > 0, 'a reading that cites nothing', r.id);
+  for (const c of r.cite || []) {
+    const src = DECK.readingSources[c];
+    check(!!src, 'a reading cites a source that is not listed', `${r.id} → ${c}`);
+    check(!src || !!src.licence, 'a source with no licence stated', c);
+    check(!src || !!src.url, 'a source with no address', c);
+  }
+  // Prose carries no Chinese. Robert cannot read characters, and a character
+  // in a sentence arrives without its reading; every one belongs in a `shows`
+  // row, which carries the reading and the meaning beside it.
+  for (const para of [...(r.read || []), r.honest || ''].filter(Boolean)) {
+    check(!/[\u3400-\u9fff]/.test(para), 'a reading prints a Chinese character in its prose', `${r.id}: "${para.slice(0, 50)}…"`);
+  }
+  for (const row of r.shows || []) {
+    check(!!row.w && !!row.jyut && !!row.means, 'an example row missing a part', `${r.id}: ${row.w}`);
+    const e = lexByWord.get(row.w);
+    check(!!e, 'a reading shows a word the corpus does not have', `${r.id}: ${row.w}`);
+    check(!e || e.jyut.replace(/\s+/g, '') === row.jyut.replace(/\s+/g, ''), 'a reading gives a word the wrong reading', `${r.id}: ${row.w} as ${row.jyut}, corpus says ${e && e.jyut}`);
+  }
+  if (!r.quote) continue;
+  const src = DECK.readingSources[r.quote.source];
+  check(!!src, 'a quote from a source that is not listed', `${r.id} → ${r.quote.source}`);
+  if (!src) continue;
+  // Quoting is republishing. A paper that is merely free to read is cited in
+  // my own words; only an openly licensed one is quoted.
+  check(LICENCE_OK.test(src.licence), 'a quote from a source with no reuse licence', `${r.id}: ${r.quote.source} is "${src.licence}"`);
+  check(!!src.file, 'a quote from a source with no text on disk to check it against', `${r.id}: ${r.quote.source}`);
+  if (!src.file) continue;
+  check(loadPaper(src.file).includes(flat(r.quote.text)), 'a quote is not in its paper word for word', `${r.id}: "${r.quote.text.slice(0, 60)}…"`);
 }
 
 // ── 7. the interface ladder only says real Cantonese ─────────────────────
@@ -532,7 +597,7 @@ check(DECK.items.filter((i) => i.k === 'sentence-listen').length >= 100, 'too li
 check(DECK.grammar.length >= 8, 'too few grammar points', '');
 
 // ── report ───────────────────────────────────────────────────────────────
-console.log(`verify: ${checks.toLocaleString()} checks on ${DECK.words.length.toLocaleString()} words, ${DECK.items.length.toLocaleString()} questions, ${DECK.context.length} cards`);
+console.log(`verify: ${checks.toLocaleString()} checks on ${DECK.words.length.toLocaleString()} words, ${DECK.items.length.toLocaleString()} questions, ${DECK.context.length} cards, ${(DECK.readings || []).length} readings`);
 if (problems.length) {
   console.error(`\n${problems.length} problem${problems.length === 1 ? '' : 's'}:`);
   for (const p of problems.slice(0, 40)) console.error('  - ' + p);

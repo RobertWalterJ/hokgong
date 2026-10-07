@@ -11,6 +11,7 @@
 // app is not depending on Tatoeba staying up.
 
 import { readFileSync, writeFileSync, mkdirSync, rmSync, cpSync, existsSync, readdirSync, statSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
@@ -18,6 +19,7 @@ import { execFileSync } from 'node:child_process';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = join(ROOT, 'docs');
 const page = join(ROOT, 'dist', 'hokgong.html');
+let deckFile = null, deckMb = 0;
 if (!existsSync(page)) throw new Error('dist/hokgong.html is missing — run node build/single.mjs first');
 
 let build = 'local';
@@ -46,6 +48,27 @@ html = html.replace('</head>', () => head + '</head>');
 const audioDir = join(ROOT, 'app', 'audio');
 const ids = existsSync(audioDir) ? readdirSync(audioDir).filter((f) => f.endsWith('.mp3')).map((f) => +f.replace('.mp3', '')) : [];
 if (!ids.length) throw new Error('app/audio is empty — run sh build/fetch-audio.sh first');
+// ── the word list, as a file rather than as source ───────────────────────
+// Four megabytes of deck inlined into the page is four megabytes the browser
+// parses as CODE before it can show anything, re-downloaded whole on every
+// deploy. Named by a hash of its contents so an unchanged deck keeps its
+// filename and the phone keeps its copy.
+{
+  const deckJson = readFileSync(join(ROOT, 'app', 'data', 'deck.json'), 'utf8');
+  const hash = createHash('sha256').update(deckJson).digest('hex').slice(0, 10);
+  const name = `deck-${hash}.json`;
+  mkdirSync(join(OUT, 'data'), { recursive: true });
+  writeFileSync(join(OUT, 'data', name), deckJson);
+  const wasInline = html;
+  // The inline literal is everything between HOKGONG_DECK= and the closing
+  // </script>; swapped for the URL the app fetches instead.
+  html = html.replace(/window\.HOKGONG_DECK=.*?;<\/script>/s, `window.HOKGONG_DECK_URL="data/${name}";</script>`);
+  if (html === wasInline) throw new Error('the inlined deck was not replaced with a URL');
+  if (html.includes('HOKGONG_DECK=')) throw new Error('the deck is still inlined');
+  deckFile = name;
+  deckMb = deckJson.length / 1048576;
+}
+
 const before = html;
 html = html.replace('window.HOKGONG_AUDIO="https://audio.tatoeba.org/sentences/yue/";',
   () => `window.HOKGONG_AUDIO="audio/";window.HOKGONG_AUDIO_IDS=${JSON.stringify(ids)};`);
@@ -54,7 +77,17 @@ if (html === before) throw new Error('the audio base was not switched to the loc
 if (/(href|src)="\/(?!\/)/.test(html.slice(0, 6000))) throw new Error('a root-absolute URL would break under /hokgong/');
 writeFileSync(join(OUT, 'index.html'), html);
 
-writeFileSync(join(OUT, 'sw.js'), readFileSync(join(ROOT, 'app', 'sw.js'), 'utf8').replace("'hokgong-v1-dev'", JSON.stringify('hokgong-v1-' + build)));
+{
+  let sw = readFileSync(join(ROOT, 'app', 'sw.js'), 'utf8')
+    .replace("'hokgong-v1-dev'", JSON.stringify('hokgong-v1-' + build))
+    .replace("'deck-dev.json'", JSON.stringify(deckFile));
+  // Both stamps matter: an unstamped version means a deploy nobody receives,
+  // and an unstamped deck name means the worker prunes the word list it is
+  // meant to be keeping.
+  if (sw.includes('hokgong-v1-dev')) throw new Error('the service worker cache version was not stamped');
+  if (sw.includes('deck-dev.json')) throw new Error('the service worker deck name was not stamped');
+  writeFileSync(join(OUT, 'sw.js'), sw);
+}
 cpSync(join(ROOT, 'app', 'manifest.webmanifest'), join(OUT, 'manifest.webmanifest'));
 for (const f of ['icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'apple-touch-icon.png']) cpSync(join(ROOT, 'app', 'icons', f), join(OUT, 'icons', f));
 cpSync(audioDir, join(OUT, 'audio'), { recursive: true });
@@ -75,4 +108,11 @@ const walk = (dir) => readdirSync(dir, { withFileTypes: true }).reduce((n, e) =>
 const audioMb = walk(join(OUT, 'audio'));
 const hblDir = join(OUT, 'audio', 'hbl');
 const hblN = existsSync(hblDir) ? readdirSync(hblDir).filter((f) => f.endsWith('.mp3')).length : 0;
-console.log(`wrote docs/ — build ${build}, ${mb(join(OUT, 'index.html')).toFixed(1)} MB page + ${ids.length} Tatoeba + ${hblN} graded recordings (${audioMb.toFixed(0)} MB)`);
+// The page is a shell: markup, styles, the app's own code. The word list and
+// the recordings are fetched beside it. If this ever fails it is because
+// something large has been inlined into the page again, and a phone on a bus
+// will feel it as the app not opening.
+const pageMb = mb(join(OUT, 'index.html'));
+if (pageMb > 1.5) throw new Error(`docs/index.html is ${pageMb.toFixed(1)} MB — something large has been inlined into the page again`);
+
+console.log(`wrote docs/ — build ${build}, ${mb(join(OUT, 'index.html')).toFixed(1)} MB page + ${ids.length} Tatoeba + ${hblN} graded recordings (${audioMb.toFixed(0)} MB) + ${deckFile} (${deckMb.toFixed(1)} MB)`);

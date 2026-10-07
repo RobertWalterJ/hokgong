@@ -12,7 +12,7 @@ import { playRecording, playWord, canPlayWord } from './audio.js';
 import { toneName, toneChao, voiceCentre, forgetVoice } from './pitch.js';
 import { ladder } from './lang.js';
 import VERSIONS from './versions.js';
-import { header, playButton, S, VERSION, knownWordSet, course } from './app.js';
+import { header, playButton, S, VERSION, knownWordSet, course, readingsScreen } from './app.js';
 
 // ── small shared pieces ──────────────────────────────────────────────────
 const SRC_NAME = {
@@ -244,6 +244,7 @@ function lookupScreen() {
       link('Tones', 'The six tones, and whether yours land', 'tones', tonesScreen),
       link('Grammar', `${d.grammar.length} patterns, each with real examples`, 'grammar', grammarScreen),
       link('Where the words come from', `${d.context.length} short cards: Cantonese in Canada, and at the table`, 'context', contextScreen),
+      link('Readings', `${(d.readings || []).length} pieces on the tones, the history, and the words English lent it`, 'readings', readingsScreen),
       link('About', 'Sources, licences, and what this app cannot do', 'about', aboutScreen)))];
 }
 

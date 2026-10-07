@@ -6,6 +6,16 @@
 
 export default [
   {
+    v: '1.19.0', date: '2026-10-07',
+    what: [
+      'Readings: eleven short pieces on the tones, where Cantonese came from, and why it sounds the way it does. One opens every so often as you learn more words — the first before your first round, the last at 560 — and each is offered once, at the top of a round, then kept to re-read.',
+      'They are sourced, and the build enforces it. Every quote is compared word for word against the paper on disk; a paper that is only free to READ can be cited but never quoted; a reading that cites nothing fails the build; and no reading may print a Chinese character in its prose, because a character in a sentence arrives without its reading. All the Chinese is in a table with the reading and the meaning beside it.',
+      'Research for them killed three things the app was going to say. That adult learners get tone contour before tone height: backwards for English speakers, and the tone lesson now says the true thing instead. That tone 4 is creaky: genuinely disputed, and the reading says who disagrees and why. The Tang-dynasty origin story, the Canton System dates, the Cantopop chronology and the lucky-number homophones: all traceable only to Wikipedia and blogs, so none of them is in.',
+      'The whole of a reading reads itself aloud, a paragraph at a time, with one button that becomes a stop button.',
+      'The app opens in a tenth of a second now, instead of not opening. The word list was being written into the page as four megabytes of JavaScript source, which the browser had to parse before it could draw anything; it is a separate file named after its own contents, so a release that does not change the words costs your phone nothing to download.',
+    ],
+  },
+  {
     v: '1.18.0', date: '2026-10-07',
     what: [
       'A tone question: a word is played and the only question is what its tone was. The other two tone questions work on a minimal pair — the same syllable at two pitches — which teaches the contrast but keeps the tone welded to one word. This asks the same tone on sixty different words, so the shape comes loose from the word it arrived on. 341 of them, across all six tones.',

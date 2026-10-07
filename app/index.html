@@ -497,6 +497,36 @@ html.playing .play { border-color: var(--accent); background: var(--tint); }
 .ctx { margin: var(--s5) 0; }
 .gpoint { background: var(--chip); border-radius: 14px; padding: var(--s4); margin: var(--s4) 0; }
 
+/* ── the readings ─────────────────────────────────────────────────── */
+/* The longest stretches of text in the app, so they are set to be READ:
+   the reading face, a measure that stops at about sixty-five characters,
+   and the paragraph spacing of a page rather than of an interface. */
+.reading { text-align: left; }
+.reading p { font-family: var(--read-font); font-size: 1.05rem; line-height: 1.7; max-width: 34em; margin: 0 0 var(--s4); }
+.reading h2 { margin-top: 0; }
+.reading .evidence { font-family: var(--ui); font-size: .8rem; margin-top: var(--s2); }
+.reading > button { margin-bottom: var(--s4); }
+.reading blockquote.quoted {
+  margin: var(--s4) 0; padding-left: var(--s4); border-left: 2px solid var(--accent);
+}
+.reading blockquote.quoted p { font-size: 1.05rem; margin-bottom: var(--s2); }
+/* Where the evidence runs out. Marked, not buried: a reading that says what
+   is disputed is the only kind worth trusting on what is not. */
+.careful { background: var(--chip); border-radius: 14px; padding: var(--s4); margin: var(--s4) 0; }
+.careful .eyebrow { color: var(--accent); margin-bottom: var(--s1); }
+.careful p { margin: 0; }
+/* The Chinese in a reading. Never loose in a sentence — a row each, with the
+   reading beside it, because the reading is the part he can read. */
+.shows { margin: var(--s4) 0 0; }
+.showrow {
+  display: grid; grid-template-columns: auto auto 1fr; align-items: baseline;
+  gap: var(--s2) var(--s3); padding: var(--s3) 0; border-top: 1px solid var(--line); text-align: left;
+}
+.showrow .han { font-size: 1.5rem; margin: 0; }
+.showrow .jyut { color: var(--accent); font-family: var(--ui); font-size: 1rem; margin: 0; }
+.showrow .gloss { grid-column: 1 / -1; color: var(--muted); font-size: .92rem; margin: 0; }
+@media (max-width: 24rem) { .showrow .gloss { font-size: .88rem; } }
+
 .passed { background: var(--tint); border-radius: 14px; padding: var(--s4); margin: var(--s4) 0; }
 .passed .eyebrow { color: var(--accent); margin-bottom: var(--s1); }
 

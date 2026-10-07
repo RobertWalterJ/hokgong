@@ -9,7 +9,7 @@
 // round.
 
 import { h, iconBtn, sayBtn, sheet, closeSheet, disclosure, flash, show, route, back, currentScreen, repaint, ICON, applyReading, READ_DEFAULTS, readable } from './ui.js';
-import { initSpeech, say, unlock, available as speechAvailable, cantoneseAvailable, onSpeaking } from './speech.js';
+import { initSpeech, say, unlock, stop as stopSpeech, available as speechAvailable, cantoneseAvailable, onSpeaking } from './speech.js';
 import { playRecording, playWord, stopAudio, onAudio, canPlayWord, haveRecordings, probeRecordings } from './audio.js';
 import { State, Round, cardState, isHolding, dayKey, newLeftToday, nextDueSentence, untilText, now, shuffle, DAY } from './schedule.js';
 import { loadDeck, indexDeck, D, wordOf, exampleOf, examplesOf, allIds, askableIds, assumedKnown, setAsideCount, stageState, SKILL, SELF_RATED, SPEAKING_ALOUD } from './deck.js';
@@ -283,6 +283,132 @@ function ladderScreen() {
     h('span', { class: 'lvl ' + r.level.replace(' ', '-') }, r.level)))))];
 }
 route('ladder', ladderScreen);
+
+// ── the readings ─────────────────────────────────────────────────────────
+// What the tones are for, where the language came from, why it sounds the way
+// it does. Each opens at a number of words known, so they arrive spread across
+// months rather than in a heap at the start.
+//
+// Robert, 7 Oct: "these types of lessons that give the cultural background …
+// should be interspersed and taught as the user progresses."
+//
+// Nothing is locked. A reading that has not opened yet can still be opened and
+// read, the same as a rung of the grammar ladder — the gate decides when the
+// app OFFERS it, not whether he is allowed it.
+export function readingState() {
+  const known = knownWordSet().n;
+  const read = State.data.readings || {};
+  const all = (D().readings || []).map((r) => ({ ...r, open: known >= r.at, done: !!read[r.id] }));
+  return { known, all, next: all.find((r) => r.open && !r.done) || null };
+}
+
+// Reading a whole piece aloud. One paragraph at a time, in order, because a
+// single utterance of eight hundred characters cannot be stopped in the middle
+// and cannot be followed. The button becomes a stop button while it runs.
+function readAloudButton(parts) {
+  if (!speechAvailable()) return null;
+  let running = false;
+  const btn = h('button', { class: 'ghost wide', type: 'button' }, 'Read this aloud');
+  const stopIt = () => { running = false; stopSpeech(); btn.textContent = 'Read this aloud'; };
+  btn.onclick = () => {
+    if (running) { stopIt(); return; }
+    running = true;
+    btn.textContent = 'Stop reading';
+    unlock();
+    let n = 0;
+    const next = () => {
+      if (!running || n >= parts.length) { stopIt(); return; }
+      say(parts[n++], { onend: next });
+    };
+    next();
+  };
+  return btn;
+}
+
+// Everything a reading puts on the screen except the buttons under it, so the
+// offer inside a round and the screen you can come back to are the same thing
+// rather than two things that drift apart.
+function readingBody(r) {
+  const sources = D().readingSources || {};
+  const s = r.quote ? sources[r.quote.source] || {} : {};
+  return [
+    readAloudButton([...r.read, r.quote ? r.quote.text : '', r.honest || ''].filter(Boolean)),
+    ...r.read.map((p) => h('p', {}, p)),
+    r.quote ? h('blockquote', { class: 'quoted' },
+      h('p', {}, '“' + r.quote.text + '”'),
+      h('p', { class: 'evidence' }, s.author + ', ' + s.title + '. Quoted word for word; ' + s.licence + '.')) : null,
+    r.honest ? h('div', { class: 'careful' },
+      h('div', { class: 'eyebrow' }, 'Where this is less certain'),
+      h('p', {}, r.honest)) : null,
+  ];
+}
+
+// The Chinese in a reading, never loose in a sentence: word, reading, meaning.
+const showsBlock = (r) => ((r.shows || []).length ? h('div', { class: 'shows' },
+  ...r.shows.map((row) => h('div', { class: 'showrow' },
+    h('p', { class: 'han' }, row.w),
+    h('p', { class: 'jyut' }, row.jyut),
+    playButton({ word: row.w, label: 'Say it' }),
+    h('p', { class: 'gloss' }, row.means)))) : null);
+
+// One reading, opened out, with the papers it rests on under it.
+function readingScreen(id) {
+  const { all } = readingState();
+  const r = all.find((x) => x.id === id);
+  if (!r) return [header('Reading'), h('main', {}, h('p', {}, 'No such reading.'))];
+  const sources = D().readingSources || {};
+  const cited = [...new Set([...(r.cite || []), ...(r.quote ? [r.quote.source] : [])])];
+  return [header(r.title), h('main', {},
+    h('section', { class: 'card reading' },
+      h('div', { class: 'eyebrow' }, r.strand),
+      ...readingBody(r)),
+    (r.shows || []).length ? h('section', { class: 'card' }, h('h2', {}, 'The words in it'), showsBlock(r)) : null,
+    h('section', { class: 'card flat' },
+      h('h2', {}, 'Where this comes from'),
+      h('p', { class: 'note' }, 'The writing is mine. Every claim in it is one of these, and nothing is in it that I could not find a source for.'),
+      ...cited.map((c) => {
+        const s = sources[c] || {};
+        return h('p', { class: 'evidence' },
+          s.author + ' (' + s.year + '). ' + s.title + '. ' + s.pub + '. ' + s.licence + '. ',
+          s.url ? h('a', { href: s.url, target: '_blank', rel: 'noopener' }, 'Open') : null);
+      })))];
+}
+route('reading', (id) => readingScreen(id));
+
+// The list of them, with where each one sits.
+export function readingsScreen() {
+  const { all, known } = readingState();
+  const where = (r) => (r.done ? 'read' : r.open ? 'open, not read yet' : 'opens at ' + r.at + ' words — you know ' + known);
+  return [header('Readings'), h('main', {},
+    h('section', { class: 'card flat' },
+      h('p', { class: 'note' }, 'Short pieces on the tones, where Cantonese came from, and why it sounds the way it does. One opens every so often as you learn more words. Nothing is locked — you can read any of them now.')),
+    h('nav', { class: 'rows' }, ...all.map((r) => h('button', {
+      class: 'row' + (r.open ? '' : ' shut'), type: 'button',
+      onclick: () => show('reading', () => readingScreen(r.id), { arg: r.id }),
+    },
+    h('div', {},
+      h('div', { class: 'rlabel' }, r.title),
+      h('div', { class: 'note' }, r.strand + ' · ' + where(r))),
+    h('span', { class: 'chev', html: ICON.chev })))))];
+}
+route('readings', readingsScreen);
+
+// Offered once, at the start of a round, and never nagged about afterwards.
+// "Not now" leaves it unread, so it comes back; it does not vanish because he
+// was in a hurry on a bus.
+function readingOffer(r, onDone) {
+  const mark = () => {
+    State.data.readings = { ...(State.data.readings || {}), [r.id]: new Date().toISOString().slice(0, 10) };
+    State.save();
+  };
+  return h('section', { class: 'card reading' },
+    h('div', { class: 'eyebrow' }, 'Something new to read · ' + r.strand),
+    h('h2', {}, r.title),
+    ...readingBody(r),
+    showsBlock(r),
+    h('button', { class: 'wide primary', type: 'button', onclick: () => { stopSpeech(); mark(); onDone(); } }, 'Start the round'),
+    h('button', { class: 'ghost wide', type: 'button', onclick: () => { stopSpeech(); onDone(); } }, 'Not now — bring it back another time'));
+}
 
 // ── the level check ──────────────────────────────────────────────────────
 // Offered once, from the home screen, and never nagged about. It asks words
@@ -834,6 +960,15 @@ let session = { asked: new Set() };
 
 function startRound(opts) {
   unlock();
+  // A reading that has opened and not been read comes first, before any
+  // question — teaching before testing, the same way a word is met before it
+  // is asked. A recall test is never interrupted: that one he chose to do.
+  const due = opts.practice ? null : readingState().next;
+  if (due && !session.readOffered) {
+    session.readOffered = true;
+    show('round', () => [header('Round'), h('main', { class: 'round' }, readingOffer(due, () => startRound(opts)))], { arg: null });
+    return;
+  }
   const r = new Round(inPlay(), { ...opts, exclude: session.asked, pace: pace(), groupOf: D().groupOf, stageOf: (id) => D().byId.get(id)?.stage, spot: spotPool(), size: sitting().size });
   if (r.empty) { show('round', () => emptyRound()); return; }
   show('round', () => roundScreen(r, { practice: !!opts.practice }), { arg: null });

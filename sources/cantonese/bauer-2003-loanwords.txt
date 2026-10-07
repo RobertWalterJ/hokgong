@@ -1,0 +1,644 @@
+1 6 The impact ofEnglish loanwords
+on the Cantonese syllabary
+
+ROBERT S . BAUER
+
+1 Introduction
+No Chinese variety has had more intimate and longer contact with English than Cantonese. Their contact began j ust over 300 years ago when the early English-speaking traders arrived in Guangzhou to exchange silver for Chinese tea, porcelain, silk, and other goods. Today the effect of English influence on the Cantonese language shows up most clearly in the Hong Kong Cantonese lexicon in which hundreds of English loanwords occur (cf. B auer and Benedict 1 997 :36 1-405). Some of these loanwords have been in use in Hong Kong Cantonese for such a long time that they have an official status and are
+written with Chinese characters, for example, ba1-si6j3 'bus' and teFA-si6j3 'taxi ' ;l further,
+many Cantonese speakers who do not speak English assume such words as these and others are ordinary Cantonese words.
+In studying English loanwords in Hong Kong Cantonese we have several advantages over trying to identify the source languages of other kinds of loanwords (cf. Bauer 1 996): first, the borrowing was not so long ago as to render the identity of the source words in English irrecoverable; second, the contact and borrowing are still ongoing with the objects
+
+The Cantonese lexical tone categories are indicated by raised numbers following the syllables as follows
+(the two-digit number following the tone contour name represents the start point and end point of the tone contour on the five-point scale): I High Level (55) ; 2 Mid-low Falling (2 1); 3 High Rising (25) ; 4 Mid-low
+Rising (23 ) ; 5 Mid Level (33); 6 Mid-low Level (22); 7A High Stopped (55); 78 Mid Stopped (33); 8 Mid­
+low Stopped (22). The morphological changed tone (known as pinjam) is marked by separating the basic tone from the changed tone which is usually tone 3 High Rising with the slash '/' ; for example, si6j3 indicates the basic tone is tone 6 Mid-low Level and the changed tone is tone 3 High Rising.
+
+David Bradley, Randy LaPolla, Boyd Michailovsky and Graham Thurgood, eds, Language variation: variation and change in the Sinosphere and in the lndosphere in honour ofJames A. Matisoff, 253-26 1 .
+Canberra: Pacific Linguistics, 2003 .
+Copyright in this edition is vested with Pacific Linguistics.
+
+papers on
+253
+
+Bauer, R.S. "The impact of English loanwords on the Cantonese syllabary". In Bradley, D., Lapolla, R., Michailovsky, B. and Thurgood, G. editors, Language variation: Papers on variation and change in the Sinosphere and in the Indosphere in honour of James A. Matisoff. PL-555:253-262. Pacific Linguistics, The Australian National University, 2003. DOI:10.15144/PL-555.253 ©2003 Pacific Linguistics and/or the author(s). Online edition licensed 2015 CC BY-SA 4.0, with permission of PL. A sealang.net/CRCL initiative.
+
+254 Robert S. Bauer
+of our study in use right before our eyes (and ears) and so easily accessible; and third, the phonological systems of English and Cantonese are so markedly different and the loanwords so abundant that the phonetic adaptation of English loanwords into Cantonese can be described as a series of distinctive and principled correspondences.
+One aspect of the borrowing of English words into Cantonese that has particularly interested me for some time has been the impact that the phonetic adaptation of English loanwords has had on the structure and development of the Cantonese syllabary. Structure refers to the phonetic shapes of syllables and the total number of them that occur in Cantonese; development recognises that the syllabary has been continuously evolving as new syllables are created and then added to it. The phrase 'new syllables ' means just that: syllables that did not exist prior to the borrowing of the loanword have been constructed through the combination of existing initial consonants and rimes to form new syllables with which to represent the loanwords. Although there are constraints on the structure of syllables imposed by the phonotactics of the language, the Cantonese phonological system is still flexible and expansive enough to accommodate loanwords; it has no need to borrow any sounds from English it does not already have but has been able to handle loanwords through the recombination of its existing phonetic resources.
+The value of studying the impact of English loanwords on the Cantonese syllabary is that it provides us with concrete evidence of language change that has resulted from language contact.
+2 Cantonese syllabary
+The first step in the identification of uniquely loanword syllables is to map out the Cantonese syllabary. The syllabary can be constructed by first li sting the 20 initial consonants across the top of the page and the 56 rimes down the far left side. The resulting intersections of columns of initial consonants with rows of rimes form a matrix of syllables and yields a potential of 1 , 1 20 syllables (recognising the occurrence of the two nasal syllabics _ and 1] raises the possible number of syllables to 1 , 1 22). One can then check through the individual syllables to identify them as either occurring or non-occurring. Appendix 3 of B auer and B enedict ( 1 997 :486-487) has been updated and reproduced in this paper as Appendix 2. The syllables in the syllabary are classified into four categories as follows:
+1 ) Cantonese syllables that are associated with the standard Chinese characters (which are used to write the modern standard Chinese language) as their standard reading pronunciations. These syllables are unmarked in the syllabary.
+2) Cantonese syllables that occur in the colloquial stratum of the lexicon and are not cognate with their semantic and functional equivalents in standard Chinese. These colloquial morphosyllables may not have standard Chinese characters associated
+
+The impact ofEnglish loanwords on the Cantonese syllabary 255
+with them as their written forms; but if they do, the characters have been borrowed for their homophonous pronunciations . Many colloquial morphosyll ables are represented by dialectal characters which have been especially created for this purpose. The colloquial syllables are marked with the superscript 'c ' .
+3 ) S yllables that only occ ur in the representation of English loanwords . These
+loanword syllables are marked with the superscript '+' .
+4) The non-occurring syllables are marked with the superscript 'n' .
+As far as I am aware, this syllabary is the only one that explicitly marks the non­ occurring syllables.2 The purpose in doing this is to try to determine if there is an underlying pattern of avoiding certain types of syllables. This idea is further considered in §4 below . B ecause syllables occurring in loanwords can be homophonous with syllables
+belonging to categories 1 and 2, the syllabary described here makes it possible to identify
+those syllables that uniquely occur in the representation of English loanwords.
+3 English loanword syllables
+In my first attempt (B auer 1 985) to produce a comprehensive Cantonese syllabary in
+which the loanword syllables were explicitly marked, a total of 30 loanword syllables were
+2 A number of Cantonese syllabaries have been published over the years, and the forms these syllabaries
+have taken have varied. One type of syllabary has simply listed the series of morphosyllables in phonetic transcription followed by standard Chinese characters which are pronounced with the morphosyllables, as in Yu 1 982. A second type of syllabary has been based on the matrix of phonetically transcribed initial consonants either down or across one side of the page and the rimes in the corresponding direction; Chinese characters are written at the intersections of initials and rimes to mark the occurrence of morphosyllables, as i n Kao ( 1 97 1 : 1 77- 1 84) and Yue-Hashimoto ( 1 97 2 : 205-3 9 8 ) . Rao et al ( 1 9 8 1 :296-302), however, indicated the occurrence of morphosyllables with a single or double slanted line. This second type of syllabary has typically recognised the standard and many colloquial morphosyllables but excluded those morphosyllables that occur only i n English loanwords. In terms of its recognition of the first three kinds of occurring morphosyllables referred to above, Yue-Hashimoto's syllabary is by far the most comprehensive by listing all the standard and almost all the colloquial Chinese characters with which Cantonese morphosyllables are written; her syllabary also recognises some English loanwords. However, marking the occurrence of Cantonese morphosyllables in a syllabary with Chinese characters has necessarily limited the morphosyllables that can be recognised to those which are associated with Chinese characters : even if the morphosyllables do exist in the spoken language, they have no written forms and so are overlooked. The syllabary on the inside front cover of the index of standard Chinese characters in Cantonese romanisation compiled by the Linguistic Society of Hong Kong (Linguistic Society of Hong Kong 1 997) has this limitation. In order to recognise the characterless morphosyllables, Kao ( 1 97 1 ) marked them with the check mark. Yue-Hashimoto recorded English glosses enclosed within parentheses to indicate these syllables. In addition, the phrase 'taboo syllable' recognised morphosyllables regarded as vulgar and obscene (even though dialectal characters exist for writing these).
+
+256 Robert S. Bauer
+recognised. However, a recheck of these reduced the number to 26 because it was found that four syllables were actually homophonous with colloquial syllables. Twelve years later B auer and B enedict ( 1 997 : 4 1 0) identified 40 English loanword syllables. My most recent tally has now noted 49 such syllables and these have been listed and exemplified in Appendix 1 . It is possible that my earlier research for identifying the loanword syllables may have undercounted some of them, and that the number of new syllables that entered Cantonese over the past two decades may be less than 23 ; nonetheless, I do believe the pattern of increase from 26 loanword syllables in 1 985 to 40 in 1 997 and to 49 in 2002 does point to a gradual expansion of the Cantonese syllabary as a result of the contact between Cantonese and English.
+Represented among the set of 49 loanword syl lables li sted in Appendix 1 are 23 different rimes. When we look at these rimes within the framework of the Cantonese syllabary' s four categories of syllables as described above, the most remarkable thing we discover is that there is nothing unusual about them. First, all these rimes belong to the set of 56 Cantonese rimes, so none are non-occurring. Second, they can be categorised into two sets: ( 1 ) rimes that occur in syllables that are associated with the standard Chinese
+characters: -i, -(E, -u, -:J, -iw, -ow, -ej, -:Jj, -im, -in, -im, -it, -elJ, -elJ, -ek, -at, -:In, -:Jt; and (2) rimes that occur in colloquial morphosyllables: -eW, -em, -en, -ep, -&to Admittedly, this
+is the only syllabary that has recognised all fi ve of these colloquial rimes (the syllabary in
+Rao et al ( 1 9 8 1 :298) listed -em, -ep, and -et, but only syllable kem is marked as occurring).
+Appendix 4. 1 in B auer and B enedict ( 1 997:488-496) li sted lexical items from the colloquial lexicon (including both words and phrases) in which the five rimes occur.
+4 Conclusion
+The phonetic structure of loanword syllables seems to be an extension of phonetic patterns observed in the occurrence of colloquial syllables. In looking at all four types of syllables, can we identify accidental and systematic gaps in the Cantonese syllabary? Do the non-occurring syllables establish a pattern that underlies Cantonese phonotactics in which certain types of syllables are disallowed? In examining the non-occurring syllables that are marked in Appendix 2, we observe that four labially articulated initi al consonants
+have the following number of non-occurring syllables out of the 56 that are possible: khw 4 1 , kw- 3 5 , w-_27, J-_23 . These numbers may indicate a tendency to avoid syllables with
+labial initial consonants. Other non-occurring syllables seem to suggest a tendency to avoid syllables that have both labially-articulated initial and final consonants, yet we must
+also note the occurrence of piw , phiw , miw, pl1W, phl1W, ml1W, paw , phaw , maw among others as readings of standard Chinese characters, and pl1m , pl1p, phl1P, ml1m ,_and w iw in
+the colloquial lexicon. There may also be a tendency to avoid syllables in which all three
+elements, including the nuclear vowel, are labially-articulated; but again we find that pow ,
+
+The impact ofEnglish loanwords on the Cantonese syllabary 257
+phow and mow are readings of standard Chinese characters, while wow occurs in the colloquial lexicon andfow in an English loanword. For any of these patterns that appear to
+underlie the labial dissimilation constraint that has been posited for Cantonese (Yue­ Hashimoto 1 972: 1 3 9; Light 1 977 : 79), counterexamples occur among the syllables associated with standard Chinese characters, syllables from the colloquial lexicon, and those that occur in loanwords. In view of the complex distribution of syllables within the syllabary and the trend for the number of loanword syllables to increase, the matters of identifying the accidental and systematic gaps in the Cantonese syllabary and mapping out Cantonese phonotactics still await a satisfying resolution.
+References
+B auer, Robert S . , 1 98 5 , The expanding syllabary of Hong Kong Cantonese. Cahiers de Linguistique Asie Orientale XIV/1 :99-1 1 1 .
+1 994, Fieldnotes on Hong Kong Cantonese. University of Hong Kong.
+1 996, Identifying the Tai substratum in Cantonese. Proceedings of the fourth international symposium on languages and linguistics, Pan-Asiatic linguistics V
+1 806-1 844. B angkok: Institute of Language and Culture for Rural Development, Mahidol University, Salaya. 1 997, Fieldnotes on Hong Kong Cantonese. Hong Kong Polytechnic University. 200 1 , Fieldnotes on Hong Kong Cantonese. Hong Kong Polytechnic University.
+B auer, Robert S . and Paul K. Benedict, 1 997, Modern Cantonese phonology. Berlin:
+Mouton de Gruyter.
+Chan, Mimi & Helen Kwok, 1982, A study of lexical borrowing from English in Hong Kong Chinese. Hong Kong: Centre of Asian Studies, University of Hong Kong.
+Cheung Kwan-hin, 1 986, The phonology of present-day Cantonese. Ph.D. dissertation, University College, London.
+Huang Xiling, 1 986, Yueyin yunhui, a Chinese syllabary pronounced according to the dialect of Canton. Hong Kong: Zhonghua Shuju.
+Kao, Diana L., 1 97 1 , Structure ofthe syllable in Cantonese. The Hague: Mouton. Kiu, K.L., 1 977, Tonal rules for English loan words in Cantonese. Journal of the
+International Phonetic Association 7/1 : 17-22. Light, Timothy, 1 977, The Cantonese final : an exercise in indigenous analysis. Journal of
+Chinese Linguistics 5/1 :75-102. Rao B ingcai , O uyang Jueya and Zhou Wuji, 1 98 1 , Guangzhouhua fangyan cidian
+[dictionary of Cantonese dialect] . Hong Kong: Shangwu Yinshuguan.
+
+258 Robert S. Bauer
+Xianggang Yuyanxue Xuehui, 1 997, Yueyu pinyin zibiao [table of Chinese characters in
+Cantonese phonetic transcription] . Hong Kong: Xianggang Yuyanxue Xuehui.
+Yu Bingzhao, 1 982, Tongyin zihui [syllabary of homophones (in Cantonese phonetic
+transcription) ] . Hongkong: New Asia Press.
+Yue-Hashimoto and Ann Oi-kan , 1 972, Studies in Yue dialects 1: phonology of Cantonese. Cambridge: Cambridge University Press.
+Zhang Hongnian , 1 972, Xianggang Yueyufa yanjiu [study of Hong Kong Cantonese
+grammar] . Hong Kong: Chinese University of Hong Kong Press.
+Zhang Liyan and Ni Liehuai, 1 999, Gangshi Guangzhouhua cidian [Hong Kong Cantonese
+dictionary] . Hong Kong: Wanli Jigou.
+Zhang Liyan, 1 983, Guangzhouhua you yin wu zi yinj ie zongji [tally of syllables with
+sound but no written form in Cantonese] . Yuwen Zazhi 10: 28-35.
+Zhang Risheng, 1 986, Xianggang Guangzhouhua Yingyu yiyin jiecide shengdiao guiyu [tonal rules for transliterating English loanwords in Hong Kong Cantonese] .
+Zhongguo Yuwen 1 :42-50.
+
+The impact ofEnglish loanwords on the Cantonese syllabary 259
+
+Appendix 1: 49 "new" Cantonese syllables created by borrowing English words.
+
+PJ.j' 'boy'
+
+ps:nl 'band'
+
+phce : in phce :l_ss:nl 'percent'
+
+pha:t
+
+in
+
+pha:fA
+
+-
+
+na
+
+. .2
+
+' partner'
+
+phJ:t in pha:1-si:-phJ;tlA 'passport' ts:n in khJ.n-ts:n(sa..2 'condenser'
+
+tJ.n in a.,j-tJ.nl 'Don'
+
+thi: in thi:-sefA 'T-shirt'
+
+thej in thef-si..2 'taste'_
+
+ths:n in ths:n1-ni..6-si..2 ' tennis'
+
+ks:m1 'game'
+
+khJ:1 'call'
+
+khJ.n1 'coin'
+
+khi:p in khi:p7A_ji:fA ' keep fit'
+
+khs.p in khs.p7A-then2 'captain'
+
+kha:t7A 'card'
+
+khJ:t7A ' court'
+
+khwi:m1 'cream'
+
+khwi:n1 ' queen '
+
+khwi:fA 'quit'
+
+mu: in mu:1-ji..2 'movie'
+
+ms:n1 MAN ' manly'
+
+mJ.n1 ' monitor (for computer)'
+
+ms:k in ms:/(B-khs:n1 ' mechanical'
+
+ji:w in ji.w1-si..2 'fuse'
+
+jow jn si:1-jow2 ' civil'
+
+js:n1 ' friend'
+
+jJ:fA 'volt'
+
+js:kjn js:FA-si..2 ' fax '
+
+ss.w in ss.w1-si ..2 ' sales'
+
+ss:m4 ' semester'
+
+ss:n in phce:l-ss:nl 'percent'
+
+hs.p in hS.p7A-phi..2 ' happy'
+
+tsejjn ti:1-tsef 'DJ (disk jockey)'
+
+tss:m1 'jam'
+
+tSJ.n in a.,j-tsJ.nl 'John '
+
+wi:n in wi:n1-na..2 'winner'
+
+ws:n in ws:nl-tslJj2 ' van'
+
+wJ.n in wJ.nl-ls:l-la..2 ' vanilla' ls.p in lS.p7A_PJ:1 'net-ball (in table
+
+tennis) ,
+
+js:w1 'yell at'
+
+js:n1 ' (Japanese) Yen'
+
+ju:1 'U' (short form for university)
+
+i:n
+
+in
+
+i:n1-tf;i
+
+. .2
+
+'inch'
+
+el] in ef/-li:fA 'Eng. Lit. '
+
+s:m in s:m1-si:1 ' MC'
+
+s:n i n s:n1-tf;i:n2 'engine'
+
+s:n1-khJ:1 'encore'
+
+s:n2-tf;i:1 N.G. 'no good'
+
+S:I] in wa.j'-s:1]1-kow2 ' wide-angle'
+
+s:k in S:FA-si:l_kwJ:l]l 'X-ray'
+
+(Bauer 1985: 1 0 1 ) (Zhang 1 972: 22 1 ) (Rao et al. 1 98 1 : 179) (Zhang 1972: 22 1 ) (Zhang 1972: 225) (Zhang 1972: 223) (Bauer 1 994) (Zhang 1 972: 220) (Bauer 2001 ) (Zhang 1986: 48) (Zhang 1 972: 222) (Bauer 1985: 101) (Bauer 1985: 101) (Bauer 1 985: 1 0 1 ) (Zhang 1972: 22 1 ) (Yue-Hashimoto 1 972: 329) (Bauer 1994) (Cathy Wong pc 41 1 2/97) (Chan & Kwok 1 982: 1 14) (Bauer 1 997) (Zhang 1 972: 224) <dung1 jing1 zai2> March 1 997, #45 : 22 (adultcornic book) (Cheung Kwan-hin pc 1 997) (Kiu 1 977: 19) (Zhang 1 972: 2 1 7) (Bauer & Benedict 1997: 365) (Zhang 1 986: 44) (Zhang 1 972: 227) (Zhang & Ni 1 999: 393) (Bauer 1 997) (Bauer 1997) (Rao et a1 1 98 1 : 1 79) (Zhang & Ni 1999: 393) (Zhang 1 986: 45) (Zhang 1 972: 2 1 7) (Bauer 1994) (Zhang 1 972: 222) (Cheung 1986: 33) (Zhang 1986: 49) (Cheung Kwan-hin pc 1 997) (Cheung Pak-man pc 6/3/00) (Cheung 1986: 33) (Zhang & Ni 1 999: 396) (Zhang 1986: 46) (Zhang 1986: 48) (Zhang 1986: 45) (Zhang 1 972: 224) ; (Zhang & Ni 1 999: 392); (B auer & Benedict 1 997 : 405) (Zhang 1 972: 225) (Zhang 1 972: 2 1 3)
+
+Appendix 2 : Cantonese syllabary.
+
+0t'v\
+
+No mark = syllable associated with standard character; C = colloquial; + = in English loanword; n = non-occurrin g .
+
+o
+
+p- ph- t- th- k- kh
+
+kw - k h w - ill -
+
+n - 1) -
+
+-1
+
+Cpl•
+
+Cphi
+
+Cti +thi Cki Ckhi
+
+"kwi "khwi
+
+Cm l•
+
+Cn L•
+
+CIJ l•
+
+-iw piw phiw tiw thiw kiw khiw "kwiw "khwiw miw niw "lJiw -1m "pim "phim tim thim kim khim kwim +khwim "m l.m nim "lJim
+
+-ill
+
+pn
+
+phin tin thin kin khin
+
+"kwin +khwin min
+
+nin "I)in
+
+-ip "pip "phip tip thip kip +khip "kwip "khwip "mip nip "I)l.p
+
+-it pit phit tit thit kit khit
+
+kwit +khwit m it
+
+"nit clJit
+
+f- s-/c;,- h -
+
+Ji si
+
+Ch i
+
++fiw siw hiw
+
+"fim sim him
+
+"fin sin hin
+
+"fip sip hip Cfit sit hit
+
+ts-/tc;,- tsh-/tc;, w-
+
+1-
+
+J-
+
+t9i
+
+t9hi
+
+CW l•
+
+Cli ji
+
+"l.
+
+t9iw
+
+t9hiw CW l•W liw jiw "l.W
+
+t9im t9in t9ip t9it
+
+t9him "Wl.m lim jim "l.m t9hin +Wi.n lin jin +I.n t9hip "wip lip jip nip t9hit Cwit lit jit "it
+
+-y "py "phy "ty "thy "ky "khy
+
+-yn
+-yt
+
+"pyn "phyn tyn "pyt "phyt tyt
+
+thyn kyn khyn +thyt Ckyt khyt
+
+"kwy "kwyn "kwyt
+
+"khwy "khwyn "khwyt
+
+"my "myn "myt
+
+"ny nyn
+
+"nIlJ)Yyn
+
+"nyt "I)yt
+
+-ej pej phej tej +thej kej khey "kwej "khwej mej nej "lJej
+
+-el) pelJ phelJ tel) thel) kel) khel) kwelJ ckhwelJ melJ -ek pek phek tek thek kek ckhek kwek ckhwek mek
+
+nelJ lJelJ nek "I)ek
+
+-E
+
+Cp£ cph£ t£ "th£ ck£ kh£
+
+ckw£ "khw£
+
+Cm£
+
+Cn£ C1)£
+
+-EW Cp£w "ph£w Ct£W "th£w ck£w ckh£w "kw£w "khw£w Cm£w "n£W "I)£W
+
+-Em "p£m "ph£m Ct£m "th£m +k£m ckh£m "kw£m "khw£m "m£m "n£m "I)£m
+
+-En +p£n "ph£n +t£n +th£n "k£n Ckh£n "kw£n "khw£n +m£n "n£n "I)£n
+
+-EI) -EP -Et
+
+p£1) ph£1J t£1) th£1J k£1J ckh£1)
+
+"p£p cp£!
+
+"ph£p cph£!
+
+ct£p Ct£!
+
+"th£p cth£!
+
+ck£p "k£!
+
++kh£p ckh£!
+
+"kw£1J
+"kw£p ckw£!
+
+"khw£1) "khw£p "khw£!
+
+m£1) "m£p "m£!
+
+"n£1) "1)£1) cn£p "IJ£P "n£! cl)£!
+
+-Ek p£k ph£k t£k th£k "k£k kh£k ckw£k "khw£k +m£k "n£k clJ£k
+
+"pee +phce tee cthee ckee ckhee "kwee "khwee "mee Cnee "I)ee
+
+-0:1) "peelJ "pheelJ cteel) "theelJ keelJ kheelJ "kweelJ "khweelJ "meel)
+
+"I)ee IJ
+
+-rek "peek "pheek teek "theek keek kheek "kweek "khweek "meek
+
+"I)ee k
+
+-ell "peq "pheq teq theq keq kheq "kweq "khweq "meq
+
+"lJeq
+
+-en "pen "phen ten then "ken "khen "kwen "khwen "men "nen "lJen -at "pet "phet "tet "thet Cket "khet "kwet "khwet "met "net clJ-et
+
+-uj puj phuj wj thuj kuj khuj kwuj khwuj m uj nuj I)uj
+
+"fy "fyn "fyt
+fej Jel)
+Jek
+J£ "f£w
+"f£m +f£n "f£1) "f£p
+J£! +f£k "fee
+"feelJ "feek jeq "fen ''fet fuj
+
+0'
+9yn 9yt sej selJ sek s£ +s£w +s£m +s£n s£1J "s£p "s£t s£k csee seelJ seek seq sen set s uj
+
+"hy hyn hyt hej hel) "hek ch£ "h£w "h£m "h£n h£1J +h£p "h£! h£k hce heelJ "heek heg "hen "het h uj
+
+t9Y t9yn t9yt +tse). tsel) tsek ts£ cts£w + ts£m "ts£n tS£1) cts£p "tS£! ts£k ct9ee t9eel) t9eek t9eq tfen tget tsuj
+
+t9hy t9hyn t9hyt "tshej tshel) tshek tsh£ "tsh£w "tsh£m "tsh£n tsh£1) "tsh£p ctsh£! tsh£k ct9hee t9heel) t9heek t9heq t9hen t9het tshuj
+
+"wy "wyn "wyt "wej weI) wek C w£ " w£w " w£m + w£n "w£1) "w£p CW£! "w£k "wee "weelJ "week "weq "wen "wet w uj
+
+"ly jy "y
+
+lyn jyn "yn
+
+lyt jyt "yt
+
+lej "jej ej lelJ jelJ +el)
+
+lek jek "ek
+
+cI£ j£
+
+c£
+
+cI£w +).£W "£w
+
+cl£m "j£m +£m
+
+"un
+
++).£n
+
++
+£n
+
+l£1) j�1) +£IJ +l£p "j£p c£p cl£! "j£! c£!
+
+l£k "j£k +£k clee "jee cee
+
+lee I) jeel) "eeIJ
+
+leek jeek "eek leq jeg neg
+
+len jen "en let Cjet cet
+
+luj juj uj
+
+-uw
+
+tllw thuw kuw khuw "kwuw "khwuw muw nuw lJuw fUw suw huw tsuw tshuw "wuw luw juw uw
+
+Appendix 2 : Cantonese syllabary (continued).
+
+p- ph-
+
+t- th- k- kh-
+
+kw- khw-
+
+ll-
+
+n-
+
+I]
+
+f-
+
+s-
+
+h-
+
+ts-
+
+tsh-
+
+w-
+
+\-
+
+0-
+
+-llll Cpf!m "phf!m Cmm Cthf!m kf!m khf!m nkwf!m nkhwf!m
+
+Cfjf!m nff!m sf!m hf!m tSf!m tshf!m "Wllll If!m jf!m
+
+-lln pf!n phf!n mn thf!n kf!n khf!n kWf!n khwlln mf!n nf!n fjf!n ff!n Sf!n hf!n tSf!n tshf!n Wf!n cLf!n jf!n
+
+-lll] pf!1J phf!fj tf!fj thf!fj kf!fj khf!fj kWf!fj khwf!fj mf!fj nf!fj cfjf!fj 'jf!fj Sf!fj hf!fj tSf!fj tshf!fj Wf!fj CLf!fj "jf!fj
+
+-llP cPf!P cphf!p cmp cthf!p kf!p khf!p "kwf!p "khwf!p nmf!p nf!p cfjf!P "ff!p Sf!P hf!p -llt pf!t phf!t tf!t "thf!t kf!t khf!t kWf!t nkhwf!t mf!t nf!t fjf!t ff!t Sf!t hf!t
+-llk pf!k cphf!k mk "thf!k "kf!k ckhf!k ckwf!k ckhwf!k mf!k Cnf!k fjf!k cff!k Sf!k hf!k
+
+tSf!P tshf!p nWf!p Lf!p jf!P tSf!t tshf!t Wf!t cLf!t jf!t tSf!k tshf!k "wf!k Lf!k "jf!k
+
+-0 pa pha ta tha ka kha
+
+kwa khwa
+
+ma
+
+na fja
+
+fa sa ha
+
+-oj paj phaj taj thaj kaj khaj kwaj Ckhwaj maj naj fjaj faj saj haj
+
+-ow paw phaw "taw "thaw kaw khaw nkwaw nkhwaw maw naw fjaw nfaw saw haw
+
+-Oll npam npham tam tham kam nkham nkwam nkhwam "mam nam fjam nfam sam ham
+
+tsa tsaj
+
+tsha wa tshaj waj
+
+cLa Laj
+
+jcja·aj.
+
+a aj
+
+tsaw tshaw °waw Law cj·aw aw
+
+tsam tsham nwam Lam cj·am am
+
+-on pan phan tan than kalt nkhan kwan "khwan man nan fjan fan san han tsan tshan wan Lan njan an
+
+-01] pafj phafj tafj thafj kafj ckhafj ckwafj khwafj mafj nafj fjafj fafj safj hafj -op npap "phap tap thap kap nkhap nkwap nkhwap nmap nap cfjap "lap sap hap
+
+tsafj tsap
+
+tshafj tshap
+
+wafj lafj nwap lap
+
+cCjj·aQp!)
+
+afj ap
+
+-ot pat +phat tat that ckat +khat kwat nkhwat Cmat nat cfjat fat sat "hat tsat tshat wat lat njat at
+
+-ok pak phak ctak "thak kak nkhak kwak ckhwak mak nnak fjak 'jak csak hak tsak tshak wak cLak Cjak ak
+
+-u cpu cphu tu cthu ku khu
+
+nkwu nkhwu +mu nnu nfjU Ju
+
+"su nhu
+
+ntsu ntshu wu
+
+cLu
+
++j. U
+
+nu
+
+-uj puj phuj "tuj "thuj Ckuj khuj nkwuj "khwuj muj -un pun phun "tun "thun kun nkhun nkwun "khwun mun
+
+"nuj "fjuj fuj nnun "fjun fun
+
+nsuj nhuj nsun nhun
+
+ntsuj ntshuj wuj ntsun ntshun wun
+
+nluj njuj nUj• nlun nj·un nun
+
+-ut put phut "tut "thut Ckut khut nkwut nkhwut mut nnut "fjut Jut nsut "hut ntsut ntshut wut nlut njut nut
+
+-llk pf!k cphf!k tf!k nt/mk nkf!k ckhf!k ckwf!k ckhwf!k mf!k Cnf!k fjf!k 'fok Sf!k hf!k tSf!k tshf!k nWf!k If!k njf!k f!k
+
+-ow pow phow tow thow kow nkhow nkwow nkhwow mow now fjow +fow sow how tsow tshow cwow low njow ow
+
+-01] pOfj phofj tofj thofj kOfj khofj nkwofj nkhwofj mOfj nOfj cfjOfj fOfj sOfj hOfj
+
+-ok pok phok tok thok kok khok nkwok nkhwok mok Cnok fjok fok sok hok
+
+-;) P;) ph;) t;) th;) b +kh;) kw;) nkhw;) m;)
+
+n;) fj;)
+
+f;) S;) h;)
+
+-;)j +P;)j. "ph;)j wj thej bj kh;)j nkw;)j nkhw;)j "m;)j. n;)j fj;)j -;)n "p;)n "ph;)n +t;)1t nth;)n bn +kh:m nkw;)n nkhw;)n +m;)n "nen fj;)n
+
+nf;)j S;)j h;)j nf;)n nS;)n h;)n
+
+-;)1] P;)fj ph;)fj t;)fj th;)fj bfj kh;)fj -;)t np;)t +ph;)t "t;)t nth;)t bt +kh;)t
+
+kW;)fj khw;)fj nkw;)t nkhw;)t
+
+m;)fj "m;)t
+
+nefj fj;)fj nnet nfj;)t
+
+f;)fj S;)fj h;)fj +jJt cDt /Dt
+
+-;)k p;)k ph;)k t;)k th;)k bk k/Dk kw;)k khw;)k m;)k nek fj;)k f;)k s;)k h;)k
+
+tSOfj tshofj cWOfj LOfj jOfj Ofj
+
+tsok tshok nwok Lok jok ok
+
+tS;) tS;)j
+
+tsh;) tsh;)j
+
+nWW;);)j.
+
+b bj
+
+cP· nj;)j
+
+;) ;)j
+
++ts;)n "tsh;)n +w;)n nbn np· n ;)n
+
+tS;)1J
+
+tsh;)1J W;)fj
+
+bfj
+
+nP· IJ
+
+ntS;)t °tsh;)t "W;)t nbt nj;)t
+
+tDk tsh;)k w;)k bk nj;)k
+
+Cm
+
+fj
+
+chmchfj
+
+Bauer, R.S. "The impact of English loanwords on the Cantonese syllabary". In Bradley, D., Lapolla, R., Michailovsky, B. and Thurgood, G. editors, Language variation: Papers on variation and change in the Sinosphere and in the Indosphere in honour of James A. Matisoff. PL-555:253-262. Pacific Linguistics, The Australian National University, 2003. DOI:10.15144/PL-555.253 ©2003 Pacific Linguistics and/or the author(s). Online edition licensed 2015 CC BY-SA 4.0, with permission of PL. A sealang.net/CRCL initiative.
+
+
