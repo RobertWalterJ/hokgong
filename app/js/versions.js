@@ -6,6 +6,16 @@
 
 export default [
   {
+    v: '1.15.0', date: '2026-10-07',
+    what: [
+      'Grammar is a ladder now, not a list. Ten patterns in the order they stand on each other: 係 holds up 唔, which holds up 食唔食 and 有冇; 咗 holds up 緊, which holds up 返 and 埋. Each rung says what it stands on and why it sits where it does.',
+      'Every rung opens into a lesson: what it is, HOW IT IS MADE as a plain formula, what to watch for, why it sits there, the rungs underneath it with how you are doing on each, and three real sentences that show it.',
+      'Where you stand on a pattern is four words — new, learning, getting there, solid — and never a percentage. A number would invite you to optimise it, and what is being measured is whether you can use a pattern.',
+      'Nothing is locked. A rung opens when the one below it is mostly right, but you can open any of them and read it now; the ladder decides what the app SUGGESTS, never what it will let you see.',
+      'The build now refuses a ladder that is not one: a rung may only stand on a rung below it, every rung must be reachable from the bottom, and the ladder that reaches your phone is checked against the one in the source rather than instead of it.',
+    ],
+  },
+  {
     v: '1.14.0', date: '2026-10-07',
     what: [
       'A level check, offered once from the home screen. It asks words from each stage of the course in turn and stops at the first stage that is not already yours. If you are starting from scratch that is four questions and an honest "we will start at the beginning". Every word is shown with its romanisation, and "I don’t know" is a real answer that costs you nothing.',

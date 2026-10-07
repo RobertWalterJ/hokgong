@@ -56,7 +56,10 @@ export default [
     watch: 'The corpus of 1990s conversation barely tags 緊 on its own, but it is everywhere in Tatoeba’s sentences and in speech today — a reminder that the corpus is a sample, not the language.',
   },
   {
-    id: 'a-not-a', title: 'Asking either way — V唔V', corpus: 353,
+    // Titled with a real example rather than the formula V唔V. Every Chinese
+    // run in this file is annotated with its reading at build time, so the
+    // formula came out as "V唔 (m4)V", which reads as a typo.
+    id: 'a-not-a', title: 'Asking either way — 食唔食', corpus: 353,
     match: '係唔係|好唔好|得唔得|去唔去|食唔食|啱唔啱|得閒唔得閒',
     plain: 'The same question shape with other verbs: 好唔好？ — is it good? 得唔得？ — will that do? Say the verb, 唔, then the verb again.',
     watch: 'With 係 this becomes 係唔係 — the ordinary way to ask “is it?”',

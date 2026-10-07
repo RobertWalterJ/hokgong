@@ -75,6 +75,105 @@ const inPlay = () => askableIds(canPlayWord(), haveRecordings(), course().curren
 // the spot checks that test that claim.
 const spotPool = () => assumedKnown(State.data.floor || 0, isMet);
 
+// ── the grammar ladder ───────────────────────────────────────────────────
+// Ten patterns in the order they stand on each other, with where the learner
+// is on each. A rung opens when the one below it is largely met and mostly
+// right — generous on purpose, because this gates what the app SUGGESTS, never
+// what it will let you look at.
+const OPEN_MET = 0.5, OPEN_RIGHT = 0.6;
+
+export function ladderState() {
+  const d = D();
+  const rungs = (d.ladder || []).map((rung) => {
+    const items = d.items.filter((it) => it.gid === rung.id);
+    let met = 0, right = 0;
+    for (const it of items) {
+      const c = State.card(it.id);
+      if (!c || c.st === 'new') continue;
+      met++;
+      if (c.ok) right++;
+    }
+    const share = items.length ? met / items.length : 0;
+    const accuracy = met ? right / met : 0;
+    // Four words, meaning four different things, and none of them a score.
+    const level = met === 0 ? 'new'
+      : share >= OPEN_MET && accuracy >= 0.85 ? 'solid'
+        : share >= OPEN_MET && accuracy >= OPEN_RIGHT ? 'getting there'
+          : 'learning';
+    const spec = d.grammar.find((g) => g.id === rung.id) || {};
+    return { ...rung, title: spec.title || rung.id, items: items.length, met, right, share, accuracy, level };
+  });
+  const by = new Map(rungs.map((r) => [r.id, r]));
+  for (const r of rungs) {
+    // Open when everything it stands on is at least getting there. The first
+    // rungs stand on nothing and are open from the start.
+    r.open = (r.builds || []).every((b) => {
+      const under = by.get(b);
+      return under && under.share >= OPEN_MET && under.accuracy >= OPEN_RIGHT;
+    });
+    r.under = (r.builds || []).map((b) => by.get(b)).filter(Boolean);
+  }
+  const next = rungs.find((r) => r.open && r.level !== 'solid') || null;
+  return { rungs, next };
+}
+
+// One rung, opened out: what it is, how it is made, what to watch for, the
+// sentences that show it, and the rungs it stands on with how you are doing on
+// each. The explanations are mine and say so; the sentences are Tatoeba's and
+// have been checked against it.
+function lessonCard(id) {
+  const d = D();
+  const { rungs } = ladderState();
+  const r = rungs.find((x) => x.id === id);
+  if (!r) return [header('Grammar'), h('main', {}, h('p', {}, 'No such pattern.'))];
+  const g = d.grammar.find((x) => x.id === id) || {};
+  const pill = (x) => h('span', { class: 'lvl ' + x.level.replace(' ', '-') }, x.level);
+  return [header(r.title), h('main', {},
+    h('section', { class: 'card' },
+      h('div', { class: 'eyebrow' }, `Rung ${r.n + 1} of ${rungs.length}`),
+      pill(r),
+      h('h2', {}, 'What it is'),
+      h('p', {}, g.plain, sayBtn(g.plain)),
+      h('h2', {}, 'How it is made'),
+      h('p', { class: 'how' }, r.how),
+      g.watch ? [h('h2', {}, 'What to watch for'), h('p', { class: 'watch' }, g.watch)] : null,
+      h('h2', {}, 'Why it sits here'),
+      h('p', { class: 'note' }, r.why),
+      h('p', { class: 'evidence' }, 'The explanation and the order are mine. Every sentence below is a real one from Tatoeba, checked against it at every build.')),
+    r.under.length ? h('section', { class: 'card' },
+      h('h2', {}, 'It stands on'),
+      h('div', { class: 'famrow' }, ...r.under.map((u) => h('button', {
+        class: 'wchip', type: 'button', onclick: () => show('lesson', () => lessonCard(u.id), { arg: u.id }),
+      }, h('span', {}, u.title), pill(u))))) : null,
+    (g.examples || []).length ? h('section', { class: 'card' },
+      h('h2', {}, 'Sentences that show it'),
+      ...g.examples.slice(0, 3).map((ex) => h('div', { class: 'sentence meet-eg' },
+        h('p', { class: 'han big-s' }, ex.text),
+        h('p', { class: 'jyut' }, ex.jyut),
+        h('p', { class: 'gloss' }, ex.eng),
+        evidenceLine({ sentence: ex.id })))) : null)];
+}
+route('lesson', (id) => lessonCard(id));
+
+// The ladder itself: ten rungs, in order, each saying where you stand.
+function ladderScreen() {
+  const { rungs, next } = ladderState();
+  return [header('Grammar, in order'), h('main', {},
+    h('section', { class: 'card flat' },
+      h('p', { class: 'note' }, 'Ten patterns, each standing on the ones before it. A rung opens when the one below it is mostly right — but nothing is locked: you can open any of them and read it now.'),
+      next ? h('p', {}, 'Next for you: ', h('strong', {}, next.title)) : null),
+    h('nav', { class: 'rows' }, ...rungs.map((r) => h('button', {
+      class: 'row' + (r.open ? '' : ' shut'), type: 'button',
+      onclick: () => show('lesson', () => lessonCard(r.id), { arg: r.id }),
+    },
+    h('div', {},
+      h('div', { class: 'rlabel' }, `${r.n + 1}. ${r.title}`),
+      h('div', { class: 'note' }, r.level === 'new' ? (r.open ? 'Open, not started' : `Stands on ${r.under.map((u) => u.title).join(' and ')}`)
+        : `${r.met} of ${r.items} met, ${Math.round(r.accuracy * 100)}% right`)),
+    h('span', { class: 'lvl ' + r.level.replace(' ', '-') }, r.level)))))];
+}
+route('ladder', ladderScreen);
+
 // ── the level check ──────────────────────────────────────────────────────
 // Offered once, from the home screen, and never nagged about. It asks words
 // from each stage in turn and stops at the first one that is not already
@@ -474,6 +573,7 @@ function homeScreen() {
       h('nav', { class: 'rows' },
         levelCard(),
         link('The course', c.done ? 'All ten stages behind you' : 'The ten stages, and what each one is for', 'course', browseScreens.course),
+        link('Grammar, in order', 'Ten patterns, each standing on the one before', 'ladder', ladderScreen),
         link('Progress', 'What you can answer, and how it has moved', 'progress', browseScreens.progress),
         link('Look things up', 'Words, tones, grammar, sources', 'lookup', browseScreens.lookup)),
       wordToday(),

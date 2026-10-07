@@ -40,6 +40,8 @@ const SYLLABUS = await load('content/syllabus.mjs');
 const NOTES = await load('content/notes.mjs');
 // Words a learner would answer with each other, and what tells them apart.
 const FAMILIES = await load('content/families.mjs');
+// What each grammar pattern is made of and what it stands on — the ladder.
+const LESSONS = await load('content/grammar-lessons.mjs');
 // For the 167 words the course teaches, the sense is chosen by hand from the
 // ones the sources already give — see content/glosses.mjs for why, and
 // build/verify.mjs for the check that it is a re-ordering and not an invention.
@@ -700,6 +702,10 @@ const deck = {
   words: chosen.map((e) => ({ w: e.w, j: e.jyut, g: e.gloss[0], alt: e.gloss.slice(1, 3), r: e.rank, t: e.tier, c: e.glossConf, s: e.glossSrc })),
   examples,
   grammar,
+  // The ladder: the order to learn the patterns in, what each stands on, and
+  // how it is made. The explanations are mine; every example a lesson shows is
+  // one build/verify.mjs has already checked against Tatoeba.
+  ladder: LESSONS.map((l, n) => ({ ...l, n })),
   context,
   items,
   audio: [...audioNeeded],

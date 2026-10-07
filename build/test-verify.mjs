@@ -29,6 +29,11 @@ const cases = [
   ['a word card meaning that drifted', (d) => { const c = d.context.find((x) => x.kind === 'words'); c.found[0] = { ...c.found[0], gloss: 'a kind of hat' }; }, 'does not match the dictionary'],
   // A grammar point you are gated on, rationed back to one question: the shape
   // of the fault that let an evening of work pass no stage at all.
+  // A rung hung off one above it: the ladder with its bottom rung removed.
+  ['a grammar rung that stands on a rung above it', (d) => {
+    const l = d.ladder.find((x) => !x.builds.length);
+    if (l) l.builds = [d.ladder[d.ladder.length - 1].id];
+  }, 'stands on a rung ABOVE it'],
   ['a gated grammar point with only one question in reach', (d) => {
     const gid = d.stages.find((st) => st.grammar.length)?.grammar[0];
     const mine = d.items.filter((it) => it.gid === gid && it.stage != null);

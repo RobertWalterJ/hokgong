@@ -418,6 +418,50 @@ for (const [i, cue] of Object.entries(DECK.cues || {})) {
   check(String(cue).toLowerCase().trim() !== (w.g || '').toLowerCase().trim(), 'a word is cued with its own meaning', `${w.w}: "${cue}"`);
 }
 
+// ── 8g. the grammar ladder is a ladder ───────────────────────────────────
+// A rung may only stand on a rung below it. One that names a step above it is
+// not a ladder, it is a circle, and a learner sent to study the thing that
+// depends on the thing he is studying would never find the bottom.
+const LADDER_SRC = (await import(pathToFileURL(join(ROOT, 'content', 'grammar-lessons.mjs')).href)).default;
+// The ladder as the APP will see it. Everything below is checked against this,
+// and this is checked against the source — so neither a bad rung written by
+// hand nor one that drifted in the build can get through.
+const LADDER = DECK.ladder || [];
+check(LADDER.length === LADDER_SRC.length, 'the deck and the ladder file disagree about how many rungs there are', `${LADDER.length} vs ${LADDER_SRC.length}`);
+for (const [n, src] of LADDER_SRC.entries()) {
+  const got = LADDER[n];
+  if (!got) { fail('a rung never reached the deck', src.id); continue; }
+  check(got.id === src.id, 'the rungs reached the deck in a different order', `${n}: ${got.id} vs ${src.id}`);
+  check(JSON.stringify(got.builds || []) === JSON.stringify(src.builds || []), 'a rung reached the deck standing on something else', src.id);
+  check(got.how === src.how, 'a rung reached the deck with a different account of how the pattern is made', src.id);
+}
+const rungAt = new Map(LADDER.map((l, n) => [l.id, n]));
+const gramIds = new Set(GRAMMAR.map((g) => g.id));
+for (const [n, l] of LADDER.entries()) {
+  check(gramIds.has(l.id), 'the ladder names a pattern the grammar syllabus does not have', l.id);
+  check(!!l.how && l.how.length > 20, 'a rung with no account of how the pattern is made', l.id);
+  check(!!l.why && l.why.length > 20, 'a rung with no reason for sitting where it does', l.id);
+  for (const b of l.builds || []) {
+    const at = rungAt.get(b);
+    if (at == null) { fail('a rung stands on something that is not on the ladder', `${l.id} → ${b}`); continue; }
+    check(at < n, 'a rung stands on a rung ABOVE it', `${l.id} (${n}) → ${b} (${at})`);
+  }
+}
+for (const g of GRAMMAR) check(rungAt.has(g.id), 'a grammar pattern is not on the ladder', g.id);
+// The bottom of the ladder has to be reachable: at least one rung standing on
+// nothing, or there is no way in.
+check(LADDER.some((l) => !(l.builds || []).length), 'every rung stands on another: the ladder has no bottom', '');
+// And every rung must be reachable from the bottom by its own links.
+{
+  const open = new Set();
+  let moved = true;
+  while (moved) {
+    moved = false;
+    for (const l of LADDER) if (!open.has(l.id) && (l.builds || []).every((b) => open.has(b))) { open.add(l.id); moved = true; }
+  }
+  for (const l of LADDER) check(open.has(l.id), 'a rung can never be opened', l.id);
+}
+
 // ── 9. the deck is big enough to be worth playing ────────────────────────
 check(DECK.words.length >= 4000, 'the word list is short of a conversational vocabulary', `${DECK.words.length} words`);
 check(DECK.items.filter((i) => i.k === 'sentence-listen').length >= 100, 'too little listening practice', '');

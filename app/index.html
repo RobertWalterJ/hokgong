@@ -334,6 +334,14 @@ details.more > :not(summary) { animation: rise .2s var(--ease); }
 .stepn { flex: none; min-width: 28px; height: 28px; border-radius: 999px; background: var(--chip); color: var(--accent); display: inline-grid; place-items: center; font-weight: 600; font-size: .9rem; }
 .install { text-align: center; }
 .install .rlabel { margin-bottom: var(--s1); }
+/* Where you stand on a pattern. Four words, not a score: a number here would
+   invite you to optimise it, and the thing being measured is whether you can
+   use a pattern, which does not have a percentage. */
+.lvl { display: inline-block; padding: 2px var(--s3); border-radius: 999px; font-size: .78rem; background: var(--chip); color: var(--muted); }
+.lvl.solid { background: var(--right-bg); color: var(--right); }
+.lvl.getting-there { background: var(--tint); color: var(--accent); }
+.row.shut { opacity: .62; }
+.how { font-family: var(--ui); background: var(--chip); padding: var(--s3) var(--s4); border-radius: 12px; }
 .newwords { margin: var(--s2) 0 var(--s4); color: var(--muted); }
 .newwords .han { color: var(--ink); }
 .play {
