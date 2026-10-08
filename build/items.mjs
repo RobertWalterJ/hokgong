@@ -132,6 +132,9 @@ const spaced = (j) => j.replace(/([a-z]+[1-6])(?=[a-z])/g, '$1 ');
 const annotate = (text) => {
   if (!text) return text;
   const seen = new Set();
+  // Readings the source already wrote by hand. Without this the word gets a
+  // second bracket with the same contents in it.
+  for (const m of text.matchAll(/([\u3400-\u9fff]+)\s*\(([a-z][a-z0-9 ]*)\)/g)) seen.add(m[1]);
   return text.replace(/[㐀-鿿]+/g, (run) => {
     let out = '';
     let i = 0;

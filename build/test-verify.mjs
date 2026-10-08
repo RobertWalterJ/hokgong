@@ -71,7 +71,16 @@ const cases = [
     r.shows[0] = { ...r.shows[0], jyut: 'zyu1' };
   }, 'wrong reading'],
   ['a reading that cites nothing', (d) => { d.readings[0].cite = []; }, 'cites nothing'],
+  ['a reading with no main message', (d) => { delete d.readings[0].main; }, 'no main message'],
   ['a deck built before a content file was edited', (d) => { d.contentHash['tones.mjs'] = 'deadbeef0000'; }, 'older than its content'],
+  // The writing tic Robert named: saying what a thing is not, in place of
+  // saying what it is.
+  ['a reading that says what something is not', (d) => {
+    d.readings[0].read[0] += ' This is not emphasis and it is not mood.';
+  }, 'instead of saying what it is'],
+  ['a grammar note that lists what something is not', (d) => {
+    d.grammar[0].watch = 'Not decoration, not emphasis.';
+  }, 'instead of saying what it is'],
 ];
 
 copyFileSync(DECK, BAK);

@@ -78,8 +78,8 @@ export const CONFUSABLE = {
 // What the lesson says before any of it is asked.
 export const LESSON = {
   title: 'The six tones',
-  what: 'Cantonese says the same syllable at six different pitches, and they are six different words. Not emphasis, not mood — a different word. 詩 si1 is a poem, 史 si2 is history, 試 si3 is to try.',
-  how: 'Think of your speaking range as a ladder with five rungs, 1 at the bottom and 5 at the top. Each tone is where it starts and where it ends: 55 begins and ends at the top; 25 climbs from the bottom to the top; 21 starts low and sinks.',
-  watch: 'Three of the six are LEVEL — held flat, at the top, the middle and the bottom. Two RISE. One FALLS. If English is your first language the three LEVEL ones are where your first wins will be: English ears are good at how high something sat and poor at how it moved, and English mouths flatten a tone that was supposed to climb. The rises are the work.',
-  honest: 'It takes months, and the app will not pretend otherwise. What it can do is let you hear the same tone on many different words until the shape comes loose from the word.',
+  what: 'Cantonese says the same syllable at six different pitches, and they are six different words. 詩 si1 is a poem, 史 si2 is history, 試 si3 is to try — one syllable, three pitches, three words.',
+  how: 'Think of your speaking range as a ladder with five rungs, 1 at the bottom and 5 at the top. Each tone is where it starts and where it ends. 55 begins and ends at the top. 25 climbs from the bottom to the top. 21 starts low and sinks.',
+  watch: 'Three of the six are LEVEL, held flat at the top, the middle and the bottom. Two RISE and one FALLS. If English is your first language, start with the three level ones. English ears hear how high a sound sat, and hear its movement much less well. The rises are the work.',
+  honest: 'It takes months, and the app will not pretend otherwise. What it can do is play you one tone on many different words. In time the shape comes loose from the word.',
 };

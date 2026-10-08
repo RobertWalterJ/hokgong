@@ -6,6 +6,23 @@
 
 export default [
   {
+    v: '1.20.0', date: '2026-10-07',
+    what: [
+      'The writing is now measured against four guides Robert sent: the CDC clear-writing guide and its assessment tool, the Cambridge Language Justice plain-language guide, and Leora Freedman’s reading-comprehension guide from the University of Toronto. audits/run-plain.mjs runs at every build and fails it on a breach.',
+      'The first run found 52 sentences over the twenty-word cap, one of them 49 words long. Every one is rewritten. The average sentence is now 10.8 words, down from 16.1, and the longest thing in the app is a quotation.',
+      'Each reading opens with its main message — the one thing to carry away — and the word table now sits ABOVE the prose rather than below it. Both come from the guides: state the main message at the top, and preview the vocabulary before the text rather than after it.',
+      'Seven sentences turned from the passive voice to the active. Another thirteen were the detector crying wolf at participial adjectives, so the detector was narrowed instead of the sentences bent.',
+      'And a reading was being printed twice. A note written with its own reading in it, like 多謝 (do1 ze6), got a second bracket with the same thing in it. Five notes, two grammar points and three cards. For a reader who relies on that bracket, it was noise in the one place he was looking.',
+    ],
+  },
+  {
+    v: '1.19.1', date: '2026-10-07',
+    what: [
+      'The writing says what a thing IS. Seven sentences across the readings, the tone lesson and the grammar notes defined something by denying a characterisation first — "this is not emphasis and it is not mood" — and in most of them nobody had suggested the thing being denied. Robert: “I’d rather that you just state the thing. I am trying to learn here.”',
+      'It was a habit rather than a slip, so the build now refuses it: four sentence shapes that deny instead of stating will fail a build, across every piece of teaching copy in the app. A denial that corrects something — that popcorn is not a borrowing, which the internet gets wrong — still passes, because it names what it is correcting.',
+    ],
+  },
+  {
     v: '1.19.0', date: '2026-10-07',
     what: [
       'Readings: eleven short pieces on the tones, where Cantonese came from, and why it sounds the way it does. One opens every so often as you learn more words — the first before your first round, the last at 560 — and each is offered once, at the top of a round, then kept to re-read.',

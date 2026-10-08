@@ -8,7 +8,7 @@
 // a new deploy arrives on the next open with signal; cache first for the
 // recordings, which never change and are the slow part on a phone.
 
-const VERSION = "hokgong-v1-c75d300-202610072312";   // stamped per deploy by make-deploy.mjs
+const VERSION = "hokgong-v1-9918bf5-202610080106";   // stamped per deploy by make-deploy.mjs
 const PREFIX = 'hokgong-';
 // The recordings live in their own cache and survive a deploy: they are 16 MB
 // and they never change, so clearing them with the page would mean a phone
@@ -21,7 +21,7 @@ const AUDIO_CACHE = PREFIX + 'audio-v1';
 const DECK_CACHE = PREFIX + 'deck-v1';
 // Which word list is the current one, stamped per deploy. Only this one is
 // kept: a superseded deck is four megabytes of words nobody is being asked.
-const DECK_FILE = "deck-a632606935.json";   // stamped per deploy by make-deploy.mjs
+const DECK_FILE = "deck-56861b9a13.json";   // stamped per deploy by make-deploy.mjs
 // The manifest is deliberately NOT in here, and the fetch handler below never
 // puts it in a cache either. Every app on this origin shares Chrome's install
 // records and those are keyed on the manifest's `id`; a stale cached manifest

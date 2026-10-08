@@ -510,6 +510,24 @@ html.playing .play { border-color: var(--accent); background: var(--tint); }
   margin: var(--s4) 0; padding-left: var(--s4); border-left: 2px solid var(--accent);
 }
 .reading blockquote.quoted p { font-size: 1.05rem; margin-bottom: var(--s2); }
+/* The one thing to carry away, at the top, set apart. The CDC guide asks for
+   a main message near the top of any material, made to stand out. */
+.reading .mainmsg {
+  font-family: var(--ui); font-size: 1.05rem; line-height: 1.5; font-weight: 600;
+  background: var(--tint); border-radius: 14px; padding: var(--s4); margin-bottom: var(--s4);
+}
+/* The vocabulary, previewed before the prose rather than listed after it.
+   Compact on purpose: a preview that takes half a screen stops being a preview
+   and becomes the thing you have to get past to reach the reading. One line a
+   word, with the play button small enough to sit in it. */
+.preview { margin-bottom: var(--s5); }
+.preview .eyebrow { margin-bottom: var(--s1); }
+.preview .showrow { grid-template-columns: auto auto auto 1fr; padding: var(--s2) 0; align-items: center; }
+.preview .showrow .han { font-size: 1.25rem; }
+.preview .showrow .jyut { font-size: .95rem; }
+.preview .showrow .gloss { grid-column: auto; font-size: .85rem; }
+.preview .showrow button { font-size: .78rem; padding: 2px var(--s2); min-height: 0; }
+
 /* Where the evidence runs out. Marked, not buried: a reading that says what
    is disputed is the only kind worth trusting on what is not. */
 .careful { background: var(--chip); border-radius: 14px; padding: var(--s4); margin: var(--s4) 0; }

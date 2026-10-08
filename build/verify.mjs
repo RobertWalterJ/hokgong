@@ -203,6 +203,55 @@ for (const c of DECK.context) {
   }
 }
 
+// The same reading in two brackets side by side. It happens when a note is
+// written with its reading already in it and the build adds another; it is
+// noise in the one place a reader who cannot read characters is looking.
+for (const [where, txt] of [
+  ...DECK.grammar.flatMap((g) => [[`grammar ${g.id}`, g.plain], [`grammar ${g.id}`, g.watch]]),
+  ...(DECK.notes || []).flatMap((n) => [[`note ${n.id}`, n.plain], [`note ${n.id}`, n.watch]]),
+  ...DECK.context.map((c) => [`card ${c.id}`, c.note]),
+]) {
+  if (!txt) continue;
+  const doubled = String(txt).match(/\(([a-z][a-z0-9 ]*)\)\s*\(\1\)/);
+  check(!doubled, 'the same reading printed twice in a row', `${where}: (${doubled && doubled[1]}) (${doubled && doubled[1]})`);
+}
+
+// ── 6. the teaching copy states the thing ─────────────────────────
+// Robert, 7 Oct: "I still don't like that AI style of writing the 'this is not
+// emphasis and this is not mood'. I'd rather that you just state the thing and
+// not have to state what it is not. I am trying to learn here."
+//
+// He is right, and it is a tic rather than a slip, so it is checked rather
+// than fixed. Defining something by denying a characterisation nobody offered
+// costs the reader a sentence and teaches them nothing; three of the five
+// cases in the readings denied things the reading had never raised.
+//
+// The shapes below are the tic and only the tic. A denial that carries real
+// information — "popcorn is not a borrowing at all", correcting something the
+// internet says — does not match, because it names what is being corrected.
+const BY_NEGATION = [
+  [/(^|(?<=[.!?] ))(This|It|They|That|These|Those) (is|are) not /, 'opens by denying something'],
+  [/not [a-z]+,? and (it|they) (is|are) not /i, 'denies two things in a row'],
+  [/\bnot [a-z]+, not [a-z]+/i, 'a list of what it is not'],
+  [/(is|are) not [a-z ]+, (it|they) (is|are) /i, 'says what it is not before what it is'],
+];
+const prose = [];
+const add = (where, txt) => { if (txt) prose.push([where, String(txt)]); };
+for (const g of DECK.grammar) { add(`grammar ${g.id}`, g.plain); add(`grammar ${g.id}`, g.watch); }
+for (const l of DECK.ladder) { add(`ladder ${l.id}`, l.how); add(`ladder ${l.id}`, l.why); }
+for (const n of DECK.notes || []) { add(`note ${n.id}`, n.plain); add(`note ${n.id}`, n.watch); }
+for (const c of DECK.context) add(`card ${c.id}`, c.note);
+for (const k of Object.keys(DECK.toneLesson || {})) add(`tone lesson ${k}`, DECK.toneLesson[k]);
+for (const t of DECK.tones) { add(`tone ${t.n}`, t.is); add(`tone ${t.n}`, t.like); }
+for (const r of DECK.readings || []) { for (const para of [...r.read, r.honest || ''].filter(Boolean)) add(`reading ${r.id}`, para); }
+for (const [where, txt] of prose) {
+  for (const sentence of txt.split(/(?<=[.!?]) /)) {
+    for (const [rx, why] of BY_NEGATION) {
+      check(!rx.test(sentence), `teaching copy ${why} instead of saying what it is`, `${where}: "${sentence.trim().slice(0, 70)}"`);
+    }
+  }
+}
+
 // ── 6a. the deck is not behind its sources ───────────────────────────────
 // A content file edited without rebuilding the deck ships the old text while
 // the source file shows the new one, and nothing about the app looks wrong.
@@ -236,6 +285,9 @@ for (const r of readings) {
   check(typeof r.at === 'number' && r.at > lastAt, 'readings do not open in order', `${r.id} opens at ${r.at}`);
   lastAt = r.at;
   check((r.read || []).length >= 2, 'a reading with almost nothing in it', r.id);
+  // The one thing to carry away, at the top. Asked for by the CDC clear-writing
+  // guide and by Freedman's reading-comprehension guide, from two directions.
+  check(!!r.main, 'a reading with no main message at the top of it', r.id);
   check((r.cite || []).length > 0, 'a reading that cites nothing', r.id);
   for (const c of r.cite || []) {
     const src = DECK.readingSources[c];

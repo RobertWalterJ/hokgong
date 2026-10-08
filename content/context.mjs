@@ -34,7 +34,7 @@ export default [
     id: 'taishan', kind: 'quote', title: 'Who came, and from where',
     quote: 'The boomtowns of Likely, Richfield, and Quesnel also appeared at this time, many of them heavily populated by Chinese miners from Taishan.',
     source: BELSHAW_PRE,
-    note: 'Taishan (台山 Toi4saan1) is a county in Guangdong. Its people speak Taishanese, a Yue language close to Cantonese — which is why the Chinese spoken in early Canadian Chinatowns was not Mandarin.',
+    note: 'Taishan (台山 Toi4saan1) is a county in Guangdong. Its people speak Taishanese, a Yue language close to Cantonese. That is the Chinese people spoke in the early Canadian Chinatowns.',
   },
   {
     id: 'head-tax', kind: 'quote', title: 'The Head Tax',
@@ -70,7 +70,7 @@ export default [
   // ── words, with the dictionary’s own glosses ──────────────────────────
   {
     id: 'jamcaa', kind: 'words', title: 'Going for dim sum',
-    note: '飲茶 is literally "drink tea", and it means the whole Sunday morning: trolleys, family, an hour of arguing over the bill.',
+    note: '飲茶 is literally "drink tea". It means the whole Sunday morning: trolleys, family, an hour of arguing over the bill.',
     words: ['飲茶', '點心', '燒賣', '蝦餃', '叉燒', '腸粉', '蛋撻', '粥', '茶樓'],
   },
   {
@@ -85,7 +85,7 @@ export default [
   },
   {
     id: 'family', kind: 'words', title: 'Everyone at the table',
-    note: 'Cantonese kinship is precise: your mother’s parents and your father’s parents have different names, and so do older and younger siblings.',
+    note: 'Cantonese kinship is precise. Your mother’s parents and your father’s parents have different names, and so do older and younger siblings.',
     words: ['媽媽', '爸爸', '公公', '婆婆', '爺爺', '嫲嫲', '哥哥', '姐姐', '妹妹', '細佬'],
   },
   {
@@ -100,7 +100,7 @@ export default [
   },
   {
     id: 'street', kind: 'words', title: 'Getting around',
-    note: 'Three of these are borrowed from English and rebuilt with Cantonese sounds: 巴士 baa1si2, 的士 dik1si2, 多士 do1si2.',
+    note: 'Three of these came from English and were rebuilt with Cantonese sounds: 巴士, 的士 and 多士.',
     words: ['巴士', '地鐵', '的士', '返工', '放工', '屋企', '街'],
   },
 ];

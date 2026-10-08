@@ -32,7 +32,7 @@ export default [
     id: 'eat-drink',
     title: '食 covers more than eating',
     words: ['食', '飲'],
-    plain: '飲 (jam2) is to drink, and 食 (sik6) is to eat — but 食 also takes in things English would not call eating: 食煙 is to smoke, 食藥 is to take medicine.',
+    plain: '飲 (jam2) is to drink and 食 (sik6) is to eat. But 食 also covers things English would not call eating: 食煙 is to smoke, 食藥 is to take medicine.',
     watch: 'Soup is the odd one out and it goes both ways: Hong Kong says 飲湯, drink soup.',
     ask: { prompt: 'Which verb goes with medicine — 食 or 飲?', answer: '食', with: ['飲'] },
     cues: { '食': 'eating, and also smoking or taking medicine', '飲': 'drinking' },

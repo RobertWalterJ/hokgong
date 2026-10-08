@@ -51,7 +51,7 @@ export default [
     id: 'a-not-a',
     how: 'verb + 唔 + the same verb. 食唔食, 好唔好. The answer is one half of it.',
     builds: ['m4'],
-    why: 'It is 唔 used twice, and it is how most yes-or-no questions are actually asked.',
+    why: 'It is 唔 used twice, and it is how people actually ask most yes-or-no questions.',
   },
   {
     id: 'jau5-mou5',
@@ -75,7 +75,7 @@ export default [
     id: 'faan1',
     how: 'verb + 返 / 埋 / 住. They attach to the verb and shade what it means: back, as well, keep on.',
     builds: ['zo2', 'gan2'],
-    why: 'The same slot after the verb that 咗 and 緊 occupy, so it is one idea extended rather than a new one.',
+    why: 'They take the same slot after the verb that 咗 and 緊 take. It is one idea extended, rather than a new one.',
   },
   {
     id: 'particles',

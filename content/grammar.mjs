@@ -15,7 +15,7 @@ export default [
   {
     id: 'hai6', title: 'Saying what something is — 係', corpus: 5224,
     match: '係', notMatch: '唔係|係唔係|係咪',
-    plain: 'Cantonese has no “am/is/are” before an adjective, but it needs 係 (hai6) to link two things: 我係加拿大人 — I am a Canadian. With an adjective you use 好 instead: 我好攰 — I am tired.',
+    plain: 'Cantonese has no “am/is/are” before an adjective. To link two things it needs 係 (hai6): 我係加拿大人 — I am a Canadian. With an adjective you use 好 instead: 我好攰 — I am tired.',
     watch: 'Don’t put 係 before an adjective. 我係攰 is wrong; 我好攰 is right.',
   },
   {
@@ -46,14 +46,14 @@ export default [
     id: 'particles', title: 'The word that carries the attitude — 啊, 喇, 咩, 喎', corpus: 11000,
     match: '啊|呀|喇|咩|喎|嘅|囉|嘛|吖',
     plain: 'Cantonese puts the speaker’s attitude in a particle at the end. 啊/呀 softens. 喇 says something has changed or is settled. 咩 asks in surprise — 真係咩？ really? 喎 passes on what someone else said, or marks it as news.',
-    watch: 'These are not decoration. Leaving them off is what makes correct Cantonese sound blunt or foreign.',
+    watch: 'They carry the attitude of the sentence. Leave them off and grammatically correct Cantonese comes out blunt or foreign.',
   },
   {
     id: 'gan2', title: 'Something in progress — 緊', corpus: null,
     match: '緊',
     plain: '緊 (gan2) after the verb means the action is going on right now: 我食緊飯 — I am eating. Same position as 咗, opposite meaning.',
     contrast: '咗',
-    watch: 'The corpus of 1990s conversation barely tags 緊 on its own, but it is everywhere in Tatoeba’s sentences and in speech today — a reminder that the corpus is a sample, not the language.',
+    watch: 'The corpus of 1990s conversation barely tags 緊 on its own. It is everywhere in Tatoeba’s sentences and in speech today. The corpus is a sample of the language, not the whole of it.',
   },
   {
     // Titled with a real example rather than the formula V唔V. Every Chinese

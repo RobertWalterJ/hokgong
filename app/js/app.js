@@ -332,7 +332,17 @@ function readingBody(r) {
   const sources = D().readingSources || {};
   const s = r.quote ? sources[r.quote.source] || {} : {};
   return [
-    readAloudButton([...r.read, r.quote ? r.quote.text : '', r.honest || ''].filter(Boolean)),
+    // The one thing to carry away, before anything else. The CDC guide asks
+    // for a main message at the top of a piece; Freedman's reading guide asks
+    // for the concept to be previewed before the text. They are the same
+    // instruction seen from two directions.
+    r.main ? h('p', { class: 'mainmsg' }, r.main) : null,
+    readAloudButton([r.main || '', ...r.read, r.quote ? r.quote.text : '', r.honest || ''].filter(Boolean)),
+    // And the words before the prose, for the same reason: a reader who has
+    // seen the vocabulary once reads the paragraph instead of decoding it.
+    (r.shows || []).length ? h('div', { class: 'preview' },
+      h('div', { class: 'eyebrow' }, 'The words it uses'),
+      showsBlock(r)) : null,
     ...r.read.map((p) => h('p', {}, p)),
     r.quote ? h('blockquote', { class: 'quoted' },
       h('p', {}, '“' + r.quote.text + '”'),
@@ -344,6 +354,7 @@ function readingBody(r) {
 }
 
 // The Chinese in a reading, never loose in a sentence: word, reading, meaning.
+// eslint-disable-next-line no-use-before-define -- called from readingBody above
 const showsBlock = (r) => ((r.shows || []).length ? h('div', { class: 'shows' },
   ...r.shows.map((row) => h('div', { class: 'showrow' },
     h('p', { class: 'han' }, row.w),
@@ -362,7 +373,6 @@ function readingScreen(id) {
     h('section', { class: 'card reading' },
       h('div', { class: 'eyebrow' }, r.strand),
       ...readingBody(r)),
-    (r.shows || []).length ? h('section', { class: 'card' }, h('h2', {}, 'The words in it'), showsBlock(r)) : null,
     h('section', { class: 'card flat' },
       h('h2', {}, 'Where this comes from'),
       h('p', { class: 'note' }, 'The writing is mine. Every claim in it is one of these, and nothing is in it that I could not find a source for.'),
@@ -405,7 +415,6 @@ function readingOffer(r, onDone) {
     h('div', { class: 'eyebrow' }, 'Something new to read · ' + r.strand),
     h('h2', {}, r.title),
     ...readingBody(r),
-    showsBlock(r),
     h('button', { class: 'wide primary', type: 'button', onclick: () => { stopSpeech(); mark(); onDone(); } }, 'Start the round'),
     h('button', { class: 'ghost wide', type: 'button', onclick: () => { stopSpeech(); onDone(); } }, 'Not now — bring it back another time'));
 }
